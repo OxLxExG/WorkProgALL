@@ -1,0 +1,49 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:res="clr-namespace:WorkProgMain.Properties"                            
+                    xmlns:a="http://schemas.xceed.com/wpf/xaml/avalondock"  
+                    xmlns:vm="clr-namespace:WorkProgMain.ViewModels"                            
+                    xmlns:log="clr-namespace:TextBlockLogging;assembly=ExceptLog"                            
+                    xmlns:c="clr-namespace:Core;assembly=Core">
+
+
+    <!--<c:PriorityMenu DataContext="{Binding Source=vm:ExceptLogVM}" 
+                    x:Key="ExceptLogForm_Factory" 
+                    Name="ExceptLogForm_Factory"
+                    Priority="1" 
+                    Header="{x:Static res:Resources.strTitleExceptions}"
+                    Command="{Binding ExceptLogFactoryCommand}"/>-->
+
+    <Grid x:Key="ExceptLogForm" DataContext="{Binding Source=vm:ExceptLogVM}">
+        <Grid.Resources>
+            <!--<x:Array x:Key="ExceptionsForm_Menus" Type="{x:Type c:PriorityMenu}">
+                <c:PriorityMenu Header="{x:Static res:Resources.m_Clear}"
+                                Command="{Binding ClearExceptLogCommand}"/>
+                <c:PriorityMenu Header="{x:Static res:Resources.m_Freeze}" IsCheckable="True" 
+                                IsChecked="{Binding ElementName=tbLog, Path=Freeze, Mode=TwoWay}"/>
+            </x:Array>-->
+        </Grid.Resources>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Menu>
+            <CollectionContainer Collection="{StaticResource ExceptionsForm_Menus}"/>
+        </Menu>
+        <log:LogTextBlock Name="tbLog" Grid.Row="1">
+            <log:LogTextBlock.ContextMenu>
+                <ContextMenu>
+                    <CollectionContainer Collection="{StaticResource ExceptionsForm_Menus}"/>
+                </ContextMenu>
+            </log:LogTextBlock.ContextMenu>
+        </log:LogTextBlock>
+    </Grid>
+    
+    <a:LayoutAnchorable ContentId="elid" 
+                        Title="{x:Static res:Resources.strTitleExceptions}" 
+                        x:Key="ExceptLogRoot" 
+                        Content ="{StaticResource ExceptLogForm}" 
+                        CanClose="False">
+    </a:LayoutAnchorable>
+
+</ResourceDictionary>

@@ -1,0 +1,67 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:local="clr-namespace:Core"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    
+    <DataTemplate x:Key="Separator">
+        <Separator Style="{StaticResource {x:Static MenuItem.SeparatorStyleKey}}" />
+    </DataTemplate>
+    
+    <local:MenuTemplateSelector x:Key="MenuTemplateSelectorVMKey"/>
+    <!--<local:ItemContainerStyleSelectorVM x:Key="ItemContainerStyleSelectorVMKey"/>-->
+
+    <!--<Style x:Key="SeparatorVM" TargetType="{x:Type MenuItem}">
+        <Setter Property="Template" >
+            <Setter.Value>
+                <ControlTemplate>
+                    <Separator Style="{StaticResource {x:Static MenuItem.SeparatorStyleKey}}" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>-->
+
+    <Style x:Key="MenuItemKey" TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}" >
+        <!--<Setter Property="ItemContainerStyleSelector" Value="{StaticResource ItemContainerStyleSelectorVMKey}"/>-->
+        <Setter Property="UsesItemContainerTemplate"  Value="True"/>
+        <Setter Property="ItemContainerTemplateSelector" Value="{StaticResource MenuTemplateSelectorVMKey}"/>
+        <Setter Property="Header" Value="{Binding Header}" />
+        <Setter Property="Icon" Value="{Binding Icon}"/>
+        <Setter Property="IsCheckable" Value="{Binding IsCheckable}" />
+        <Setter Property="IsChecked" Value="{Binding IsChecked}" />
+        <Setter Property="IsEnabled" Value="{Binding IsEnable}" />
+        <Setter Property="Visibility" Value="{Binding Visibility}" />
+    </Style>
+    
+    <DataTemplate x:Key="MenuItemVM">
+        <MenuItem Style="{StaticResource MenuItemKey}"/>
+    </DataTemplate>
+
+    <Style x:Key="CommandMenuItemStyle" TargetType="{x:Type MenuItem}" BasedOn="{StaticResource MenuItemKey}">
+        <Setter Property="Command" Value="{Binding Command}"/>
+        <Setter Property="InputGestureText"
+                Value="{Binding InputGestureText}" />
+    </Style>
+    <DataTemplate x:Key="CommandMenuItemVM">
+        <MenuItem Style="{StaticResource CommandMenuItemStyle}"/>
+    </DataTemplate>
+
+    <Style x:Key="OnSubMenuOpenMenuItemStyle" TargetType="{x:Type MenuItem}" BasedOn="{StaticResource MenuItemKey}">
+        <Setter Property="IsSubmenuOpen" Value="{Binding IsSubmenuOpen}"/>
+    </Style>
+    <DataTemplate x:Key="OnSubMenuOpenMenuItemVM">
+        <MenuItem Style="{StaticResource OnSubMenuOpenMenuItemStyle}"/>
+    </DataTemplate>
+
+    <!--<DataTemplate x:Key="MenuOpenFileVM" DataType="MenuOpenFileVM">
+        <local:FileOpenMenuItemView Style="{StaticResource MenuItemKey}"/>
+    </DataTemplate>
+
+    <DataTemplate x:Key="MenuSaveFileVM" DataType="MenuSaveFileVM">
+        <local:FileSaveMenuItemView Style="{StaticResource MenuItemKey}"/>
+    </DataTemplate>
+    
+    <DataTemplate x:Key="MessageBoxMenuVM" DataType="MessageBoxMenuVM">
+        <local:MessageBoxMenuItem Style="{StaticResource MenuItemKey}" />
+    </DataTemplate>-->
+
+</ResourceDictionary>

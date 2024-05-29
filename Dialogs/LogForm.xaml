@@ -1,0 +1,22 @@
+﻿<UserControl x:Class="WpfDialogs.LogFormBase"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:WpfDialogs"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Menu x:Name="menu">
+            <MenuItem x:Name="NClear"  Header="Clear"/>
+            <MenuItem x:Name="NFreeze" IsCheckable="True" IsChecked="False" Header="Freeze"/>
+        </Menu>
+        <TextBlock x:Name="data" Grid.Row="1">
+            DATA
+        </TextBlock>
+    </Grid>
+</UserControl>

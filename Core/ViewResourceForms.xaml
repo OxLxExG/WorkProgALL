@@ -1,0 +1,85 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:avalonDock="clr-namespace:Xceed.Wpf.AvalonDock;assembly=Xceed.Wpf.AvalonDock.NET5"
+                    xmlns:adconv="clr-namespace:Xceed.Wpf.AvalonDock.Converters;assembly=Xceed.Wpf.AvalonDock.NET5"
+                    xmlns:adlayout="clr-namespace:Xceed.Wpf.AvalonDock.Layout;assembly=Xceed.Wpf.AvalonDock.NET5"
+                    xmlns:adctrl="clr-namespace:Xceed.Wpf.AvalonDock.Controls;assembly=Xceed.Wpf.AvalonDock.NET5"                    
+                    >
+
+    <adconv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+
+    <Style x:Key="LayoutItemStyle" TargetType="{x:Type adctrl:LayoutItem}">
+        <Setter Property="Title" Value="{Binding Model.Title}"/>
+        <Setter Property="CloseCommand" Value="{Binding Model.CloseCommand}"/>
+        <Setter Property="ContentId" Value="{Binding Model.ContentID}"/>
+        <Setter Property="Visibility" Value="{Binding Model.IsVisible, Mode=TwoWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter={x:Static Visibility.Hidden}}"/>
+        <Setter Property="IsSelected" Value="{Binding Model.IsSelected, Mode=TwoWay}"/>
+        <Setter Property="IsActive" Value="{Binding Model.IsActive, Mode=TwoWay}"/>
+        <Setter Property="CanClose" Value="{Binding Model.CanClose}"/>
+        <Setter Property="CanFloat" Value="{Binding Model.CanFloat}"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Model.IconSourceEnable}" Value="True">
+                <Setter Property="IconSource" Value="{Binding Model.IconSource}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Model.ToolTipEnable}" Value="True">
+                <Setter Property="ToolTip" Value="{Binding Model.ToolTip}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="ToolVMStyle" 
+           TargetType="{x:Type adctrl:LayoutAnchorableItem}" 
+           BasedOn="{StaticResource LayoutItemStyle}">
+        <Setter Property="CanHide" Value="{Binding Model.CanHide}"/>
+    </Style>
+
+    <Style x:Key="DocumentVMStyle" 
+           TargetType="{x:Type adctrl:LayoutDocumentItem}" 
+           BasedOn="{StaticResource LayoutItemStyle}">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Model.DescriptionEnable}" Value="True">
+                <Setter Property="Description" Value="{Binding Model.Description}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+    
+    <!--<DataTemplate x:Key="LayoutAnchorableTemplate">
+        <TextBlock Text="{Binding Path=Title,StringFormat=Tool {0:s}!}"/>
+    </DataTemplate>
+    
+    <DataTemplate x:Key="LayoutDocumentTemplate">
+        <TextBlock>
+            <TextBlock.Text>
+                <MultiBinding StringFormat="{} doc name {0}. \n description {1}">
+                    <Binding  Path="Title"/>
+                    <Binding Path="Description"/>
+                </MultiBinding>
+            </TextBlock.Text>
+        </TextBlock>
+    </DataTemplate>
+
+    <Style x:Key="ToolVMStyle" 
+           TargetType="{x:Type adctrl:LayoutAnchorableItem}" 
+           BasedOn="{StaticResource LayoutAnchorableItemStyle}"/>
+    <Style x:Key="DocumentVMStyle" 
+           TargetType="{x:Type adctrl:LayoutDocumentItem}" 
+           BasedOn="{StaticResource LayoutDocumentItemStyle}"/>-->
+
+    <DataTemplate x:Key="ToolVMTemplate">
+        <StackPanel>
+            <TextBlock Text="Object"/>
+            <TextBlock Text="{Binding Title}"/>
+        </StackPanel>
+    </DataTemplate>
+
+
+    <DataTemplate x:Key="DocumentVMTemplate">
+        <StackPanel>
+            <TextBlock Text="{Binding}"/>
+            <TextBlock Text="{Binding ContentID}"/>
+        </StackPanel>
+    </DataTemplate>
+
+
+
+</ResourceDictionary>

@@ -1,0 +1,146 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="XMLSchemaMetaData"
+    targetNamespace="http://tempuri.org/horizont.pb"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified"           
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"    
+    xmlns="http://tempuri.org/horizont.pb"
+    xmlns:mstns="http://tempuri.org/horizont.pb"
+>
+  <!--xmlns:sch="http://purl.oclc.org/dsdl/schematron"-->
+  
+  <!-- описание атрибутов -->
+  
+  <xs:attributeGroup name="AnyVarA">
+    <xs:attribute name="name" type="xs:token" use="optional"/>
+    <xs:attribute name="global" type="xs:unsignedInt" use="required"/>
+    <xs:attribute name="local" type="xs:unsignedInt" use="required"/>
+    <xs:attribute name="metr" type="xs:token" use="optional"/>
+    <xs:attribute name="info" type="xs:string" use="optional"/>
+  </xs:attributeGroup>
+
+  <xs:attributeGroup name="StructVarA">
+    <xs:attribute name="size" type="xs:unsignedInt" use="required"/>
+    <!-- used only in EEP root sections  -->
+    <xs:attribute name="from" type="xs:unsignedShort"/>
+    <xs:attributeGroup ref="AnyVarA"/>
+  </xs:attributeGroup>
+  <xs:attributeGroup name="DataVarA">
+    <xs:attributeGroup ref="AnyVarA"/>
+    <xs:attribute name="array" type="xs:unsignedInt" use="optional"/>
+    <xs:attribute name="arrayShowLen" type="xs:unsignedInt" use="optional"/>
+    <xs:attribute name="color" type="xs:unsignedInt" use="optional"/>
+    <xs:attribute name="style" type="xs:unsignedInt" use="optional"/>
+    <xs:attribute name="width" type="xs:unsignedInt" use="optional"/>
+    <xs:attribute name="ReadOnly" use="optional"/>
+    <xs:attribute name="eu" type="xs:token" use="optional"/>
+    <xs:attribute name="title" type="xs:token" use="optional"/>
+    <xs:attribute name="hint" type="xs:string" use="optional"/>
+    <xs:attribute name="RangeLo" type="xs:decimal" use="optional"/>
+    <xs:attribute name="RangeHi" type="xs:decimal" use="optional"/>
+  </xs:attributeGroup>
+  
+  <xs:attributeGroup name="IntVarA">
+    <xs:attributeGroup ref="DataVarA"/>
+    <xs:attribute name="ShowHex" use="optional"/>
+  </xs:attributeGroup>
+
+  <xs:attributeGroup name="FloatVarA">
+    <xs:attributeGroup ref="DataVarA"/>    
+    <xs:attribute name="digits" type="xs:unsignedInt" use="optional"/>
+    <xs:attribute name="precision" type="xs:unsignedInt" use="optional"/>
+  </xs:attributeGroup>
+
+  <!-- описание типов данных -->
+
+  <xs:complexType name="IntVar">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attributeGroup ref="IntVarA"/>
+      </xs:extension>       
+    </xs:simpleContent>    
+  </xs:complexType>
+  
+  <xs:complexType name="FloatVar">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attributeGroup ref="FloatVarA"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="StructVar">
+    <xs:choice maxOccurs="unbounded">
+      <xs:choice>
+        <xs:element name="uint8_t" type="IntVar"/>
+        <xs:element name="int8_t" type="IntVar"/>
+        <xs:element name="char" type="IntVar"/>
+        <xs:element name="uint16_t" type="IntVar"/>
+        <xs:element name="int16_t" type="IntVar"/>
+        <xs:element name="float" type="FloatVar"/>
+        <xs:element name="uint32_t" type="IntVar"/>
+        <xs:element name="int32_t" type="IntVar"/>
+        <xs:element name="double" type="FloatVar"/>
+        <xs:element name="struct_t" type="StructVar"/>
+      </xs:choice>
+    </xs:choice>
+    <xs:attributeGroup ref="StructVarA"/>
+  </xs:complexType>
+  
+  <xs:complexType name="RootStruct">
+    <xs:complexContent>
+      <xs:extension base="StructVar">
+        <!-- used only in RAM RamSize or SSDSize -->
+        <xs:attribute name="RamSize" use="optional" type="xs:unsignedShort"/>
+        <xs:attribute name="SSDSize" use="optional" type="xs:unsignedInt"/>
+        <xs:attribute name="RootPath" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:pattern value="WRK|RAM|EEP"/>              
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+    
+
+    <xs:complexType name="XMLMetaData" >
+      <xs:annotation>
+        <xs:documentation>
+          Описание метаданных устройства. Содержит секции:
+          WRK - режим информации
+          RAM - чтение памяти
+          EEP - сохраняемые метаданные
+        </xs:documentation>
+      </xs:annotation>
+      <xs:sequence>
+        <xs:element name="struct_t" type="RootStruct" maxOccurs="3" minOccurs="1"/>
+      </xs:sequence>
+      <xs:attribute name="name" type="xs:string"/>
+      <xs:attribute name="adr" use="required" type="xs:unsignedShort">
+        <xs:annotation>
+          <xs:documentation>
+            адрес устройства на шине данных
+            1-15 - однобайтный режим
+            257-65536 - расширенный трех байтный
+            16-255 - двух байтный несовместим с предыдущими
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="info" type="xs:string"/>
+      <xs:attribute name="chip" type="xs:byte"/>    
+      <xs:attribute name="serial" use="required" type="xs:unsignedShort"/>    
+      <xs:attribute name="SupportUartSpeed" type="xs:unsignedShort"/>    
+      <xs:attribute name="NoPowerDataCount" type="xs:byte"/>    
+      <xs:attribute name="export"/>    
+    </xs:complexType>
+
+    <xs:element name="struct_t" type="XMLMetaData">
+    <xs:unique name="eachRootPathMostOnce">
+      <xs:selector xpath="mstns:struct_t"/>
+      <xs:field xpath="@RootPath"/>
+    </xs:unique>
+  </xs:element>
+
+</xs:schema>

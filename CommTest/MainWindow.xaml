@@ -1,0 +1,115 @@
+﻿<Window x:Class="SerialPortTest.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SerialPortTest"
+        xmlns:con="clr-namespace:TextBlockLogging;assembly=ExceptLog"
+        mc:Ignorable="d"
+        Closing="Window_Closing"
+        Title="MainWindow" Height="550" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+
+            <!--<DockPanel Background="Aqua" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Height="Auto">-->
+                <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"></RowDefinition>
+                        <RowDefinition ></RowDefinition>
+                        <RowDefinition Height="auto"></RowDefinition>
+                        <RowDefinition ></RowDefinition>
+                        <RowDefinition Height="auto"  ></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition></ColumnDefinition>
+                        <ColumnDefinition Width="auto"></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <WrapPanel >
+                        <Button x:Name="btClear" Margin="5" Content="Clear" HorizontalAlignment="Left" VerticalAlignment="Top" Click="btClear_Click" />
+                        <ToggleButton  x:Name="btFreeze" Margin="5" Content="Freeze" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                           IsThreeState ="False"
+                           Click="btFreeze_Checked" />
+                        <Button x:Name="btSend" Margin="5" Content="Info" HorizontalAlignment="Left" VerticalAlignment="Top" Click="Button_Click" />
+                        <Button x:Name="btSend2" Margin="5" Content="Ram" HorizontalAlignment="Left" VerticalAlignment="Top" Click="btSend2_Click" />
+                        <Button x:Name="btSend3" Margin="5" Content="SSDRam" HorizontalAlignment="Left" VerticalAlignment="Top" Click="btSend3_Click" />
+                        <Button x:Name="btWrite" Margin="5" Content="Write" HorizontalAlignment="Left" VerticalAlignment="Top" Click="btWrite_Click" />
+                        <Button x:Name="btCancel" Margin="5" Content="Cancel" HorizontalAlignment="Center" VerticalAlignment="Center" Click="btCancel_Click" />
+                        <ToggleButton  x:Name="btNet" Margin="5" Content="Ser/Net" HorizontalAlignment="Center" VerticalAlignment="Center"  
+                           IsThreeState ="False"
+                           IsChecked="True"
+                           Click="btNet_Checked" />
+                        <TextBox x:Name="comPortName" Margin="5" Width="50">
+                            <TextBox.Text>
+                                COM9
+                            </TextBox.Text>
+                        </TextBox>
+                    </WrapPanel>
+                    <ScrollViewer Grid.Row="1" VerticalAlignment="Stretch" HorizontalScrollBarVisibility="Visible">
+                        <con:LogTextBlock x:Name="memo"                                         
+                                            TextWrapping="Wrap" 
+                                            Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}" FontFamily="Courier New"/>
+                    </ScrollViewer>
+                    <GridSplitter Grid.Row="2" Background="Black" 
+                      ShowsPreview="True" Height="2" HorizontalAlignment="Stretch" VerticalAlignment="Center"></GridSplitter>
+                    <GridSplitter Grid.Row="2" Grid.Column="2" Background="Black" 
+                      ShowsPreview="True" Height="2" HorizontalAlignment="Stretch" VerticalAlignment="Center"></GridSplitter>
+                    <WrapPanel  Grid.Row="4" VerticalAlignment="Bottom">
+                        <Button x:Name="btCleare" Margin="5" Content="Clear" HorizontalAlignment="Left" VerticalAlignment="Top" Click="btCleare_Click" />
+                        <ToggleButton  x:Name="btFreezee" Margin="5" Content="Freeze" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                           IsThreeState ="False"
+                           Click="btFreezee_Click" />
+                    </WrapPanel>
+                    <GridSplitter Grid.Column="1" Grid.Row="1"  Background="Black" ShowsPreview="True" Width="2" HorizontalAlignment="Center" VerticalAlignment="Stretch"></GridSplitter>
+                    <GridSplitter Grid.Column="1" Grid.Row="3"  Background="Black" ShowsPreview="True" Width="2" HorizontalAlignment="Center" VerticalAlignment="Stretch"></GridSplitter>
+                    <WrapPanel  Grid.Row="4" Grid.Column="3" VerticalAlignment="Bottom">
+                        <Button x:Name="btCleart" Margin="5" Content="Clear" HorizontalAlignment="Left" VerticalAlignment="Top" Click="btCleart_Click" />
+                        <ToggleButton  x:Name="btFreezet" Margin="5" Content="Freeze" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                           IsThreeState ="False"
+                           Click="btFreezet_Click" />
+                    </WrapPanel>
+                    <WrapPanel  Grid.Row="0" Grid.Column="3" VerticalAlignment="Stretch">
+                        <Button x:Name="btCleari" Margin="5" Content="Clear" HorizontalAlignment="Left" VerticalAlignment="Top" Click="btCleari_Click" />
+                        <ToggleButton  x:Name="btFreezei" Margin="5" Content="Freeze" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                           IsThreeState ="False"
+                           Click="btFreezei_Click" />
+                    </WrapPanel>
+                    <ScrollViewer  Grid.Row="3" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" >
+                        <con:LogTextBlock x:Name="log" VerticalAlignment="Stretch" 
+                TextWrapping="Wrap" 
+                Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}" FontFamily="Courier New"/>
+                    </ScrollViewer>
+                    <ScrollViewer  Grid.Row="3" Grid.Column="3" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" >
+                        <con:LogTextBlock x:Name="trace" VerticalAlignment="Stretch" 
+                TextWrapping="Wrap" 
+                Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}" FontFamily="Courier New"/>
+                    </ScrollViewer>
+                    <ScrollViewer  Grid.Row="1" Grid.Column="2" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" >
+                        <con:LogTextBlock x:Name="info" VerticalAlignment="Stretch" 
+                TextWrapping="Wrap" 
+                Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}" FontFamily="Courier New"/>
+                    </ScrollViewer>
+                </Grid>
+            <!--</DockPanel>-->
+                <StatusBar Grid.Row="1" x:Name="sb" VerticalAlignment="Bottom" HorizontalAlignment="Stretch">
+            <StatusBarItem>
+                <TextBlock x:Name="sbGSpeed">sbGSpeed</TextBlock>
+            </StatusBarItem>
+            <StatusBarItem>
+                <TextBlock x:Name="sbLSpeed">sbLSpeed</TextBlock>
+            </StatusBarItem>
+            <StatusBarItem>
+                <TextBlock x:Name="sbProc">proc</TextBlock>
+            </StatusBarItem>
+            <StatusBarItem>
+                <TextBlock x:Name="sbEla">T1</TextBlock>
+            </StatusBarItem>
+            <StatusBarItem>
+                <TextBlock x:Name="sbRem">T2</TextBlock>
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</Window>

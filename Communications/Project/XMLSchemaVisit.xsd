@@ -1,0 +1,157 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="XMLSchemaVisit"
+    targetNamespace="http://tempuri.org/horizont.pb"
+    elementFormDefault="qualified"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns="http://tempuri.org/horizont.pb"
+>
+  <xs:include schemaLocation="../MetaData/XMLSchemaMetaData.xsd"/>
+
+
+  <xs:complexType name="ConType" abstract="true">
+  </xs:complexType>
+
+  <xs:complexType name="SerialConn">
+    <xs:complexContent>
+      <xs:extension base="ConType">
+      <xs:sequence>
+        <xs:element name="BaudRate" type="xs:string"/>
+        <xs:element name="PortName" type="xs:string"/>
+      </xs:sequence>
+      </xs:extension>      
+    </xs:complexContent>
+  </xs:complexType>
+
+
+  <xs:complexType name="NetConn">
+    <xs:complexContent>
+      <xs:extension base="ConType">
+        <xs:sequence>
+          <xs:element name="Host" type="xs:string"/>
+          <xs:element name="Port" type="xs:positiveInteger"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="Device" abstract="true">
+  </xs:complexType>
+
+  <xs:complexType name="DevicePB">
+    <xs:complexContent>
+      <xs:extension base="Device">
+        <xs:sequence>
+      <xs:element name="timout" type="xs:positiveInteger" minOccurs="0" default="2047"/>
+      <xs:element name="struct_t" type="XMLMetaData">
+        <xs:unique name="eachRootPathMostOnce1">
+          <xs:selector xpath="struct_t"/>
+          <xs:field xpath="@RootPath"/>
+        </xs:unique>
+      </xs:element>
+    </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="DeviceTelesystem">
+    <xs:complexContent>
+      <xs:extension base="Device">
+
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="DeviceTelesystem2">
+    <xs:complexContent>
+      <xs:extension base="Device">
+
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="Bus">
+    <xs:sequence>
+      <xs:element name="Name" type="xs:string"/>
+      <xs:element name="Devices">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Device" type="Device" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:complexType name="Pipe">
+    <xs:sequence>
+      <xs:element name="connection" type="ConType"/>
+      <xs:element name="Buses">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Bus" type="Bus" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="Trip">
+    <xs:sequence>
+      <xs:element name="TripStatus" type="xs:byte"/>
+      <xs:element name="DTimStart" type="xs:dateTime" minOccurs="0"/>
+      <xs:element name="DTimStop" type="xs:dateTime" minOccurs="0"/>
+      <xs:element name="DTimStartDrilling" type="xs:dateTime" minOccurs="0"/>
+      <xs:element name="DTimStopDrilling" type="xs:dateTime" minOccurs="0"/>
+      <xs:element name="ReasonTrip" type="xs:string" minOccurs="0"/>
+      <xs:element name="Delay" type="xs:dateTime"  minOccurs="0"/>
+      <xs:element name="Pipes"  minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Pipe" type="Pipe" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:attributeGroup name="FileDocA">
+    <xs:attribute name="ReadOnly" type="xs:boolean"/>
+    <xs:attribute name="ContentID" type="xs:string" use="required"/>
+    <xs:attribute name="Active" type="xs:boolean" />
+    <xs:attribute name="Expanded" type="xs:boolean" />
+    <xs:attribute name="Title" type="xs:string" />
+  </xs:attributeGroup>
+
+
+  <xs:complexType name="FileDocRefType">
+    <xs:simpleContent>
+      <xs:extension base="xs:anyURI">
+        <xs:attributeGroup ref="FileDocA"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+    
+    <xs:complexType name="Visit">      
+    <xs:sequence>
+      <!--<xs:element name="Documents" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Document" type="FileDocRefType" maxOccurs="unbounded"/>
+            --><!--<xs:any namespace="##any" processContents="lax" maxOccurs="unbounded"/>--><!--
+          </xs:sequence>
+        </xs:complexType>        
+      </xs:element>-->                  
+      <xs:element name="Trips">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Trip" type="Trip" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+     <!--<xs:attributeGroup ref="FileDocA"/>-->
+    </xs:complexType>
+
+  <xs:element name="Visit" type="Visit"/>
+  
+</xs:schema>

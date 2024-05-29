@@ -3,9 +3,25 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.34916.146
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{8EEF94C1-CB3E-4245-829E-F3E5AF822321}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests", "Tests\Tests.csproj", "{8EEF94C1-CB3E-4245-829E-F3E5AF822321}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleTests", "ConsoleTests\ConsoleTests.csproj", "{B6A75B98-EC38-47D5-8DFF-8EBA4B07809B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleTests", "ConsoleTests\ConsoleTests.csproj", "{B6A75B98-EC38-47D5-8DFF-8EBA4B07809B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkProgMain", "Main\WorkProgMain.csproj", "{CAD3082F-9DD2-4C31-9852-E0F548A1AD7D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Communications", "Communications\Communications.csproj", "{AABAC349-8B59-4FC8-A090-66B3DEC8CB7A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core", "Core\Core.csproj", "{AE4AF924-13FD-4857-BC1F-D44F6A70C30D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExceptLog", "ExceptLog\ExceptLog.csproj", "{D8BDE4EE-904F-4C7D-AB23-93838A65B1E7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WpfDialogs", "Dialogs\WpfDialogs.csproj", "{0ADD6BCB-A5C0-43CE-81EF-E5330682528D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SerialPortTest", "CommTest\SerialPortTest.csproj", "{57F7790A-5A9E-4576-B935-9C75502B34D1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xceed.Wpf.AvalonDock.NET5", "..\Device3\wpftoolkit\ExtendedWPFToolkitSolution\Src\Xceed.Wpf.AvalonDock\Xceed.Wpf.AvalonDock.NET5.csproj", "{DEB55812-58F2-431F-A359-8F1F630C2755}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xceed.Wpf.Toolkit.NET5", "..\Device3\wpftoolkit\ExtendedWPFToolkitSolution\Src\Xceed.Wpf.Toolkit\Xceed.Wpf.Toolkit.NET5.csproj", "{7FDA8298-F416-419C-AE63-D06A91977E52}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +37,38 @@ Global
 		{B6A75B98-EC38-47D5-8DFF-8EBA4B07809B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B6A75B98-EC38-47D5-8DFF-8EBA4B07809B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B6A75B98-EC38-47D5-8DFF-8EBA4B07809B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CAD3082F-9DD2-4C31-9852-E0F548A1AD7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CAD3082F-9DD2-4C31-9852-E0F548A1AD7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CAD3082F-9DD2-4C31-9852-E0F548A1AD7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CAD3082F-9DD2-4C31-9852-E0F548A1AD7D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AABAC349-8B59-4FC8-A090-66B3DEC8CB7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AABAC349-8B59-4FC8-A090-66B3DEC8CB7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AABAC349-8B59-4FC8-A090-66B3DEC8CB7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AABAC349-8B59-4FC8-A090-66B3DEC8CB7A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE4AF924-13FD-4857-BC1F-D44F6A70C30D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE4AF924-13FD-4857-BC1F-D44F6A70C30D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE4AF924-13FD-4857-BC1F-D44F6A70C30D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE4AF924-13FD-4857-BC1F-D44F6A70C30D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8BDE4EE-904F-4C7D-AB23-93838A65B1E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8BDE4EE-904F-4C7D-AB23-93838A65B1E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8BDE4EE-904F-4C7D-AB23-93838A65B1E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8BDE4EE-904F-4C7D-AB23-93838A65B1E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0ADD6BCB-A5C0-43CE-81EF-E5330682528D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0ADD6BCB-A5C0-43CE-81EF-E5330682528D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0ADD6BCB-A5C0-43CE-81EF-E5330682528D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0ADD6BCB-A5C0-43CE-81EF-E5330682528D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57F7790A-5A9E-4576-B935-9C75502B34D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57F7790A-5A9E-4576-B935-9C75502B34D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57F7790A-5A9E-4576-B935-9C75502B34D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57F7790A-5A9E-4576-B935-9C75502B34D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DEB55812-58F2-431F-A359-8F1F630C2755}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DEB55812-58F2-431F-A359-8F1F630C2755}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DEB55812-58F2-431F-A359-8F1F630C2755}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DEB55812-58F2-431F-A359-8F1F630C2755}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7FDA8298-F416-419C-AE63-D06A91977E52}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7FDA8298-F416-419C-AE63-D06A91977E52}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7FDA8298-F416-419C-AE63-D06A91977E52}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7FDA8298-F416-419C-AE63-D06A91977E52}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

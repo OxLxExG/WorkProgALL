@@ -1,0 +1,25 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <XmlDataProvider x:Key="ReisManager">
+        <x:XData>
+            <Projects File="not">
+
+            </Projects>
+        </x:XData>
+    </XmlDataProvider>
+    
+    <XmlDataProvider x:Key="Reis">
+        <x:XData>
+            <Project File="not" Active="False" Selected="False">
+                <Documents>
+                     
+                </Documents>
+                <IOs>
+                    
+                </IOs>
+            </Project>  
+        </x:XData>
+    </XmlDataProvider>
+    
+</ResourceDictionary>
