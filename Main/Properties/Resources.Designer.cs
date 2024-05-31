@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace WorkProgMain.Properties {
+namespace Main.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace WorkProgMain.Properties {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("WorkProgMain.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Main.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -660,6 +660,15 @@ namespace WorkProgMain.Properties {
         public static string tTrips {
             get {
                 return ResourceManager.GetString("tTrips", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Create new visit.
+        /// </summary>
+        public static string wCreateVisitDialogLabel {
+            get {
+                return ResourceManager.GetString("wCreateVisitDialogLabel", resourceCulture);
             }
         }
         

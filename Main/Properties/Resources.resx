@@ -318,6 +318,9 @@
   <data name="tTrips" xml:space="preserve">
     <value>Trips</value>
   </data>
+  <data name="wCreateVisitDialogLabel" xml:space="preserve">
+    <value>Create new visit</value>
+  </data>
   <data name="wFileSaveDialogLabel" xml:space="preserve">
     <value>Save current changes?</value>
   </data>

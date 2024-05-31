@@ -12,7 +12,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 
-namespace WorkProgMain.ViewModels
+namespace Main.ViewModels
 {
     public class ProjectsExplorerMenuFactory : IMenuItemClient
     {

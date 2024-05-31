@@ -15,13 +15,13 @@ using System.Globalization;
 using System.Windows;
 using ExceptionExtensions;
 using System.Text.RegularExpressions;
-using WorkProgMain.ViewModels;
+using Main.ViewModels;
 using System.Collections;
-using WorkProgMain.Views.Pane;
+using Main.Views.Pane;
 using System.Windows.Data;
 using System.Windows.Input;
 
-namespace WorkProgMain
+namespace Main
 {
     using Connections;
     using Properties;

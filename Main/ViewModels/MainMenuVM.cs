@@ -17,13 +17,13 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Xml.Serialization;
-using WorkProgMain.Models;
-using WorkProgMain.Properties;
+using Main.Models;
+using Main.Properties;
 using WpfDialogs;
 using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 using static System.Net.WebRequestMethods;
 
-namespace WorkProgMain.ViewModels
+namespace Main.ViewModels
 {
     //    <!--<c:PriorityMenu Priority = "0" Name="NFile" Header="{x:Static res:Resources.m_File}">
     //    <c:PriorityMenu Priority = "11" Header="_Save" Command="{Binding DocLayoutSaveCommand}"/>

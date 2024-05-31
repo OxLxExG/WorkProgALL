@@ -318,6 +318,9 @@
   <data name="tTrips" xml:space="preserve">
     <value>Рейсы</value>
   </data>
+  <data name="wCreateVisitDialogLabel" xml:space="preserve">
+    <value>Создание нового заезда</value>
+  </data>
   <data name="wFileSaveDialogLabel" xml:space="preserve">
     <value>Сохранить изменение следующих элементов?</value>
   </data>

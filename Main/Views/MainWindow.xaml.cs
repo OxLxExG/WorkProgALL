@@ -12,14 +12,14 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Navigation;
 using System.Xml;
-using WorkProgMain.ViewModels;
+using Main.ViewModels;
 using WpfDialogs;
 using Xceed.Wpf.AvalonDock;
 using Xceed.Wpf.AvalonDock.Controls;
 using Xceed.Wpf.AvalonDock.Layout;
 using Xceed.Wpf.AvalonDock.Layout.Serialization;
 
-namespace WorkProgMain
+namespace Main
 {
     [ValueConversion(typeof(VMBaseForm), typeof(LayoutContent))]
     public class VMtoLayoutContentConverter : IValueConverter

@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace WorkProgMain.Views
+namespace Main.Views
 {
     /// <summary>
     /// Логика взаимодействия для ProjectsExplorerUC.xaml

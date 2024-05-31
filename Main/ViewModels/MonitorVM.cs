@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WorkProgMain.ViewModels
+namespace Main.ViewModels
 {
     public class ConnectionServer
     {

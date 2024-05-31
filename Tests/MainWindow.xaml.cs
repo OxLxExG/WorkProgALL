@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using Microsoft.Win32;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -19,6 +20,9 @@ namespace Tests
         public MainWindow()
         {
             InitializeComponent();
+
+           var f =new OpenFolderDialog();
+            f.ShowDialog();
         }
     }
 }

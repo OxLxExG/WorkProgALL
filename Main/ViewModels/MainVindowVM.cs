@@ -6,7 +6,7 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 
-namespace WorkProgMain.ViewModels
+namespace Main.ViewModels
 {
     internal class CloseProgramCommand : VMBase, ICommand
     {

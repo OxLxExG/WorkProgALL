@@ -1,4 +1,4 @@
-﻿namespace WorkProgMain.Properties {
+﻿namespace Main.Properties {
     
     
     // Этот класс позволяет обрабатывать определенные события в классе параметров:

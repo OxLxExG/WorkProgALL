@@ -1,6 +1,6 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:c="clr-namespace:Core;assembly=Core"
-                    xmlns:vi="clr-namespace:WorkProgMain.Views"                    
+                    xmlns:vi="clr-namespace:Main.Views"                    
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <ResourceDictionary.MergedDictionaries>

@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xceed.Wpf.AvalonDock.Layout;
 
-namespace WorkProgMain.Views.Pane
+namespace Main.Views.Pane
 {
     public class LayoutInitializer : ILayoutUpdateStrategy
     {

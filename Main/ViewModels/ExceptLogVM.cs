@@ -18,7 +18,7 @@ using System.Diagnostics.Eventing.Reader;
 using System.Threading;
 using System.Windows.Threading;
 
-namespace WorkProgMain.ViewModels
+namespace Main.ViewModels
 {
     public class LogMenuFactory<LogVM> : IMenuItemClient
         where LogVM: TextLogVM

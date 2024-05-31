@@ -19,13 +19,13 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Schema;
 using System.Xml.Serialization;
-using WorkProgMain.Properties;
+using Main.Properties;
 using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 
-namespace WorkProgMain.ViewModels
+namespace Main.ViewModels
 {
     using static Communications.MetaData.BinaryParser;
-    using static WorkProgMain.Models.MMenus;
+    using static Main.Models.MMenus;
 
 
     public class IfDocCommandMenuItemVM : CommandMenuItemVM
@@ -117,6 +117,12 @@ namespace WorkProgMain.ViewModels
                 IconSource = "pack://application:,,,/Images/NewProject.PNG",
                 Command = new RelayCommand(() =>
                 {
+                    var d = VMBase.ServiceProvider.GetRequiredService<ICreateNewVisitDialog>();
+                    if (d != null && d.Show() == BoxResult.OK)
+                    {
+                         
+                    }
+                    else return;
                     var nnk = BinaryParser.Parse(BinaryParser.Meta_NNK);
                     var cal = BinaryParser.Parse(BinaryParser.Meta_CAL);
                     var ind = BinaryParser.Parse(BinaryParser.Meta_Ind);

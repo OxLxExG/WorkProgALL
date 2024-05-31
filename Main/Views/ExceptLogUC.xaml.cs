@@ -16,10 +16,10 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TextBlockLogging;
-using WorkProgMain.ViewModels;
+using Main.ViewModels;
 using WpfDialogs;
 
-namespace WorkProgMain.Views
+namespace Main.Views
 {
 
     public class ToLogTextBlockConverter : IValueConverter

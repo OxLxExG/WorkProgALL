@@ -138,6 +138,25 @@ namespace Core
     {
         public BoxResult Show(IList<SaveFileItem> RootItems);
     }
+    public enum VisitAddToGroup
+    {
+        AddToCurrent,
+        NewGroup,
+        SingleVisit
+    }
+    //public record  CreateNewVisitDialogResult(        
+    //    BoxResult BoxResult, 
+    //    string VisitFile, 
+    //    string GroupFile,
+    //    VisitAddToGroup VisitAddToGroup
+    //    );
+    public interface ICreateNewVisitDialog
+    {
+        string VisitFile { get; }
+        string GroupFile { get; }
+        VisitAddToGroup VisitAddToGroup { get; }
+        public BoxResult Show();
+    }
     public interface IFileDialog
     {
         public string Title { get; set; }
@@ -179,5 +198,13 @@ namespace Core
         public bool CreatePrompt { get; set; }
         public bool OverwritePrompt { get; set; }
     }
-
+    public interface IOpenFolderDialog
+    {
+        public string Title { get; set; }
+        public string InitialDirectory { get; set; }
+        public bool ValidateNames { get; set; }
+        public IList<object> CustomPlaces { get; set; }
+        public bool ShowDialog();
+        string FolderName { get; set; }
+    }
 }

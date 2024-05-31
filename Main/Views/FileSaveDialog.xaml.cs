@@ -14,7 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace WorkProgMain.Views
+namespace Main.Views
 {
     //[ValueConversion(typeof(bool), typeof(Visibility))]
     //public class DrityToVisibilityConverter : IValueConverter

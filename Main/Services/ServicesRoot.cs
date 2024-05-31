@@ -7,10 +7,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using WorkProgMain.ViewModels;
-using WorkProgMain.Views;
+using Main.ViewModels;
+using Main.Views;
 
-namespace WorkProgMain.Services
+namespace Main.Services
 {
     internal static class ServicesRoot
     {
@@ -37,6 +37,7 @@ namespace WorkProgMain.Services
             else services.AddTransient<IMenuItemClient, ProjectsSingleMenuFactory>();
             services.AddTransient<VisitsGroupVM>();
             services.AddTransient<ISaveFilesDialog, ServiceSaveDialog>();
+            services.AddTransient<ICreateNewVisitDialog, CreateNewVisitDialog>();
 
             //services.AddTransient<MenuItemVM>();
             //services.AddTransient<CommandMenuItemVM>();

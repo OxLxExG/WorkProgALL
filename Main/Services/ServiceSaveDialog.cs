@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using WorkProgMain.Views;
+using Main.Views;
 
-namespace WorkProgMain.Services
+namespace Main.Services
 {
     internal class ServiceSaveDialog : ISaveFilesDialog
     {
@@ -16,6 +16,21 @@ namespace WorkProgMain.Services
             f.treeView.ItemsSource = RootItems;
             f.ShowDialog();
             return f.Result;
+        }
+    }
+    internal class CreateNewVisitDialog : ICreateNewVisitDialog
+    {
+        CreateVisitDialog createVisitDialog = new CreateVisitDialog();
+        public string VisitFile => ((CreateNewVisitDialog) createVisitDialog.DataContext).VisitFile;
+
+        public string GroupFile => ((CreateNewVisitDialog)createVisitDialog.DataContext).GroupFile;
+
+        public VisitAddToGroup VisitAddToGroup => ((CreateNewVisitDialog)createVisitDialog.DataContext).VisitAddToGroup;
+
+        public BoxResult Show()
+        {
+            createVisitDialog.ShowDialog();
+            return createVisitDialog.Result;
         }
     }
 }

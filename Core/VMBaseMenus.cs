@@ -28,6 +28,19 @@ namespace Core
         public void AddStaticMenus(IMenuItemServer s);
         //  public void RemoveAddStaticMenus();
     }
+    public static class MenuService
+    {
+        public static T Create<T>(rootMenu root)
+            where T: MenuItemVM,new()
+        {
+           return new T
+            {
+                Header = root.Header,
+                ContentID = root.ContentID,
+                Priority = root.Priority,
+            };
+        }
+    }
     ///// <summary>
     ///// основа меню сепараторы и меню
     ///// </summary>
@@ -48,7 +61,7 @@ namespace Core
     {
 
         public MenuItemVM() { }
-        public MenuItemVM(rootMenu root): this() 
+        public MenuItemVM(rootMenu root) : this()
         {
             Header = root.Header;
             ContentID = root.ContentID;

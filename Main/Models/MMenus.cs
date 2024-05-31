@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WorkProgMain.Models
+namespace Main.Models
 {
     public static class MMenus
     {

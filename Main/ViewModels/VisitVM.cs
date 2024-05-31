@@ -13,7 +13,7 @@ using System.Xml;
 using System.Xml.Serialization;
 using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 
-namespace WorkProgMain.ViewModels
+namespace Main.ViewModels
 {
     public abstract class BaseVisitItemVM : VMBase
     {

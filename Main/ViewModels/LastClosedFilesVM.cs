@@ -8,9 +8,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 
-namespace WorkProgMain.ViewModels
+namespace Main.ViewModels
 {
-    using static WorkProgMain.Models.MMenus;
+    using static Main.Models.MMenus;
 
     internal abstract class LastSettingsMenuVM : LastClosedFilesVM
     {
