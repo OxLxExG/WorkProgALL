@@ -1,27 +1,23 @@
 ﻿using Connections;
 using Connections.Interface;
 using System;
-using System.CodeDom;
+using Communications.MetaData;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Xml;
-using System.Xml.Linq;
-using System.Xml.Schema;
 using System.Xml.Serialization;
 using static Communications.MetaData.BinaryParser;
 
-namespace Communications.Project
+namespace Main.Models
 {
-    public abstract class AbstractVisitItem: INotifyPropertyChanged
+    public abstract class ModelVisitItem: INotifyPropertyChanged
     {
+        //protected bool HideId;
+
         private Guid _id = Guid.Empty;
         public Guid Id 
         { 
@@ -33,7 +29,8 @@ namespace Communications.Project
             }
             set => _id = value; 
         }
-        
+        //public bool ShouldSerializeId() => !HideId;
+
         public event PropertyChangedEventHandler? PropertyChanged;
         protected bool SetProperty<T>([NotNullIfNotNull(nameof(newValue))] ref T field, T newValue, [CallerMemberName] string? propertyName = null)
         {
@@ -48,12 +45,12 @@ namespace Communications.Project
             return true;
         }
         #region property Parent        
-        public virtual void UpdateParent(ComplexAbstractVisitItem? parent)
+        public virtual void UpdateParent(ComplexModelVisitItem? parent)
         {
             _Parent = parent;
         }
-        private ComplexAbstractVisitItem? _Parent;
-        [XmlIgnore] public ComplexAbstractVisitItem? Parent
+        private ComplexModelVisitItem? _Parent;
+        [XmlIgnore] public ComplexModelVisitItem? Parent
         {
             get  => _Parent;
             set
@@ -68,27 +65,27 @@ namespace Communications.Project
         }
         #endregion
     }
-    public abstract class ComplexAbstractVisitItem : AbstractVisitItem
+    public abstract class ComplexModelVisitItem : ModelVisitItem
     {
-        public abstract void ItemsRemove(AbstractVisitItem item);
-        public abstract void ItemsAdd(AbstractVisitItem item);
+        public abstract void ItemsRemove(ModelVisitItem item);
+        public abstract void ItemsAdd(ModelVisitItem item);
     }
     /// <summary>
     /// сделал класс только для человекочитаемости XML файла сериализации
     /// </summary>
     /// <typeparam name="CHILDS"> Device,Bus,Pipe,Trip</typeparam>
-    public abstract class ComplexAbstractVisitItem<CHILDS> : ComplexAbstractVisitItem 
-        where CHILDS : AbstractVisitItem
+    public abstract class ComplexModelVisitItem<CHILDS> : ComplexModelVisitItem 
+        where CHILDS : ModelVisitItem
     {
         [XmlIgnore]
         public ObservableCollection<CHILDS> Items { get; set; } = new ObservableCollection<CHILDS>();
 
-        public override void UpdateParent(ComplexAbstractVisitItem? parent)
+        public override void UpdateParent(ComplexModelVisitItem? parent)
         {
             base.UpdateParent(parent);
             foreach (var item in Items) item.UpdateParent(this);
         }
-        public override  void ItemsAdd(AbstractVisitItem item)
+        public override  void ItemsAdd(ModelVisitItem item)
         {
             if (item is CHILDS t)
             {
@@ -96,13 +93,13 @@ namespace Communications.Project
             }
             else throw new InvalidOperationException();
         }
-        public override void ItemsRemove(AbstractVisitItem item)
+        public override void ItemsRemove(ModelVisitItem item)
         {
             if (item is CHILDS t) Items.Remove(t);
             else throw new InvalidOperationException();
         }
     }
-    public class Device : AbstractVisitItem
+    public class Device : ModelVisitItem
     {
         public static readonly Device Empty = new Device();
     }
@@ -128,13 +125,13 @@ namespace Communications.Project
 
         #region property Device PB Meta Data 
         public string Name => metaData.name;
-        public int Address => GetD<int>(MetaData.Atr.adr);
-        public string info => GetD<string>(MetaData.Atr.info);
-        public int chip => GetD<int>(MetaData.Atr.chip);
-        public int serial => GetD<int>(MetaData.Atr.serial);
-        public int SupportUartSpeed => GetD<int>(MetaData.Atr.SupportUartSpeed);
-        public int NoPowerDataCount => GetD<int>(MetaData.Atr.NoPowerDataCount);
-        private T GetD<T>(MetaData.Atr atr)
+        public int Address => GetD<int>(Atr.adr);
+        public string info => GetD<string>(Atr.info);
+        public int chip => GetD<int>(Atr.chip);
+        public int serial => GetD<int>(Atr.serial);
+        public int SupportUartSpeed => GetD<int>(Atr.SupportUartSpeed);
+        public int NoPowerDataCount => GetD<int>(Atr.NoPowerDataCount);
+        private T GetD<T>(Atr atr)
         {
             var v = metaData.attrs.FirstOrDefault(a => a.Atr == atr);
             return v.value != null ? (T)v.value : default!;
@@ -148,7 +145,7 @@ namespace Communications.Project
     /// для циклоопроса сенсоров на шине bus
     /// если нет хотябы одного Device то убить Bus
     /// </summary>
-    public class Bus: ComplexAbstractVisitItem<Device> //Icomparable? // сериализуем
+    public class Bus: ComplexModelVisitItem<Device> //Icomparable? // сериализуем
         //where DEVICE : Device
     {
         public static readonly Bus Empty = new Bus();
@@ -176,7 +173,7 @@ namespace Communications.Project
     /// & Bus
     /// если нет хотябы одного Bus то убить Pipe
     /// </summary>
-    public class Pipe: ComplexAbstractVisitItem<Bus> // IComparable сравнивать по IConnection
+    public class Pipe: ComplexModelVisitItem<Bus> // IComparable сравнивать по IConnection
     {
         public static readonly Pipe Empty = new Pipe();
 
@@ -198,7 +195,7 @@ namespace Communications.Project
     /// Рейс
     /// based on witsml:BhaRun
     /// </summary>
-    public class Trip: ComplexAbstractVisitItem<Pipe>
+    public class Trip: ComplexModelVisitItem<Pipe>
     {
         public static readonly Trip Empty = new Trip();
         public int TripStatus { get; set; } // TODO:
@@ -220,20 +217,32 @@ namespace Communications.Project
     /// <summary>
     /// Заезд 
     /// </summary>
-    public class Visit: ComplexAbstractVisitItem<Trip>
+    public class Visit: ComplexModelVisitItem<Trip>
     {
         public const string SCH = @"D:\Projects\C#\Communications\Project\XMLSchemaVisit.xsd";
         public const string NS = "http://tempuri.org/horizont.pb";
         public const string NS_PX = "vs";
 
         public static readonly Visit Empty = new Visit();
+
+        //public Visit() { HideId = true; }
         /// <summary>
         /// локальные имена файлов witsMl
         /// select form by checkin xsd
         /// </summary>
-      //   public StringCollection Documents { get; set; } = new StringCollection();
-      //  public bool ShouldSerializeDocuments => Documents.Count > 0;
+        //   public StringCollection Documents { get; set; } = new StringCollection();
+        //  public bool ShouldSerializeDocuments => Documents.Count > 0;
         public ObservableCollection<Trip> Trips { get => Items; set { Items = value; } }
         public bool ShouldSerializeTrips() => Items.Count > 0;
+
+        public static XmlSerializer Serializer => new XmlSerializer(typeof(Visit), null, new[] 
+        {
+                            typeof(DevicePB),
+                            typeof(DeviceTelesystem),
+                            typeof(DeviceTelesystem2),
+                            typeof(SerialConn),
+                            typeof(NetConn),
+                            typeof(BusPB)
+        },null, NS,null);
     }
 }

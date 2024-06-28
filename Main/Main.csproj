@@ -8,6 +8,7 @@
     <AnalysisLevel>latest</AnalysisLevel>
     <LangVersion>latest</LangVersion>
     <ApplicationIcon>icon.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,10 +16,12 @@
     <None Remove="icon.ico" />
     <None Remove="Images\DockBottom.PNG" />
     <None Remove="Images\DockPane.PNG" />
-    <None Remove="Images\ExceptLog.png" />
     <None Remove="Images\HTabGroup.png" />
     <None Remove="Images\InfoLog.png" />
     <None Remove="Images\TraceLog.png" />
+    <None Remove="Images\Warning.png" />
+    <None Remove="Images\ExceptLog.png" />
+    <None Remove="Images\Except.png" />
     <None Remove="Images\Freeze.png" />
     <None Remove="Images\Clear.png" />
     <None Remove="Images\Project.png" />
@@ -37,6 +40,7 @@
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.77" />
+    <!--<PackageReference Include="System.Drawing.Common" Version="8.0.6" />-->
   </ItemGroup>
 
   <ItemGroup>
@@ -71,6 +75,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Models\XMLSchemaVisit.xsd">
+      <SubType>Designer</SubType>
+    </None>
     <None Update="Properties\Settings.settings">
       <Generator>PublicSettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -81,7 +88,9 @@
     <Resource Include="Images\DockBottom.PNG" />
     <Resource Include="Images\DockPane.PNG" />
     <Resource Include="Images\HTabGroup.png" />
+    <Resource Include="Images\Warning.png" />
     <Resource Include="Images\ExceptLog.png" />
+    <Resource Include="Images\Except.png" />
     <Resource Include="Images\InfoLog.png" />
     <Resource Include="Images\TraceLog.png" />
     <Resource Include="Images\Freeze.png" />

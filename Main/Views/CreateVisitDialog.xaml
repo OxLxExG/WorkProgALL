@@ -4,6 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Main.Views"
         xmlns:res="clr-namespace:Main.Properties"
+        
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         x:Class="Main.Views.CreateVisitDialog"
         WindowStartupLocation="CenterOwner"
@@ -12,12 +13,17 @@
         MinWidth="800"
         Height="550"
         Width="800">
+    
+    
     <Window.DataContext>
         <local:CreateVisitDialogVM />
     </Window.DataContext>
+    
+    
     <Grid>
         <Grid.Resources>
             <local:BoolToVisibilityConverter x:Key="BoolToVisibility" />
+            <!--<local:IconToImageConverter x:Key="IconToImageConverter" />-->
             <Style TargetType="{x:Type Button}">
                 <Setter Property="Margin"
                         Value="8,15" />
@@ -33,16 +39,16 @@
                 <Setter Property="Control.HorizontalAlignment"
                         Value="Left" />
                 <Setter Property="Control.Margin"
-                        Value="40,10,10,10" />
+                        Value="40,10,4,10" />
                 <Setter Property="Control.Height"
                         Value="24" />
             </Style>
             
             <Style x:Key="WtBox" BasedOn="{StaticResource allbox}">
                 <Setter Property="xctk:WatermarkComboBox.Watermark"
-                        Value="Необходимо выбрать расположение" />
-
+                        Value="{x:Static res:Resources.lblSelectPlase}" />
             </Style>
+            
             <Style x:Key="ValidationTextBoxErrorStyle"
                    BasedOn="{StaticResource allbox}"
                    TargetType="{x:Type xctk:WatermarkTextBox}">
@@ -63,10 +69,19 @@
                                                 BorderThickness="1">
                                             <AdornedElementPlaceholder x:Name="placeholder" />
                                         </Border>
-                                        <TextBlock FontSize="11"
-                                                   FontStyle="Italic"
-                                                   Foreground="Red"
-                                                   Text="{Binding [0].ErrorContent}" />
+                                        <StackPanel Orientation="Horizontal">
+                                            <Image Width="10"
+                                                   Height="10"
+                                                   Source="/Images/Except.png"
+                                                   Stretch="Fill" />
+
+                                            <TextBlock FontSize="11"
+                                                       FontStyle="Italic"
+                                                       Foreground="Red"
+                                                       Margin="5,0,0,0"
+                                                       Text="{Binding [0].ErrorContent}" />
+
+                                        </StackPanel>
                                     </StackPanel>
                                 </ControlTemplate>
                             </Setter.Value>
@@ -74,35 +89,53 @@
                     </MultiDataTrigger>
                 </Style.Triggers>
             </Style>
-            <Style x:Key="vg"
+
+            <Style x:Key="ProjectGroupName"
                    BasedOn="{StaticResource ValidationTextBoxErrorStyle}"
                    TargetType="{x:Type xctk:WatermarkTextBox}">
                 <Style.Triggers>
-                    <DataTrigger Binding="{Binding ElementName=cbiVisitOnly, Path=IsSelected}"
+                    <DataTrigger Binding="{Binding Path=VisitOnlySelected}"
+                                 Value="True">
+                        <Setter Property="Visibility"
+                                Value="Collapsed" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Path=cbIsChecked }"
                                  Value="True">
                         <Setter Property="IsEnabled"
                                 Value="False" />
-                        <Setter Property="Foreground"
+                        <Setter Property="Background"
+                                Value="LightGray" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Path=CurrentGroupSelected }"
+                                 Value="True">
+                        <Setter Property="IsEnabled"
+                                Value="False" />
+                        <Setter Property="Background"
                                 Value="LightGray" />
                     </DataTrigger>
                 </Style.Triggers>
             </Style>
-            
-            
-            <Style TargetType="CheckBox">
-                <Setter Property="IsEnabled"
-                        Value="{Binding cbIsEnabled, Mode=TwoWay}" />
+                       
+            <Style x:Key="GroupSingleDir"
+                TargetType="CheckBox">
+                <!--<Setter Property="IsEnabled"
+                        Value="{Binding cbIsEnabled, Mode=TwoWay}" />-->
                 <Setter Property="IsChecked"
                         Value="{Binding cbIsChecked, Mode=TwoWay}" />
                 <Style.Triggers>
-                    <DataTrigger Binding="{Binding ElementName=cbiVisitOnly, Path=IsSelected}"
+                    <DataTrigger Binding="{Binding Path=VisitOnlySelected}"
                                  Value="True">
-                        <Setter Property="IsEnabled"
-                                Value="False" />
-                        <Setter Property="IsChecked"
-                                Value="False" />
-                        <Setter Property="Foreground"
-                                Value="LightGray" />
+                        <!--!!! Связаные свойства! Триггер убивает привязку !!!!
+                             !!! Вся логикка через PropertyChanged VM !!!-->
+                        <Setter Property="Visibility"
+                                Value="Collapsed" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Path=CurrentGroupSelected}"
+                                 Value="True">
+                        <!--!!! Связаные свойства! Триггер убивает привязку !!!!
+                             !!! Вся логикка через PropertyChanged VM !!!-->
+                        <Setter Property="Visibility"
+                                Value="Collapsed" />
                     </DataTrigger>
                 </Style.Triggers>
             </Style>
@@ -110,13 +143,14 @@
             <Style x:Key="TextBloGroup"
                    TargetType="TextBlock">
                 <Style.Triggers>
-                    <DataTrigger Binding="{Binding ElementName=cbiVisitOnly, Path=IsSelected}"
+                    <DataTrigger Binding="{Binding Path=VisitOnlySelected}"
                                  Value="True">
-                        <Setter Property="Foreground"
-                                Value="LightGray" />
+                        <Setter Property="Visibility"
+                                Value="Collapsed" />
                     </DataTrigger>
                 </Style.Triggers>
             </Style>
+            
         </Grid.Resources>
 
         <Grid.RowDefinitions>
@@ -132,32 +166,40 @@
         
         <StackPanel Grid.Row="1"
                     HorizontalAlignment="Left">
+            
             <TextBlock Margin="40,10,10,0"
-                       Text="Имя заезда" />
+                       Text="{x:Static res:Resources.lblNameVisit}" />
+            
             <xctk:WatermarkTextBox x:Name="visitName"
                                    Style="{StaticResource ValidationTextBoxErrorStyle}"
-                                   Watermark="Введите название заезда">
+                                   Watermark="{x:Static res:Resources.lblEnterNameVisit}">
                 <xctk:WatermarkTextBox.Text>
                     <Binding Path="VisitFile"
                              Mode="TwoWay"
                              UpdateSourceTrigger="PropertyChanged">
                         <Binding.ValidationRules>
-                            <local:ValidateFileNameRule ErrorText="Имя заезда пустое или содержит некорректные символы" />
+                            <local:ValidateFileNameRule ErrorText="{x:Static res:Resources.lblErrNameVisit}" />
                         </Binding.ValidationRules>
                     </Binding>
                 </xctk:WatermarkTextBox.Text>
             </xctk:WatermarkTextBox>
-            <!--<TextBlock Foreground="Red"
-                       Text="{Binding ElementName=visitName, Path=(Validation.ErrorTemplate) }" />-->
-            <TextBlock Margin="40,10,10,0"
-                       Text="Расположение" />
 
-            <StackPanel Orientation="Horizontal">
+            <TextBlock x:Name="lblPlasement" Margin="40,10,10,0"
+                       Text="{x:Static res:Resources.lblPlacement}" />
+
+            <StackPanel x:Name="Plasement" Orientation="Horizontal">
+
+                <!--SelectedItem="{Binding Path=RootDir, Mode=TwoWay}"-->
                 <xctk:WatermarkComboBox x:Name="bxPath"
                                         Style="{StaticResource WtBox}"
                                         IsEditable="True"
-                                        ItemsSource="{Binding }">
                                         
+                                        ItemsSource="{Binding WorkDirs}">
+                    <xctk:WatermarkComboBox.Text>
+                        <Binding Path="RootDir"
+                                 Mode="TwoWay"
+                                 UpdateSourceTrigger="PropertyChanged" />
+                    </xctk:WatermarkComboBox.Text>
                 </xctk:WatermarkComboBox>
                 
                 <Button x:Name="btNewPath"
@@ -166,33 +208,37 @@
                         Width="40"
                         Height="24"
                         Click="btNewPath_Click"/>
+                
             </StackPanel>
 
-            <TextBlock Text="Группа заездов"
+            <TextBlock x:Name="lblGroupVisit"  Text="{x:Static res:Resources.lblGroupVisit}"
                        Margin="40,15,10,0"/>
 
-            <xctk:WatermarkComboBox Style="{StaticResource WtBox}">
+            <xctk:WatermarkComboBox x:Name="GroupVisit"  Style="{StaticResource WtBox}">
+                
                 <ComboBoxItem IsSelected="{Binding CurrentGroupSelected}"
-                              Content="Добавить в текущую группу заездов" 
-                              IsEnabled="{Binding cbiCurrGroupIsEnable}" />
+                              Content="{x:Static res:Resources.lblAddCurVis}" 
+                              IsEnabled="{Binding CurrGroupIsEnable}" />
+                
                 <ComboBoxItem IsSelected="{Binding NewGroupSelected}"
-                              Content="Создать новую группу заездов" />
-                <ComboBoxItem x:Name="cbiVisitOnly"
-                              IsSelected="{Binding VisitOnlySelected}" 
-                              Content="Создать только заезд" />
+                              Content="{x:Static res:Resources.lblCreGrpVis}" />
+                <ComboBoxItem 
+                              IsSelected="{Binding VisitOnlySelected}"
+                              Content="{x:Static res:Resources.lblCreSnglVisit}" />
             </xctk:WatermarkComboBox>
-            
-            <TextBlock Style="{StaticResource TextBloGroup}" Text="Имя группы заездов"
+
+            <TextBlock Style="{StaticResource TextBloGroup}"
+                       Text="{x:Static res:Resources.lblNameGrpVisit}"
                        Margin="40,25,10,0" />
 
             <xctk:WatermarkTextBox x:Name="GroupName"
-                                   Style="{StaticResource vg}"
-                                   Watermark="Необходимо выбрать название группы заездов">
+                                   Style="{StaticResource ProjectGroupName}"
+                                   Watermark="{x:Static res:Resources.lblSelNameGrpVis}">
                 <xctk:WatermarkTextBox.Text>
                     <Binding Path="GroupFile"                             
                              UpdateSourceTrigger="PropertyChanged">
                         <Binding.ValidationRules>
-                            <local:ValidateFileNameRule ErrorText="Имя группы заездов пустое или содержит некорректные символы" />
+                            <local:ValidateFileNameRule ErrorText="{x:Static res:Resources.lblErrNameGrpVisit}" />
                         </Binding.ValidationRules>
                     </Binding>
                 </xctk:WatermarkTextBox.Text>
@@ -202,28 +248,34 @@
             <!--IsChecked="{Binding cbIsChecked}"
                       Visibility="{Binding cbIsVisible, Converter={StaticResource BoolToVisibility}}"-->
 
-            <CheckBox Content="Группа заездов и заезд в одном каталоге"
+            <CheckBox x:Name="cbx" Style="{StaticResource GroupSingleDir}"
+                      Content="{x:Static res:Resources.lblGrpVisitSameDir}"
                       Margin="40,10,10,0">
             </CheckBox>
             
             <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Заезд будет создан в:"
-                           Margin="40,25,10,0" />
-                <TextBlock Margin="10,25,10,0">
-                    <TextBlock.Text>
-                        <MultiBinding StringFormat="{}{0}\{1}\{2}">
-                            <Binding Path="Text"
-                                     ElementName="bxPath" />
-                            <Binding Path="Text"
-                                     ElementName="GroupName" />
-                            <Binding Path="Text"
-                                     ElementName="visitName" />
-                        </MultiBinding>
-                    </TextBlock.Text>
-                </TextBlock>
-                    
+                <TextBlock Text="{x:Static res:Resources.lblVisitGreateIn}"
+                           Margin="40,25,0,0" />
+
+                <TextBlock  Text="{Binding FullPath}"
+                            Margin="10,25,0,0" />
             </StackPanel>
-            
+            <StackPanel Orientation="Horizontal"
+                        Visibility="{Binding WarnCatVisible,Converter={StaticResource BoolToVisibility}}">
+                <Image Width="16"
+                       Height="16"
+                       Stretch="Fill"
+                       Source="/Images/Warning.png"
+                       Margin="40,5,0,0" />
+                <!--<Image.Source>
+                        <Binding Source="{x:Static sd:SystemIcons.Warning}"
+                                 Converter="{StaticResource IconToImageConverter}" />
+                    </Image.Source>-->
+
+                <TextBlock  Text="{x:Static res:Resources.lblWrnCatNotEmpty}"
+                            Margin="10,5,0,0" />
+            </StackPanel>
+
         </StackPanel>
         <StackPanel Grid.Row="2"
                     Orientation="Horizontal"

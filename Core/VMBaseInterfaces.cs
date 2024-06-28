@@ -119,6 +119,15 @@ namespace Core
                     if (sd.DrityOrHasChildDrity()) return true; 
             return false;
         }
+        public static bool DrityOrHasChildVMDrity(this VMBaseFileDocument d)
+        {
+            if (d.IsVMDirty) return true;
+
+            if (d is ComplexFileDocumentVM c && c.ChildDocuments != null)
+                foreach (var sd in c.ChildDocuments)
+                    if (sd.DrityOrHasChildVMDrity()) return true;
+            return false;
+        }
         public static SaveFileItem? GenerateDrityTree(this VMBaseFileDocument d, SaveFileItem? root = null) 
         {
             if (!d.DrityOrHasChildDrity()) return null;
@@ -138,24 +147,27 @@ namespace Core
     {
         public BoxResult Show(IList<SaveFileItem> RootItems);
     }
-    public enum VisitAddToGroup
+    public enum NewVisitType
     {
-        AddToCurrent,
-        NewGroup,
-        SingleVisit
+        AddVisit,
+        SingleVisit,
+        NewGroup
     }
-    //public record  CreateNewVisitDialogResult(        
-    //    BoxResult BoxResult, 
-    //    string VisitFile, 
-    //    string GroupFile,
-    //    VisitAddToGroup VisitAddToGroup
-    //    );
+    public record CreateNewVisitDialogResult(
+        string VisitFile,
+        string RootDir,
+        string GroupFile,
+        NewVisitType VisitType,
+        bool SameDir,
+        string VisitFullFile,
+        string GroupFullFile,
+        bool VisitExiste,
+        bool GroupExiste
+        );
     public interface ICreateNewVisitDialog
     {
-        string VisitFile { get; }
-        string GroupFile { get; }
-        VisitAddToGroup VisitAddToGroup { get; }
-        public BoxResult Show();
+        public bool AddToCurrent {  get; set; }
+        public BoxResult Show(Action<CreateNewVisitDialogResult> result);
     }
     public interface IFileDialog
     {
@@ -169,6 +181,7 @@ namespace Core
         public bool AddExtension { get; set; }
         public string DefaultExt { get; set; }
         public bool ShowDialog();
+        public bool ShowDialog(Action<string> res);
         //
         // Сводка:
         //     Gets an array that contains one file name for each selected file.

@@ -5,7 +5,7 @@
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
     xmlns="http://tempuri.org/horizont.pb"
 >
-  <xs:include schemaLocation="../MetaData/XMLSchemaMetaData.xsd"/>
+  <xs:include schemaLocation="../../Communications/MetaData/XMLSchemaMetaData.xsd"/>
 
 
   <xs:complexType name="ConType" abstract="true">

@@ -12,7 +12,7 @@ using System.ComponentModel;
 
 namespace Core
 {
-    internal static class AnyResuorceSelector
+    public static class AnyResuorceSelector
     {
         public static object? Get(ResourceDictionary _dictionary, object item, string suffix = "")
         {
@@ -122,11 +122,17 @@ namespace Core
         {
             this.fileDialog = fileDialog;
         }
-        public bool ShowDialog() 
-            {
-                var r = fileDialog.ShowDialog();
-                return r ?? false;
-            }
+        public bool ShowDialog()
+        {
+            var r = fileDialog.ShowDialog();
+            return r ?? false;
+        }
+        public bool ShowDialog(Action<string> res)
+        {
+            bool r = fileDialog.ShowDialog() ?? false;
+            if (r) res(fileDialog.FileName);
+            return r;
+        }
     }
     internal sealed class FileOpenView : FileView, IFileOpenDialog
     {

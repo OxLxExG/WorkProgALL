@@ -177,9 +177,7 @@ namespace Main.ViewModels
                             ContentID = MMenus.CloseAll.ContentID,
                             Command = new RelayCommand(() => 
                             {
-                                RootFileDocumentVM.Instance?.Remove();
-                                RootFileDocumentVM.Instance = null;
-                                DockManagerVM.Clear();
+                                ProjectFile.CloseRoot(true);
                             })
                         },
                         new CommandMenuItemVM

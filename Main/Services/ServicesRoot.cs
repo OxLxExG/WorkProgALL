@@ -25,19 +25,19 @@ namespace Main.Services
 
             services.AddSingleton<MenuVM>();
 
-            if (opt.UseGroup)
-            {
+           // if (opt.UseGroup)
+         //   {
                 services.AddSingleton<LastGroupMenuVM>();
-                services.AddSingleton<LastVisitMenuVM>();
-            }
-            else services.AddSingleton<LastSingleVisitMenuVM>();
+              //  services.AddSingleton<LastVisitMenuVM>();
+         //   }
+           // else services.AddSingleton<LastSingleVisitMenuVM>();
             services.AddSingleton<LastFileMenuVM>();
 
-            if (opt.UseGroup) services.AddTransient<IMenuItemClient, ProjectsGroupMenuFactory>();
-            else services.AddTransient<IMenuItemClient, ProjectsSingleMenuFactory>();
-            services.AddTransient<VisitsGroupVM>();
+            services.AddTransient<IMenuItemClient, ProjectsGroupMenuFactory>();
+            //services.AddTransient<IMenuItemClient, ProjectsSingleMenuFactory>();
+            //services.AddTransient<VisitsGroupVM>();
             services.AddTransient<ISaveFilesDialog, ServiceSaveDialog>();
-            services.AddTransient<ICreateNewVisitDialog, CreateNewVisitDialog>();
+            services.AddTransient<ICreateNewVisitDialog, NewVisitDialog>();
 
             //services.AddTransient<MenuItemVM>();
             //services.AddTransient<CommandMenuItemVM>();

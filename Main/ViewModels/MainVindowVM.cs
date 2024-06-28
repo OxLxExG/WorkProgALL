@@ -38,7 +38,7 @@ namespace Main.ViewModels
         {
             if (targetType == typeof(string))
             {
-                if (value != null && value is RootFileDocumentVM rd) 
+                if (value != null && value is VMBaseFileDocument rd) 
                 {
                     return (rd.IsNew ? rd.FileName : rd.FileFullName) + (rd.IsDirty ? "*" : ""); 
                 }
@@ -70,7 +70,7 @@ namespace Main.ViewModels
         public MenuVM MenuVM { get; private set; }
         public ToolBarVM ToolGlyphVM { get; private set; }
         public ToolBarVM ToolTextVM { get; private set; }
-        public RootFileDocumentVM? RootDocInstance => RootFileDocumentVM.Instance;
+        public ComplexFileDocumentVM? RootDocInstance => RootFileDocumentVM.Instance;
         public MainVindowVM(MenuVM m, IToolServer t)
         {
             ToolGlyphVM = new ToolBarVM { ContentID = "ToolGlyph" };

@@ -123,6 +123,15 @@
   <data name="cptTotal" xml:space="preserve">
     <value>Total</value>
   </data>
+  <data name="dlgGroupExists" xml:space="preserve">
+    <value>Группа Заездов с указанным именем\n\n  {0}\n\nуже существует на диске, нерезаписать существующую Группу Заездов новой?</value>
+  </data>
+  <data name="dlgVisGrpExisis" xml:space="preserve">
+    <value>Группа Заездов и Заезд с указанными именами\n\n  {0}\n\n  {1}\n\nуже существуют на диске,перезаписать существующую Группу Заездов и Заезд новыми?</value>
+  </data>
+  <data name="dlgVisitExisis" xml:space="preserve">
+    <value>Заезд с указанным именем\n\n  {0}\n\nуже существует на диске, перезаписать существующий заезд новым?</value>
+  </data>
   <data name="errAppendFromBad" xml:space="preserve">
     <value>File can not be appended  data begin: {0} data end: {1}  data append from {2}</value>
   </data>
@@ -140,6 +149,51 @@
   </data>
   <data name="errFromBiggeTotal" xml:space="preserve">
     <value>From {0} bigger total {1}</value>
+  </data>
+  <data name="lblAddCurVis" xml:space="preserve">
+    <value>Добавить в текущую группу заездов</value>
+  </data>
+  <data name="lblCreGrpVis" xml:space="preserve">
+    <value>Создать новую группу заездов</value>
+  </data>
+  <data name="lblCreSnglVisit" xml:space="preserve">
+    <value>Создать только заезд</value>
+  </data>
+  <data name="lblEnterNameVisit" xml:space="preserve">
+    <value>Введите название заезда</value>
+  </data>
+  <data name="lblErrNameGrpVisit" xml:space="preserve">
+    <value>Имя группы заездов пустое или содержит некорректные символы</value>
+  </data>
+  <data name="lblErrNameVisit" xml:space="preserve">
+    <value>Имя заезда пустое или содержит некорректные символы</value>
+  </data>
+  <data name="lblGroupVisit" xml:space="preserve">
+    <value>Группа заездов</value>
+  </data>
+  <data name="lblGrpVisitSameDir" xml:space="preserve">
+    <value>Группа заездов и заезд в одном каталоге</value>
+  </data>
+  <data name="lblNameGrpVisit" xml:space="preserve">
+    <value>Имя группы заездов</value>
+  </data>
+  <data name="lblNameVisit" xml:space="preserve">
+    <value>Имя заезда</value>
+  </data>
+  <data name="lblPlacement" xml:space="preserve">
+    <value>Расположение</value>
+  </data>
+  <data name="lblSelectPlase" xml:space="preserve">
+    <value>Необходимо выбрать расположение</value>
+  </data>
+  <data name="lblSelNameGrpVis" xml:space="preserve">
+    <value>Необходимо выбрать название группы заездов</value>
+  </data>
+  <data name="lblVisitGreateIn" xml:space="preserve">
+    <value>Заезд будет создан в:</value>
+  </data>
+  <data name="lblWrnCatNotEmpty" xml:space="preserve">
+    <value>Этот каталог не пуст</value>
   </data>
   <data name="msgDeleteFile" xml:space="preserve">
     <value>Delete file? {0}, all data mast bee lost</value>
@@ -192,11 +246,14 @@
   <data name="nfile_Add_File" xml:space="preserve">
     <value>Добавить файл...</value>
   </data>
+  <data name="nfile_Add_New_Project" xml:space="preserve">
+    <value>Создать новый заезд...</value>
+  </data>
   <data name="nfile_Add_Project" xml:space="preserve">
-    <value>Добввить заезд...</value>
+    <value>Добавить существующий заезд...</value>
   </data>
   <data name="nfile_Close" xml:space="preserve">
-    <value>Закрыть {0}</value>
+    <value>Закрыть </value>
   </data>
   <data name="nfile_CloseAll" xml:space="preserve">
     <value>Закрыть все</value>
@@ -207,11 +264,14 @@
   <data name="nfile_Create" xml:space="preserve">
     <value>Создать</value>
   </data>
+  <data name="nfile_Flt_ALL" xml:space="preserve">
+    <value>Заезд или Группа </value>
+  </data>
   <data name="nfile_last_Files" xml:space="preserve">
     <value>Посление файлы</value>
   </data>
   <data name="nfile_last_ProjectGroups" xml:space="preserve">
-    <value>Последние группы заездов</value>
+    <value>Последние заезды или группы</value>
   </data>
   <data name="nfile_last_Projects" xml:space="preserve">
     <value>Последние заезды</value>
@@ -221,6 +281,9 @@
   </data>
   <data name="nfile_Open" xml:space="preserve">
     <value>Открыть</value>
+  </data>
+  <data name="nfile_Open_ALL" xml:space="preserve">
+    <value>Открыть заезд или группу заездов</value>
   </data>
   <data name="nfile_Open_File" xml:space="preserve">
     <value>Открыть файл...</value>
@@ -232,7 +295,7 @@
     <value>Открыть заезд...</value>
   </data>
   <data name="nfile_Save" xml:space="preserve">
-    <value>Сохранить {0)</value>
+    <value>Сохранить {0}</value>
   </data>
   <data name="nfile_SaveAll" xml:space="preserve">
     <value>Сохранить все</value>

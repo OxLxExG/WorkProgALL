@@ -229,5 +229,78 @@ namespace Main.Properties {
                 this["ClosedProjectGroup"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string CurrentWorkDir {
+            get {
+                return ((string)(this["CurrentWorkDir"]));
+            }
+            set {
+                this["CurrentWorkDir"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("<?xml version=\"1.0\" encoding=\"utf-16\"?>\r\n<ArrayOfString xmlns:xsd=\"http://www.w3." +
+            "org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" />")]
+        public global::System.Collections.Specialized.StringCollection WorkDirs {
+            get {
+                return ((global::System.Collections.Specialized.StringCollection)(this["WorkDirs"]));
+            }
+            set {
+                this["WorkDirs"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string CurrentGroupName {
+            get {
+                return ((string)(this["CurrentGroupName"]));
+            }
+            set {
+                this["CurrentGroupName"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string CurrentVisitName {
+            get {
+                return ((string)(this["CurrentVisitName"]));
+            }
+            set {
+                this["CurrentVisitName"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IsSingleVisit {
+            get {
+                return ((bool)(this["IsSingleVisit"]));
+            }
+            set {
+                this["IsSingleVisit"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string XMLDockManager {
+            get {
+                return ((string)(this["XMLDockManager"]));
+            }
+            set {
+                this["XMLDockManager"] = value;
+            }
+        }
     }
 }

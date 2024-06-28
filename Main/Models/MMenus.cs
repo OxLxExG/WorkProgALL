@@ -25,6 +25,8 @@ namespace Main.Models
         public static readonly rootMenu NewFile = new rootMenu(RootMenusID.NFile_Create, RootMenusID.NFile_Create_File,
                                                                      Properties.Resources.nFile_New, 702);
 
+        public static readonly rootMenu OpenALL = new rootMenu(RootMenusID.NFile_Open, RootMenusID.NFile_Open_ALL,
+                                                                     Properties.Resources.nfile_Open_ALL, 700);
         public static readonly rootMenu OpenProjectGroup = new rootMenu(RootMenusID.NFile_Open, RootMenusID.NFile_Open_Group,
                                                                      Properties.Resources.nfile_Open_Group, 700);
         public static readonly rootMenu OpenProject = new rootMenu(RootMenusID.NFile_Open, RootMenusID.NFile_Open_Project,
@@ -34,6 +36,8 @@ namespace Main.Models
 
         public static readonly rootMenu AddProject = new rootMenu(RootMenusID.NFile_Add, RootMenusID.NFile_Add_Project,
                                                                      Properties.Resources.nfile_Add_Project, 701);
+        public static readonly rootMenu AddNewProject = new rootMenu(RootMenusID.NFile_Add, RootMenusID.NFile_Add_NewProject,
+                                                                     Properties.Resources.nfile_Add_New_Project, 601);
         public static readonly rootMenu AddFile = new rootMenu(RootMenusID.NFile_Add, RootMenusID.NFile_Add_File,
                                                                      Properties.Resources.nfile_Add_File, 702);
 

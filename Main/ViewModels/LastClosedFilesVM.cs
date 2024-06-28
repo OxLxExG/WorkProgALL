@@ -1,7 +1,9 @@
 ﻿using Core;
+using Main.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.IO;
 using System.Linq;
 using System.Reflection.PortableExecutable;
 using System.Text;
@@ -27,13 +29,11 @@ namespace Main.ViewModels
         public LastRootMenuVM(rootMenu m) : base(m) { }
         protected override void BeforeOpenClosedFileEvent(string file)
         {
-            RootFileDocumentVM.Instance?.Remove();
-            RootFileDocumentVM.Instance = null;
-            DockManagerVM.Clear();
+            ProjectFile.CloseRoot(true);
         }
         protected override void AfterOpenClosedFileEvent(string file)
         {
-            RootFileDocumentVM.Instance = (RootFileDocumentVM?)RootFileDocumentVM.InstanceFactory!.LoadNew(file);
+            ProjectFile.CreateOldProject(file);
         }
         protected override void SaveClosedFiles() => Properties.Settings.Default.Save();
     }
@@ -43,41 +43,42 @@ namespace Main.ViewModels
         public LastGroupMenuVM() : base(LastVisitGroups) { }
         protected override StringCollection lastClosedFiles { get => Properties.Settings.Default.ClosedProjectGroup; }
     }
-    internal class LastSingleVisitMenuVM : LastRootMenuVM
-    {
-        public LastSingleVisitMenuVM() : base(LastVisits) { }
-        protected override StringCollection lastClosedFiles { get => Properties.Settings.Default.ClosedProjects; }
-    }
-    internal class LastVisitMenuVM : LastSettingsMenuVM
-    {
-        public LastVisitMenuVM() : base(LastVisits)
-        {
-            RootFileDocumentVM.StaticPropertyChanged += (o, e) => CheckEnable();
-        }
-        protected override void CheckEnable()
-        {
-            IsEnable = Items.Count > 0 && RootFileDocumentVM.Instance != null;
-        }
-        protected override StringCollection lastClosedFiles 
-        {
-            get 
-            { if (RootFileDocumentVM.Instance is VisitsGroupVM pgi)
-                {
-                    return pgi.LastClosedVisits;
-                }
-                return null!;
-            } 
-        }
-        protected override void AfterOpenClosedFileEvent(string file)
-        {
-            VisitsGroupVM.AddVisit(file);
-        }
-        protected override void BeforeOpenClosedFileEvent(string file) { }
-        protected override void SaveClosedFiles()
-        {
-            RootFileDocumentVM.SetDrity();
-        }
-    }
+    //internal class LastSingleVisitMenuVM : LastRootMenuVM
+    //{
+    //    public LastSingleVisitMenuVM() : base(LastVisits) { }
+    //    protected override StringCollection lastClosedFiles { get => Properties.Settings.Default.ClosedProjects; }
+    //}
+    //internal class LastVisitMenuVM : LastSettingsMenuVM
+    //{
+    //    public LastVisitMenuVM() : base(LastVisits)
+    //    {
+    //        RootFileDocumentVM.StaticPropertyChanged += (o, e) => CheckEnable();
+    //    }
+    //    protected override void CheckEnable()
+    //    {
+    //        IsEnable = Items.Count > 0 && RootFileDocumentVM.Instance != null;
+    //    }
+    //    protected override StringCollection lastClosedFiles 
+    //    {
+    //        get 
+    //        { 
+    //            //if (RootFileDocumentVM.Instance is VisitsGroupVM pgi)
+    //            //{
+    //            //    return pgi.LastClosedVisits;
+    //            //}
+    //            return null!;
+    //        } 
+    //    }
+    //    protected override void AfterOpenClosedFileEvent(string file)
+    //    {
+    //        //VisitsGroupVM.AddVisit(file);
+    //    }
+    //    protected override void BeforeOpenClosedFileEvent(string file) { }
+    //    protected override void SaveClosedFiles()
+    //    {
+    //       RootFileDocumentVM.SetDrity(); 
+    //    }
+    //}
     internal class LastFileMenuVM : LastSettingsMenuVM
     {
         public LastFileMenuVM() : base(LastFiles) { }

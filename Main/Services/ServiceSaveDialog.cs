@@ -18,17 +18,20 @@ namespace Main.Services
             return f.Result;
         }
     }
-    internal class CreateNewVisitDialog : ICreateNewVisitDialog
+    internal class NewVisitDialog : ICreateNewVisitDialog
     {
-        CreateVisitDialog createVisitDialog = new CreateVisitDialog();
-        public string VisitFile => ((CreateNewVisitDialog) createVisitDialog.DataContext).VisitFile;
+        public bool AddToCurrent { get ; set; }
 
-        public string GroupFile => ((CreateNewVisitDialog)createVisitDialog.DataContext).GroupFile;
-
-        public VisitAddToGroup VisitAddToGroup => ((CreateNewVisitDialog)createVisitDialog.DataContext).VisitAddToGroup;
-
-        public BoxResult Show()
+        public BoxResult Show(Action<CreateNewVisitDialogResult> result)
         {
+            CreateVisitDialog createVisitDialog = new CreateVisitDialog();
+            var vm = (CreateVisitDialogVM)createVisitDialog.DataContext;
+            if (AddToCurrent)
+            {
+                vm.CurrentGroupSelected = true;
+                createVisitDialog.SetOnlyAdd();
+            }
+            vm.result = result;            
             createVisitDialog.ShowDialog();
             return createVisitDialog.Result;
         }

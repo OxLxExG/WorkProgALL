@@ -79,6 +79,33 @@ namespace Main.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на A Group of Visits with the specified name\n\n {0}\n\nalready exists on the disk, do you want to overwrite the existing Group of Visits with a new one?.
+        /// </summary>
+        public static string dlgGroupExists {
+            get {
+                return ResourceManager.GetString("dlgGroupExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на The Group of Visits and the Visit with the specified names\n\n {0}\n\n {1}\n\nalready exist on the disk, should you overwrite the existing Group of Visits and the Visit with new ones?.
+        /// </summary>
+        public static string dlgVisGrpExisis {
+            get {
+                return ResourceManager.GetString("dlgVisGrpExisis", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на A Visit with the specified name\n\n{0}\n\nalready exists on disk,overwrite the existing Visit with a new one?.
+        /// </summary>
+        public static string dlgVisitExisis {
+            get {
+                return ResourceManager.GetString("dlgVisitExisis", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на File can not be appended  data begin: {0} data end: {1}  data append from {2}.
         /// </summary>
         public static string errAppendFromBad {
@@ -129,6 +156,141 @@ namespace Main.Properties {
         public static string errFromBiggeTotal {
             get {
                 return ResourceManager.GetString("errFromBiggeTotal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Add to current group of visits.
+        /// </summary>
+        public static string lblAddCurVis {
+            get {
+                return ResourceManager.GetString("lblAddCurVis", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Create a new visit group.
+        /// </summary>
+        public static string lblCreGrpVis {
+            get {
+                return ResourceManager.GetString("lblCreGrpVis", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Create single Visit.
+        /// </summary>
+        public static string lblCreSnglVisit {
+            get {
+                return ResourceManager.GetString("lblCreSnglVisit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Enter Visit name.
+        /// </summary>
+        public static string lblEnterNameVisit {
+            get {
+                return ResourceManager.GetString("lblEnterNameVisit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на The visit group name is empty or contains invalid characters.
+        /// </summary>
+        public static string lblErrNameGrpVisit {
+            get {
+                return ResourceManager.GetString("lblErrNameGrpVisit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на The visit name is empty or contains invalid characters.
+        /// </summary>
+        public static string lblErrNameVisit {
+            get {
+                return ResourceManager.GetString("lblErrNameVisit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Group of visits.
+        /// </summary>
+        public static string lblGroupVisit {
+            get {
+                return ResourceManager.GetString("lblGroupVisit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на A group of visits and a visit in same directory.
+        /// </summary>
+        public static string lblGrpVisitSameDir {
+            get {
+                return ResourceManager.GetString("lblGrpVisitSameDir", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Name group of visits.
+        /// </summary>
+        public static string lblNameGrpVisit {
+            get {
+                return ResourceManager.GetString("lblNameGrpVisit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Visit name.
+        /// </summary>
+        public static string lblNameVisit {
+            get {
+                return ResourceManager.GetString("lblNameVisit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Placement.
+        /// </summary>
+        public static string lblPlacement {
+            get {
+                return ResourceManager.GetString("lblPlacement", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на You must select a location.
+        /// </summary>
+        public static string lblSelectPlase {
+            get {
+                return ResourceManager.GetString("lblSelectPlase", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на You must select the name of the visit group.
+        /// </summary>
+        public static string lblSelNameGrpVis {
+            get {
+                return ResourceManager.GetString("lblSelNameGrpVis", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на the visit will be created in:.
+        /// </summary>
+        public static string lblVisitGreateIn {
+            get {
+                return ResourceManager.GetString("lblVisitGreateIn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на This directory is not empty.
+        /// </summary>
+        public static string lblWrnCatNotEmpty {
+            get {
+                return ResourceManager.GetString("lblWrnCatNotEmpty", resourceCulture);
             }
         }
         
@@ -286,7 +448,16 @@ namespace Main.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Add visit....
+        ///   Ищет локализованную строку, похожую на Create visit....
+        /// </summary>
+        public static string nfile_Add_New_Project {
+            get {
+                return ResourceManager.GetString("nfile_Add_New_Project", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Add existing visit....
         /// </summary>
         public static string nfile_Add_Project {
             get {
@@ -295,7 +466,7 @@ namespace Main.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Close {0}.
+        ///   Ищет локализованную строку, похожую на Close .
         /// </summary>
         public static string nfile_Close {
             get {
@@ -331,6 +502,15 @@ namespace Main.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Visit or Group.
+        /// </summary>
+        public static string nfile_Flt_ALL {
+            get {
+                return ResourceManager.GetString("nfile_Flt_ALL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Last files.
         /// </summary>
         public static string nfile_last_Files {
@@ -340,7 +520,7 @@ namespace Main.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Last visit groups.
+        ///   Ищет локализованную строку, похожую на Last visit or visits groups.
         /// </summary>
         public static string nfile_last_ProjectGroups {
             get {
@@ -376,6 +556,15 @@ namespace Main.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Open Visit or Group visits.
+        /// </summary>
+        public static string nfile_Open_ALL {
+            get {
+                return ResourceManager.GetString("nfile_Open_ALL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Open file....
         /// </summary>
         public static string nfile_Open_File {
@@ -403,7 +592,7 @@ namespace Main.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Save {0).
+        ///   Ищет локализованную строку, похожую на Save {0}.
         /// </summary>
         public static string nfile_Save {
             get {
@@ -538,7 +727,7 @@ namespace Main.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на strNoSave.
+        ///   Ищет локализованную строку, похожую на Not Save.
         /// </summary>
         public static string strNoSave {
             get {
@@ -583,7 +772,7 @@ namespace Main.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на strSave.
+        ///   Ищет локализованную строку, похожую на Save.
         /// </summary>
         public static string strSave {
             get {

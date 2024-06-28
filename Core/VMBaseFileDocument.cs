@@ -62,18 +62,20 @@ namespace Core
         // public static event EventHandler<UserFileEventArg>? UserFileEventEvent;
         public VMBaseFileDocument() 
         {
+            PropertyChanged += (o,e) => IsVMDirty = true;
             DockManagerVM.FormsCleared += FormsClearedEvent;
             DockManagerVM.FormClosed += FormClosedEvent;
         }
-        protected virtual void FormsClearedEvent(object? sender, EventArgs e)
+        protected void FormsClearedEvent(object? sender, EventArgs e)
         {
             if (ChildFormIDs != null)
             {
                 ChildFormIDs.Clear();
                 ChildFormIDs = null;
+                IsVMDirty = true;
             }
         }
-        protected virtual void FormClosedEvent(object? sender, EventArgs e)
+        protected void FormClosedEvent(object? sender, EventArgs e)
         {
             if (sender is VMBaseForm f && ChildFormIDs != null && ChildFormIDs.Contains(f.ContentID))
                 RemoveChildForm(f);
@@ -88,6 +90,7 @@ namespace Core
         {
             if (ChildFormIDs == null) ChildFormIDs = new();
             ChildFormIDs.Add(childForm.ContentID);
+            IsVMDirty = true;
         }
         public virtual void RemoveChildForm(VMBaseForm childForm)
         {
@@ -95,14 +98,16 @@ namespace Core
             {
                 ChildFormIDs.Remove(childForm.ContentID);
                 if (ChildFormIDs.Count == 0) ChildFormIDs = null;
+                IsVMDirty = true;
             }
         }
         #endregion
 
-        private ComplexFileDocumentVM? parent {get;set;}
+        private ComplexFileDocumentVM? parent {get; set;}
         public virtual void UpdateParent(ComplexFileDocumentVM? root) => parent = root;
         public bool UnloadedModel { get; set; }
         public bool ShouldSerializeUnloadedModel() => UnloadedModel == true;
+        [XmlIgnore]public virtual bool FileNotFound { get; set; }
         /// <summary>
         /// То что умеет себя сохранять в файл Visit, WitsML
         /// </summary>
@@ -117,115 +122,153 @@ namespace Core
         /// </summary>
         public string Title { get; set; } = string.Empty;
         public bool ShouldSerializeTitle() => Title != DefaultTitle;
-        public bool IsActive { get; set; }
+
+        bool _IsActive;
+        public bool IsActive { get=>_IsActive; set => SetProperty(ref _IsActive, value); }
         public bool ShouldSerializeIsActive() => IsActive;
         public bool CanActive { get; set; }
         public bool ShouldSerializeCanActive() => CanActive;
         public bool IsReadOnly { get; set; }
         public bool ShouldSerializeIsReadOnly() => IsReadOnly;
+        
+        bool _IsExpanded;
+        public bool IsExpanded { get=>_IsExpanded; set => SetProperty(ref _IsExpanded, value); }
+        public bool ShouldSerializeIsExpanded() => IsExpanded;
+       
+        bool _IsSelected;
+        public bool IsSelected { get=> _IsSelected; set => SetProperty(ref _IsSelected, value); }
+        public bool ShouldSerializeIsSelected() => IsSelected;
+
 
         private bool _IsDirty;
-        [XmlIgnore] public bool IsDirty { get => _IsDirty; set => SetProperty(ref _IsDirty, value); }
+        /// <summary>
+        /// model changed cport i t.d.
+        /// </summary>
+        [XmlIgnore]
+        public bool IsDirty
+        {
+            get => _IsDirty;
+            set
+            {
+                if (SetProperty(ref _IsDirty, value))
+                {
+                    if (value) IsVMDirty = value; 
+                }
+            }
+        }
+   
+        private bool _IsVMDirty;
+        /// <summary>
+        /// view model or this class changed expand port settings i t.d.
+        /// </summary>
+        [XmlIgnore] public bool IsVMDirty { get => _IsVMDirty; set => SetProperty(ref _IsVMDirty, value); }
         [XmlIgnore] public bool IsNew { get; set; } = true;
-        [XmlIgnore] public virtual string FileFullName { get; set; } = string.Empty;
+
+        private string _FileFullName = string.Empty;
+        [XmlIgnore] public string FileFullName { get => _FileFullName;
+            set 
+            {
+               if (SetProperty(ref _FileFullName, value))
+                {
+                    IsDirty = false;
+                    IsNew = false;
+                }
+            }
+        }
         public string FilePath => Path.GetDirectoryName(FileFullName) ?? string.Empty;
-        public string FileName => Path.GetFileName(FileFullName) ;
+        public string FileName => Path.GetFileNameWithoutExtension(FileFullName) ;
         public string DrityFileName => Path.GetFileName(FileFullName) + (IsDirty ? "*" : "");
 
         #region Prop File Dialog 
         /// <summary>
         /// last saved file directory ? 
         /// </summary>
-        [XmlIgnore] public string InitialDirectory { get; set; } = string.Empty; 
-        [XmlIgnore] public string Filter { get; set; } = string.Empty;
-        [XmlIgnore] public bool ValidateNames { get; set; } = true;
+        //[XmlIgnore] public string InitialDirectory { get; set; } = string.Empty; 
+        //[XmlIgnore] public string Filter { get; set; } = string.Empty;
+        //[XmlIgnore] public bool ValidateNames { get; set; } = true;
+        //[XmlIgnore] public IList<object>? CustomPlaces { get; set; }
+        //[XmlIgnore] public bool CheckPathExists { get; set; } = true;
+        //[XmlIgnore] public bool CheckFileExists { get; set; }
+        //[XmlIgnore] public bool AddExtension { get; set; }= true;
+        //[XmlIgnore] public string DefaultExt { get; set; } = string.Empty;
 
-        [XmlIgnore] public IList<object>? CustomPlaces { get; set; }
-        [XmlIgnore] public bool CheckPathExists { get; set; } = true;
-        [XmlIgnore] public bool CheckFileExists { get; set; }
-        [XmlIgnore] public bool AddExtension { get; set; }= true;
-        [XmlIgnore] public string DefaultExt { get; set; } = string.Empty;
+        //[XmlIgnore] public bool ReadOnlyChecked { get; set; }= true;
+        //[XmlIgnore] public bool ShowReadOnly { get; set; }
 
-        [XmlIgnore] public bool ReadOnlyChecked { get; set; }= true;
-        [XmlIgnore] public bool ShowReadOnly { get; set; }
-
-        [XmlIgnore] public bool CreatePrompt { get; set; }
-        [XmlIgnore] public bool OverwritePrompt { get; set; } = true;
+        //[XmlIgnore] public bool CreatePrompt { get; set; }
+        //[XmlIgnore] public bool OverwritePrompt { get; set; } = true;
         #endregion
 
         protected virtual void LoadModel() { }
-        protected virtual void SaveModel() 
+        protected virtual void SaveModelAndViewModel() 
         {
+            NeedAnySave = false;
             IsDirty = false;
+            IsVMDirty = false;
         }
-        private void AssignDialog(IFileDialog f)
-        {
-            f.InitialDirectory = InitialDirectory;
-            f.Filter = Filter;
-            f.DefaultExt = DefaultExt;
-            f.ValidateNames = ValidateNames;
-            if (CustomPlaces != null) f.CustomPlaces = CustomPlaces;
-            f.CheckPathExists = CheckPathExists;
-            f.CheckFileExists = CheckFileExists;
-            f.AddExtension = AddExtension;
-            f.FileName = FileFullName;
+        //private void AssignDialog(IFileDialog f)
+        //{
+        //    f.InitialDirectory = InitialDirectory;
+        //    f.Filter = Filter;
+        //    f.DefaultExt = DefaultExt;
+        //    f.ValidateNames = ValidateNames;
+        //    if (CustomPlaces != null) f.CustomPlaces = CustomPlaces;
+        //    f.CheckPathExists = CheckPathExists;
+        //    f.CheckFileExists = CheckFileExists;
+        //    f.AddExtension = AddExtension;
+        //    f.FileName = FileFullName;
 
-        }
-        public bool OpenDialog(Action<string> SetName)
-        {
-            var f = FOpen();
-            AssignDialog(f);
-            f.Title = $"Open {Title} dialog";
-            f.ReadOnlyChecked = ReadOnlyChecked;
-            f.ShowReadOnly = ShowReadOnly;
-            if (f.ShowDialog())
-            {
-                SetName(f.FileName);
-                return true;
-            }
-            return false;
-        }
-        protected bool SaveDialog(Action<string> SetName)
-        {
-            var f = FSave();
-            AssignDialog(f);
-            f.Title = $"Save {Title} dialog";
-            var p = NormalizePath(FilePath);
-            if (CustomPlaces?.FirstOrDefault(o => o is string s && NormalizePath(s) == p) == default)
-            {
-                CustomPlaces?.Add(FilePath);
-            }            
-            if (CustomPlaces != null) f.CustomPlaces = CustomPlaces;
-            f.CreatePrompt = CreatePrompt;
-            f.OverwritePrompt = OverwritePrompt;
-            f.FileName = FileName;
-            if (f.ShowDialog())
-            {
-                SetName(f.FileName);
-                return true;
-            } return false;
-            static string NormalizePath(string path)
-            {
-                return Path.GetFullPath(new Uri(path).LocalPath)
-                           .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
-                           .ToUpperInvariant();
-            }
-        }
-
+        //}
+        //public bool OpenDialog(Action<string> SetName)
+        //{
+        //    var f = FOpen();
+        //    AssignDialog(f);
+        //    f.Title = $"Open {Title} dialog";
+        //    f.ReadOnlyChecked = ReadOnlyChecked;
+        //    f.ShowReadOnly = ShowReadOnly;
+        //    if (f.ShowDialog())
+        //    {
+        //        SetName(f.FileName);
+        //        return true;
+        //    }
+        //    return false;
+        //}
+        //protected bool SaveDialog(Action<string> SetName)
+        //{
+        //    var f = FSave();
+        //    AssignDialog(f);
+        //    f.Title = $"Save {Title} dialog";
+        //    var p = Path.GetFullPath(FilePath);
+        //    if (CustomPlaces?.FirstOrDefault(o => o is string s && s.IsSameFiles(p)) == default)
+        //    {
+        //        CustomPlaces?.Add(FilePath);
+        //    }            
+        //    if (CustomPlaces != null) f.CustomPlaces = CustomPlaces;
+        //    f.CreatePrompt = CreatePrompt;
+        //    f.OverwritePrompt = OverwritePrompt;
+        //    f.FileName = FileName;
+        //    if (f.ShowDialog())
+        //    {
+        //        SetName(f.FileName);
+        //        return true;
+        //    } return false;
+        //}
+        protected virtual IFileSaveDialog iSaveDialog => FSave(); 
         public virtual void Save()
         {
-            if (!IsDirty) return;
+            if (IsNew && !IsDirty) return;
             
-            if (IsNew) 
+            if (IsNew && IsDirty) 
             {
-                if (SaveDialog(newName=> FileFullName = newName))
+                if (iSaveDialog.ShowDialog(newName=> FileFullName = newName))
                 {
                     IsNew = false;
                 }
                 else throw new CancelDialogException();
             }
-           SaveModel();
+           SaveModelAndViewModel();
         }
+        protected bool NeedAnySave;
         protected void SaveWithDialog()
         {
             if (this.DrityOrHasChildDrity())
@@ -242,6 +285,10 @@ namespace Core
                         throw new CancelDialogException();
                 }
             }
+            else if (this.DrityOrHasChildVMDrity() || NeedAnySave)
+            {  
+                Save(); 
+            }
         }
         public virtual void ClearForms()
         {
@@ -249,7 +296,10 @@ namespace Core
             {
                 foreach (var _id in ChildFormIDs)
                     if (!string.IsNullOrEmpty(_id))
+                    {
                         DockManagerVM.Remove(_id);
+                        IsVMDirty = true;
+                    }
             }
         }
         public virtual void Remove(bool UserCloseFile = true)
@@ -258,7 +308,7 @@ namespace Core
             if (parent != null) 
             {
                 parent.RemoveChild(this);
-                RootFileDocumentVM.SetDrity();
+               // RootFileDocumentVM.SetDrity();
             }
             DockManagerVM.FormsCleared -= FormsClearedEvent;
             DockManagerVM.FormClosed -= FormClosedEvent;
@@ -268,14 +318,16 @@ namespace Core
         public virtual void SaveAs()
         {
             SaveWithDialog();
-            SaveDialog(f =>
+            iSaveDialog.ShowDialog(f =>
             {
                 if (f != FileFullName)
                 {
                     lastClosedFiles?.UserCloseFile(FileFullName);
                     FileFullName = f;
-                    SaveModel();
-                    RootFileDocumentVM.SetDrity();
+                    // TODO: create DIR
+                    SaveModelAndViewModel();
+                    if (parent != null) parent.IsDirty = true;
+                   // RootFileDocumentVM.SetDrity();
                 }
             }); 
         }
@@ -327,7 +379,7 @@ namespace Core
             if (ChildDocuments == null) ChildDocuments = new ObservableCollection<VMBaseFileDocument>();
             ChildDocuments.Add(d);
             IsDirty = true;
-            RootFileDocumentVM.SetDrity();
+            //RootFileDocumentVM.SetDrity();
             d.UpdateParent(this);
             lastClosedFiles?.UserOpenFile(d.FileFullName);
         }
@@ -337,7 +389,7 @@ namespace Core
             {
                 ChildDocuments.Remove(d);
                 IsDirty = true;
-                RootFileDocumentVM.SetDrity();
+               // RootFileDocumentVM.SetDrity();
                 if (ChildDocuments.Count == 0) ChildDocuments = null;
             }
         }
@@ -408,8 +460,8 @@ namespace Core
         public void ReadXml(XmlReader reader)
         {
             var s = VMBase.ServiceProvider.GetRequiredService<IDockManagerSerialization>();
-            if (reader.LocalName == nameof(RootFileDocumentVM.dockManagerSerialize) && 
-                reader.Read() && 
+            if (reader.LocalName == nameof(DockManagerSerialize) &&
+                reader.Read() &&
                 reader.NodeType == XmlNodeType.Element)
             {
                 s.Deserialize(reader);
@@ -424,30 +476,30 @@ namespace Core
         }
     }
 
-    public abstract class DocumentFactory//<T> where T : RootFileDocumentVM, new()
-    {
-        public abstract VMBaseFileDocument? LoadNew(string file);
-        public abstract string LoadDialog();
-        public abstract VMBaseFileDocument CreateNew();
-    }
-    public abstract class RootFileDocumentVM: ComplexFileDocumentVM
+    //public abstract class DocumentFactory//<T> where T : RootFileDocumentVM, new()
+    //{
+    //    public abstract VMBaseFileDocument? LoadNew(string file);
+    //    public abstract string LoadDialog();
+    //    public abstract VMBaseFileDocument CreateNew();
+    //}
+    public static class RootFileDocumentVM
     {
         public static event PropertyChangedEventHandler? StaticPropertyChanged;
 
         #region prop InstanceFactory
-        private static DocumentFactory? _instanceFactory;
-        public static DocumentFactory? InstanceFactory 
-        {
-            get=>_instanceFactory; 
-            set 
-            {
-                if(_instanceFactory != value) 
-                {
-                    _instanceFactory = value;
-                    StaticPropertyChanged?.Invoke(value,new PropertyChangedEventArgs(nameof(InstanceFactory)));
-                }
-            } 
-        }
+        //private static DocumentFactory? _instanceFactory;
+        //public static DocumentFactory? InstanceFactory 
+        //{
+        //    get=>_instanceFactory; 
+        //    set 
+        //    {
+        //        if(_instanceFactory != value) 
+        //        {
+        //            _instanceFactory = value;
+        //            StaticPropertyChanged?.Invoke(value,new PropertyChangedEventArgs(nameof(InstanceFactory)));
+        //        }
+        //    } 
+        //}
         #endregion
 
         #region prop Instance
@@ -455,8 +507,8 @@ namespace Core
         {
             StaticPropertyChanged?.Invoke(sender, new PropertyChangedEventArgs(e.PropertyName));
         }
-        private static RootFileDocumentVM? _instance;
-        public static RootFileDocumentVM? Instance 
+        private static ComplexFileDocumentVM? _instance;
+        public static ComplexFileDocumentVM? Instance 
         { 
             get=>_instance; 
             set 
@@ -471,32 +523,32 @@ namespace Core
             }
         }
         #endregion
-        public RootFileDocumentVM(): base() 
-        {            
-            DockManagerVM.FormAdded += FormAddedEvent;
-            DockManagerVM.ActiveDocumentChanging += ActiveDocumentChangingEvent;
-            DockManagerVM.FormVisibleChanged += FormVisibleChanged;
-        }
-        void FormVisibleChanged(VMBaseForm? vMBaseForm) => IsDirty = vMBaseForm != null;
-        void FormAddedEvent(object? sender, FormAddedEventArg e) => IsDirty = e.formAddedFrom == FormAddedFrom.User;
-        void ActiveDocumentChangingEvent(object? sender, ActiveDocumentChangedEventArgs e) => IsDirty = e.OldActive != null;
-        public override void Remove(bool UserCloseFile = true)
-        {
-            DockManagerVM.FormVisibleChanged -= FormVisibleChanged;
-            DockManagerVM.FormAdded -= FormAddedEvent;
-            DockManagerVM.ActiveDocumentChanging -= ActiveDocumentChangingEvent;
-            base.Remove(UserCloseFile);
-        }
-        protected override void FormsClearedEvent(object? sender, EventArgs e)
-        {
-            base.FormsClearedEvent(sender, e);
-            IsDirty = true;
-        }
-        protected override void FormClosedEvent(object? sender, EventArgs e)
-        {
-            base.FormClosedEvent(sender, e);
-            IsDirty = true;
-        }
+        //public RootFileDocumentVM(): base() 
+        //{            
+        //    DockManagerVM.FormAdded += FormAddedEvent;
+        //    DockManagerVM.ActiveDocumentChanging += ActiveDocumentChangingEvent;
+        //    DockManagerVM.FormVisibleChanged += FormVisibleChanged;
+        //}
+        //void FormVisibleChanged(VMBaseForm? vMBaseForm) => IsVMDirty = vMBaseForm != null;
+        //void FormAddedEvent(object? sender, FormAddedEventArg e) => IsVMDirty = e.formAddedFrom == FormAddedFrom.User;
+        //void ActiveDocumentChangingEvent(object? sender, ActiveDocumentChangedEventArgs e) => IsVMDirty = e.OldActive != null;
+        //public override void Remove(bool UserCloseFile = true)
+        //{
+        //    DockManagerVM.FormVisibleChanged -= FormVisibleChanged;
+        //    DockManagerVM.FormAdded -= FormAddedEvent;
+        //    DockManagerVM.ActiveDocumentChanging -= ActiveDocumentChangingEvent;
+        //    base.Remove(UserCloseFile);
+        //}
+        //protected override void FormsClearedEvent(object? sender, EventArgs e)
+        //{
+        //    base.FormsClearedEvent(sender, e);
+        //    IsVMDirty = true;
+        //}
+        //protected override void FormClosedEvent(object? sender, EventArgs e)
+        //{
+        //    base.FormClosedEvent(sender, e);
+        //    IsVMDirty = true;
+        //}
         public static void SetDrity()
         {
             if (Instance != null)
@@ -504,7 +556,14 @@ namespace Core
                 Instance.IsDirty = true;
             }
         }
-        public DockManagerSerialize dockManagerSerialize { get; set; } = new DockManagerSerialize();
+        public static void SetVMDrity()
+        {
+            if (Instance != null)
+            {
+                Instance.IsVMDirty = true;
+            }
+        }
+        //public DockManagerSerialize DockManagerSerialize { get; set; } = new DockManagerSerialize();
     }
 
 }

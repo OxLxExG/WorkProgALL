@@ -63,12 +63,6 @@ namespace Main.ViewModels
     {
         public static void Show() => DockManagerVM.AddOrGetandShow(nameof(ProjectsExplorerVM), FormAddedFrom.User);
 
-
-        //public static RootFileDocumentVM? Instance {
-        //    get => RootFileDocumentVM.Instance;
-        //    set => RootFileDocumentVM.Instance = value;
-        //}
-    
         public ProjectsExplorerVM()
         {
 

@@ -21,9 +21,9 @@ namespace Core
     {
         public StdLoggs() : this(new(), new()) { }
     }
-    public record GlobalSettings(StdLoggs Logging, string Culture, string GroupDir, string ProjectDir, bool UseGroup)
+    public record GlobalSettings(StdLoggs Logging, string Culture, string GroupDir, string ProjectDir)
     {
-        public GlobalSettings() : this(new(), "en-US", string.Empty, string.Empty, true) { }
+        public GlobalSettings() : this(new(), "en-US", string.Empty, string.Empty) { }
     }
     public static class RootMenusID
     {
@@ -37,11 +37,13 @@ namespace Core
 
         public static string NFile_Open => "NFile_Open";
         public static string NFile_Open_Group => "NOpen_Group";
+        public static string NFile_Open_ALL => "NOpen_ALL";
         public static string NFile_Open_Project => "NOpen_Project";
         public static string NFile_Open_File => "NOpen_File";
 
         public static string NFile_Add => "NFile_Add";
         public static string NFile_Add_Project => "NAdd_Project";
+        public static string NFile_Add_NewProject => "NAdd_NewProject";
         public static string NFile_Add_File => "NAdd_File";
 
         public static string NFile_Close => "NFile_Close";

@@ -24,6 +24,7 @@ using System.Windows.Input;
 namespace Main
 {
     using Connections;
+    using Main.Models;
     using Properties;
     using System.ComponentModel;
     using System.IO;
@@ -124,13 +125,13 @@ namespace Main
             //pe.IsVisibleChanged += ((MainVindowVM)this.MainWindow.DataContext).DocIsVisibleChanged;
             //pe.AddToLayout(((IMainWindow)this.MainWindow).DockManager, Xceed.Wpf.AvalonDock.Layout.AnchorableShowStrategy.Left);
 
-            RootFileDocumentVM.InstanceFactory = opt.UseGroup? new GroupFactory() : new VisitFactory();
+            //RootFileDocumentVM.InstanceFactory = opt.UseGroup? new GroupFactory() : new VisitFactory();
             try
             {
                 var rot = Settings.Default.CurrentRoot;
                 if (!string.IsNullOrEmpty(rot) && File.Exists(rot))
                 {
-                   RootFileDocumentVM.Instance = RootFileDocumentVM.InstanceFactory!.LoadNew(rot) as RootFileDocumentVM;
+                    ProjectFile.LoadRoot(rot);// RootFileDocumentVM.InstanceFactory!.LoadNew(rot) as RootFileDocumentVM;
                 }
             }
             catch 

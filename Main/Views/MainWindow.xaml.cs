@@ -18,6 +18,7 @@ using Xceed.Wpf.AvalonDock;
 using Xceed.Wpf.AvalonDock.Controls;
 using Xceed.Wpf.AvalonDock.Layout;
 using Xceed.Wpf.AvalonDock.Layout.Serialization;
+using System.Xml.Serialization;
 
 namespace Main
 {
@@ -74,11 +75,26 @@ namespace Main
                 toolBarButtonGliph.BandIndex = Properties.Settings.Default.ToolBarGlyph_Index;
                 toolBarButtonText.Band = Properties.Settings.Default.ToolBarTxt_Band;
                 toolBarButtonText.BandIndex = Properties.Settings.Default.ToolBarTxt_Index;
+                //using (TextReader reader = new StringReader(Properties.Settings.Default.XMLDockManager))
+                //{
+                //    var serializer = new XmlLayoutSerializer(dockManager);
+
+                //    serializer.LayoutSerializationCallback += (s, args) =>
+                //        args.Content = DockManagerVM.AddOrGet(args.Model.ContentId, FormAddedFrom.DeSerialize);
+
+                //    serializer.Deserialize(reader);
+                //}
             }
         }
 
         private void WindowMain_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            //using (StringWriter textWriter = new StringWriter())
+            //{
+            //    var serializer = new XmlLayoutSerializer(dockManager);
+            //    serializer.Serialize(textWriter);
+            //    Properties.Settings.Default.XMLDockManager = textWriter.ToString();
+            //}             
             Properties.Settings.Default.Top = WindowMain.RestoreBounds.Top;
             Properties.Settings.Default.Left = WindowMain.RestoreBounds.Left;
             Properties.Settings.Default.Height = WindowMain.RestoreBounds.Height;
@@ -101,13 +117,13 @@ namespace Main
         private void RestoreButton_Click(object sender, RoutedEventArgs e)
         {
             WindowMain.WindowState = WindowState.Normal;
-            RootFileDocumentVM.SetDrity();
+            RootFileDocumentVM.SetVMDrity();
         }
 
         private void MaximizeButton_Click(object sender, RoutedEventArgs e)
         {
             WindowMain.WindowState = WindowState.Maximized;
-            RootFileDocumentVM.SetDrity();
+            RootFileDocumentVM.SetVMDrity();
         }
 
         public void Serialize(XmlWriter writer)

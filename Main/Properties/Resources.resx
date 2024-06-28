@@ -123,6 +123,15 @@
   <data name="cptTotal" xml:space="preserve">
     <value>Total</value>
   </data>
+  <data name="dlgGroupExists" xml:space="preserve">
+    <value>A Group of Visits with the specified name\n\n {0}\n\nalready exists on the disk, do you want to overwrite the existing Group of Visits with a new one?</value>
+  </data>
+  <data name="dlgVisGrpExisis" xml:space="preserve">
+    <value>The Group of Visits and the Visit with the specified names\n\n {0}\n\n {1}\n\nalready exist on the disk, should you overwrite the existing Group of Visits and the Visit with new ones?</value>
+  </data>
+  <data name="dlgVisitExisis" xml:space="preserve">
+    <value>A Visit with the specified name\n\n{0}\n\nalready exists on disk,overwrite the existing Visit with a new one?</value>
+  </data>
   <data name="errAppendFromBad" xml:space="preserve">
     <value>File can not be appended  data begin: {0} data end: {1}  data append from {2}</value>
   </data>
@@ -140,6 +149,51 @@
   </data>
   <data name="errFromBiggeTotal" xml:space="preserve">
     <value>From {0} bigger total {1}</value>
+  </data>
+  <data name="lblAddCurVis" xml:space="preserve">
+    <value>Add to current group of visits</value>
+  </data>
+  <data name="lblCreGrpVis" xml:space="preserve">
+    <value>Create a new visit group</value>
+  </data>
+  <data name="lblCreSnglVisit" xml:space="preserve">
+    <value>Create single Visit</value>
+  </data>
+  <data name="lblEnterNameVisit" xml:space="preserve">
+    <value>Enter Visit name</value>
+  </data>
+  <data name="lblErrNameGrpVisit" xml:space="preserve">
+    <value>The visit group name is empty or contains invalid characters</value>
+  </data>
+  <data name="lblErrNameVisit" xml:space="preserve">
+    <value>The visit name is empty or contains invalid characters</value>
+  </data>
+  <data name="lblGroupVisit" xml:space="preserve">
+    <value>Group of visits</value>
+  </data>
+  <data name="lblGrpVisitSameDir" xml:space="preserve">
+    <value>A group of visits and a visit in same directory</value>
+  </data>
+  <data name="lblNameGrpVisit" xml:space="preserve">
+    <value>Name group of visits</value>
+  </data>
+  <data name="lblNameVisit" xml:space="preserve">
+    <value>Visit name</value>
+  </data>
+  <data name="lblPlacement" xml:space="preserve">
+    <value>Placement</value>
+  </data>
+  <data name="lblSelectPlase" xml:space="preserve">
+    <value>You must select a location</value>
+  </data>
+  <data name="lblSelNameGrpVis" xml:space="preserve">
+    <value>You must select the name of the visit group</value>
+  </data>
+  <data name="lblVisitGreateIn" xml:space="preserve">
+    <value>the visit will be created in:</value>
+  </data>
+  <data name="lblWrnCatNotEmpty" xml:space="preserve">
+    <value>This directory is not empty</value>
   </data>
   <data name="msgDeleteFile" xml:space="preserve">
     <value>Delete file? {0}, all data mast bee lost</value>
@@ -192,11 +246,14 @@
   <data name="nfile_Add_File" xml:space="preserve">
     <value>Add File...</value>
   </data>
+  <data name="nfile_Add_New_Project" xml:space="preserve">
+    <value>Create visit...</value>
+  </data>
   <data name="nfile_Add_Project" xml:space="preserve">
-    <value>Add visit...</value>
+    <value>Add existing visit...</value>
   </data>
   <data name="nfile_Close" xml:space="preserve">
-    <value>Close {0}</value>
+    <value>Close </value>
   </data>
   <data name="nfile_CloseAll" xml:space="preserve">
     <value>Close all</value>
@@ -207,11 +264,14 @@
   <data name="nfile_Create" xml:space="preserve">
     <value>Create</value>
   </data>
+  <data name="nfile_Flt_ALL" xml:space="preserve">
+    <value>Visit or Group</value>
+  </data>
   <data name="nfile_last_Files" xml:space="preserve">
     <value>Last files</value>
   </data>
   <data name="nfile_last_ProjectGroups" xml:space="preserve">
-    <value>Last visit groups</value>
+    <value>Last visit or visits groups</value>
   </data>
   <data name="nfile_last_Projects" xml:space="preserve">
     <value>Last visits</value>
@@ -221,6 +281,9 @@
   </data>
   <data name="nfile_Open" xml:space="preserve">
     <value>Open</value>
+  </data>
+  <data name="nfile_Open_ALL" xml:space="preserve">
+    <value>Open Visit or Group visits</value>
   </data>
   <data name="nfile_Open_File" xml:space="preserve">
     <value>Open file...</value>
@@ -232,7 +295,7 @@
     <value>Open visit...</value>
   </data>
   <data name="nfile_Save" xml:space="preserve">
-    <value>Save {0)</value>
+    <value>Save {0}</value>
   </data>
   <data name="nfile_SaveAll" xml:space="preserve">
     <value>Save all</value>
@@ -277,7 +340,7 @@
     <value>maximum data length</value>
   </data>
   <data name="strNoSave" xml:space="preserve">
-    <value>strNoSave</value>
+    <value>Not Save</value>
   </data>
   <data name="strPacketLen" xml:space="preserve">
     <value>packet length</value>
@@ -292,7 +355,7 @@
     <value>Reading memory {0} terminated</value>
   </data>
   <data name="strSave" xml:space="preserve">
-    <value>strSave</value>
+    <value>Save</value>
   </data>
   <data name="strTimeout" xml:space="preserve">
     <value>Timeout</value>

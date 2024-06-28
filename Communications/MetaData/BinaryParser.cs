@@ -1178,10 +1178,13 @@ namespace Communications.MetaData
             public void ReadXml(XmlReader reader)
             {
                 reader.MoveToContent();
+                if (reader.IsEmptyElement)
+                {
+                    return;
+                }
 
                 XReadAttrs(reader, attrs, this);
                 XReadDatas(reader, datas);
-
                 reader.ReadEndElement();
             }
 

@@ -214,10 +214,24 @@ namespace Core
         /// <summary>
         /// при удалении пользователем документа
         /// </summary>
+        bool ContainsAndRemove(string file)
+        {
+            var f = Path.GetFullPath(file);
+            foreach (var item in lastClosedFiles)
+            {
+                if (item!.IsSameFiles(f))
+                {
+                    lastClosedFiles.Remove(item);
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public void UserCloseFile(string file)
         {
             if (string.IsNullOrEmpty(file)) return;
-            if (lastClosedFiles.Contains(file)) lastClosedFiles.Remove(file);
+            ContainsAndRemove(file); 
             lastClosedFiles.Insert(0, file);
             while (lastClosedFiles.Count > 10) lastClosedFiles.RemoveAt(lastClosedFiles.Count - 1);
             SaveClosedFiles();
@@ -228,9 +242,8 @@ namespace Core
         /// </summary>
         public void UserOpenFile(string file)
         {
-            if (lastClosedFiles.Contains(file))
-            {
-                lastClosedFiles.Remove(file);
+            if (ContainsAndRemove(file))
+            {                
                 SaveClosedFiles();
                 UpdateSubMenus();
             }

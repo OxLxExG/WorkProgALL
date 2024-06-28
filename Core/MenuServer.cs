@@ -33,6 +33,7 @@ namespace Core
         public void Remove(string ContentID);
         public void Remove(IEnumerable<MenuItemVM> Menus);
         public bool Contains(string ContentID);
+        public MenuItemVM? Find(string ContentID);
         public void UpdateSeparatorGroup(string ParentContentID);
         public void UpdateSeparatorGroup(MenuItemVM? ParentContentID);
     }
@@ -114,7 +115,10 @@ namespace Core
         {
             return Recur(Items, (i) => i.ContentID == ContentID) != null;
         }
-
+        public MenuItemVM? Find(string ContentID)
+        {
+            return Recur(Items, (i) => i.ContentID == ContentID);
+        }
         public void UpdateSeparatorGroup(MenuItemVM? root)
         {
             if (root != null && root.Items.Count > 0) base.UpdateSeparatorGroup(root.Items);
@@ -124,7 +128,6 @@ namespace Core
             var root = Recur(Items, (i) => i.ContentID == ParentContentID);
             UpdateSeparatorGroup(root);
         }
-
         public void Remove(IEnumerable<MenuItemVM> Menus)
         {
             foreach (var menu in Menus)
