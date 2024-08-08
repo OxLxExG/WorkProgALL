@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.Input;
 using Core;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using TextBlockLogging;
 using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 
 namespace Main.ViewModels
@@ -71,9 +73,32 @@ namespace Main.ViewModels
             CanFloat = false;
             CanDockAsTabbedDocument = false;
             CanClose = false;
-            ShowStrategy = Core.ShowStrategy.Left;  
+            ShowStrategy = Core.ShowStrategy.Left;
             ContentID = nameof(ProjectsExplorerVM);
             ToolTip = Properties.Resources.tProjectExplorer;
+            OnMenuActivate += ActivateDynItems;
+            OnMenuDeActivate += DeActivateDynItems;
+        }
+
+        public override void Close()
+        {
+            OnMenuActivate -= ActivateDynItems;
+            OnMenuDeActivate -= DeActivateDynItems;
+            base.Close();
+        }
+        private void DeActivateDynItems()
+        {
+            var l = ServiceProvider.GetRequiredService<ILogger<ProjectsExplorerVM>>();
+            l.LogTrace("~~DeActivateDynItems {} ", ContentID);
+        }
+        private void ActivateDynItems()
+        {
+            var m = new MenuItemVM { ContentID = "ProjectsExplorerMi)", Header="Обозреватель",Priority=1 };
+            MenuItemServer.Add("ROOT",m);
+            //var range = new PriorityItemBase[]  { m };
+            DynamicItems.Add(m);
+            var l = ServiceProvider.GetRequiredService<ILogger<ProjectsExplorerVM>>();
+            l.LogTrace("ActivateDynItems {} ", ContentID);
         }
     }
 }

@@ -1,7 +1,10 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:v="clr-namespace:Main.Views"
+                    xmlns:c="clr-namespace:Core;assembly=Core"
                     xmlns:vm="clr-namespace:Main.ViewModels">
+
+    <c:MenuTemplateSelector x:Key="MenuTemplateSelectorVMKey" />
 
 
     <!--<Style x:Key="VMBaseStyle"
@@ -205,34 +208,60 @@
         </Setter>
     </Style>
 
-    <DataTemplate x:Key="VisitDocumentSubHeader" DataType="{x:Type vm:VisitDocument}">
-        <v:VisitUI />
+    <Style x:Key="ContextMenuStypeKey" TargetType="ContextMenu">
+        <Setter Property="ItemsSource"
+                Value="{Binding CItems}" />
+        <Setter Property="UsesItemContainerTemplate"
+                Value="True" />
+        <Setter Property="ItemContainerTemplateSelector"
+                Value="{StaticResource MenuTemplateSelectorVMKey}" />
+    </Style>
+    
+    <Style x:Key="DataTemplateStyle"
+           TargetType="FrameworkElement">
+        <Setter Property="ContextMenu">
+            <Setter.Value>
+                <ContextMenu ItemsSource="{Binding CItems}"
+                             UsesItemContainerTemplate="True"
+                             ItemContainerTemplateSelector="{StaticResource MenuTemplateSelectorVMKey}"  />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+        <DataTemplate x:Key="VisitDocumentSubHeader" DataType="{x:Type vm:VisitDocument}">
+        <v:VisitUI Style="{StaticResource DataTemplateStyle}"/>
     </DataTemplate>
 
     <HierarchicalDataTemplate x:Key="VisitDocumentHeader"
                               DataType="{x:Type vm:VisitDocument}"
                               ItemsSource="{Binding Items}">
-        <TextBlock Text="{Binding FileName}" />
+        
+        <TextBlock Text="{Binding FileName}"
+                   Style="{StaticResource DataTemplateStyle}" />
+        
     </HierarchicalDataTemplate>
 
     <HierarchicalDataTemplate x:Key="HeaderHelperHeader" 
                               DataType="{x:Type vm:HeaderHelper}"
                               ItemsSource="{Binding Items}">
-        <TextBlock Text="{Binding Header}" />
+        <TextBlock Text="{Binding Header}"/>
     </HierarchicalDataTemplate>
 
 
     <HierarchicalDataTemplate x:Key="TripVMHeader"
                               DataType="{x:Type vm:TripVM}"
                               ItemsSource="{Binding Items}">
-            <TextBlock Text="Рейс" Foreground="Red" />
+        <TextBlock Text="Рейс"
+                   Foreground="Red"
+                   Style="{StaticResource DataTemplateStyle}" />
     </HierarchicalDataTemplate>
 
     <DataTemplate x:Key="TripVMSubHeader"
                   DataType="{x:Type vm:TripVM}">
         <!--<StackPanel Orientation="Vertical">-->
             <!--<TextBlock Text="{Binding trip.Delay}" />-->
-            <TextBlock Text="{Binding trip.DTimStart}" />
+        <TextBlock Text="{Binding trip.DTimStart}"
+                   Style="{StaticResource DataTemplateStyle}" />
             <!--<TextBlock Text="{Binding trip.DTimStartDrilling}" />
             <TextBlock Text="{Binding trip.DTimStop}" />
             <TextBlock Text="{Binding trip.DTimStopDrilling}" />-->
@@ -242,18 +271,60 @@
     <HierarchicalDataTemplate x:Key="PipeVMHeader"
                               DataType="{x:Type vm:PipeVM}"
                               ItemsSource="{Binding Items}">
-            <TextBlock Text="{Binding pipe.Connection.IsOpen}" />
+        <TextBlock Text="{Binding pipe.Connection.IsOpen}"
+                   Style="{StaticResource DataTemplateStyle}" />
     </HierarchicalDataTemplate>
+    
+    <HierarchicalDataTemplate x:Key="SerialPipeVMHeader" 
+                              DataType="{x:Type vm:SerialPipeVM}"
+                              ItemsSource="{Binding Items}"
+                              >
+
+        <TextBlock Text="Serial Connection">
+            <TextBlock.ContextMenu>
+                <ContextMenu Style="{StaticResource ContextMenuStypeKey}" />
+            </TextBlock.ContextMenu>
+        </TextBlock>
+    </HierarchicalDataTemplate>
+    
+    <DataTemplate x:Key="SerialPipeVMSubHeader"
+                              DataType="{x:Type vm:SerialPipeVM}">
+        <StackPanel Style="{StaticResource DataTemplateStyle}">
+            <!--<StackPanel.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header=" sdaacdcasd" />
+                </ContextMenu>
+            </StackPanel.ContextMenu>-->
+            <TextBlock Text="{Binding pipe.SerialConn.BaudRate}" />
+            <TextBlock Text="{Binding pipe.SerialConn.PortName}" />
+        </StackPanel>
+    </DataTemplate>
+
+    <HierarchicalDataTemplate x:Key="NetPipeVMHeader"
+                              DataType="{x:Type vm:NetPipeVM}"
+                              ItemsSource="{Binding Items}">
+        <TextBlock Text="Net Connection"
+                   Style="{StaticResource DataTemplateStyle}" />
+    </HierarchicalDataTemplate>
+
+    <DataTemplate x:Key="NetPipeVMSubHeader"
+                              DataType="{x:Type vm:NetPipeVM}">
+        <StackPanel Style="{StaticResource DataTemplateStyle}">
+            <TextBlock Text="{Binding pipe.NetConn.Port}" />
+            <TextBlock Text="{Binding pipe.NetConn.Host}" />
+        </StackPanel>
+    </DataTemplate>
 
     <HierarchicalDataTemplate x:Key="BusVMHeader"
                               DataType="{x:Type vm:BusVM}"
                               ItemsSource="{Binding Items}">
-            <TextBlock Text="{Binding bus.Name}" />
+        <TextBlock Text="{Binding bus.Name}"
+                   Style="{StaticResource DataTemplateStyle}" />
     </HierarchicalDataTemplate>
 
     <DataTemplate x:Key="DeviceVMHeader"
                   DataType="{x:Type vm:DeviceVM}">
-            <StackPanel>
+        <StackPanel Style="{StaticResource DataTemplateStyle}">
                 <TextBlock Text="Device" />
                 <TextBlock Text="{Binding model.Id}" />
             </StackPanel>

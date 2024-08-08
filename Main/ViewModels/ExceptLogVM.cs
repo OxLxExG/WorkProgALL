@@ -84,6 +84,12 @@ namespace Main.ViewModels
             OnMenuActivate += ActivateDynItems;
             OnMenuDeActivate += DeActivateDynItems;
         }
+        public override void Close()
+        {
+            OnMenuActivate -= ActivateDynItems;
+            OnMenuDeActivate -= DeActivateDynItems;
+            base.Close();
+        }
 
         private bool freeze = false;
         public bool Freeze
@@ -91,19 +97,16 @@ namespace Main.ViewModels
             get => freeze;
             set
             {
-                if (freeze != value)
-                {
-                    freeze = value;
-                    // binding formVM.Freeze => buttonVM.IsChecked
-                    if (_freezeToolButton != null) _freezeToolButton.IsChecked = freeze;
-                    OnPropertyChanged(nameof(Freeze));
-                }
+                CheckToolButton? tb = null;
+                if (SetProperty(ref freeze, value) 
+                    && _freezeToolButton != null 
+                    && _freezeToolButton.TryGetTarget(out tb)) tb.IsChecked = freeze;
             }
         }
-        CheckToolButton? _freezeToolButton;
+        WeakReference<CheckToolButton>? _freezeToolButton;
         private void ActivateDynItems()
         {
-            _freezeToolButton = new CheckToolButton
+            var ftb = new CheckToolButton
             {
                 ToolTip = new ToolTip { Content = Properties.Resources.m_Freeze + " (" + Title + ")" },
                 ContentID = "Freeze" + ContentID,
@@ -113,6 +116,7 @@ namespace Main.ViewModels
                 // binding  buttonVM.Command=>formVM.Freeze=>buttonVM.IsChecked
                 Command = new RelayCommand(() => Freeze = !Freeze),
             };
+            _freezeToolButton = new WeakReference<CheckToolButton>(ftb);
             var clb = new ToolButton
             {
                 ToolTip = new ToolTip { Content = Properties.Resources.m_Clear + " (" + Title + ")" },
@@ -121,7 +125,7 @@ namespace Main.ViewModels
                 Priority = 100,
                 Command = new RelayCommand(() => OnClear?.Invoke())
             };
-            var range = new[] { _freezeToolButton, clb };
+            var range = new[] { ftb, clb };
 
             IToolServer toolServer = ServiceProvider.GetRequiredService<IToolServer>();
             toolServer.Add("ToolGlyph", range);
@@ -132,7 +136,6 @@ namespace Main.ViewModels
         }
         private void DeActivateDynItems()
         {
-            _freezeToolButton = null;
             var l = ServiceProvider.GetRequiredService<ILogger<LogTextBlock>>();
             l.LogTrace("~ActivateToolMenu {} ", ContentID);
         }

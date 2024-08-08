@@ -62,9 +62,16 @@ namespace Core
         // public static event EventHandler<UserFileEventArg>? UserFileEventEvent;
         public VMBaseFileDocument() 
         {
-            PropertyChanged += (o,e) => IsVMDirty = true;
+            PropertyChanged += PropertyChangedEvent;
             DockManagerVM.FormsCleared += FormsClearedEvent;
             DockManagerVM.FormClosed += FormClosedEvent;
+        }
+        protected void PropertyChangedEvent(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName != nameof(IsVMDirty))
+            {
+                IsVMDirty = true;
+            }
         }
         protected void FormsClearedEvent(object? sender, EventArgs e)
         {
@@ -131,9 +138,9 @@ namespace Core
         public bool IsReadOnly { get; set; }
         public bool ShouldSerializeIsReadOnly() => IsReadOnly;
         
-        bool _IsExpanded;
+        bool _IsExpanded = true;
         public bool IsExpanded { get=>_IsExpanded; set => SetProperty(ref _IsExpanded, value); }
-        public bool ShouldSerializeIsExpanded() => IsExpanded;
+        public bool ShouldSerializeIsExpanded() => !IsExpanded;
        
         bool _IsSelected;
         public bool IsSelected { get=> _IsSelected; set => SetProperty(ref _IsSelected, value); }
@@ -268,8 +275,8 @@ namespace Core
             }
            SaveModelAndViewModel();
         }
-        protected bool NeedAnySave;
-        protected void SaveWithDialog()
+        [XmlIgnore] public bool NeedAnySave;
+        protected virtual void SaveWithDialog()
         {
             if (this.DrityOrHasChildDrity())
             {
@@ -515,9 +522,9 @@ namespace Core
             {
                 if (_instance != value)
                 {
-                    if (_instance != null) _instance.PropertyChanged -= InstanceOnPropertyChanged;  
+                   // if (_instance != null) _instance.PropertyChanged -= InstanceOnPropertyChanged;  
                     _instance = value;
-                    if (_instance != null) _instance.PropertyChanged += InstanceOnPropertyChanged;
+                   // if (_instance != null) _instance.PropertyChanged += InstanceOnPropertyChanged;
                     StaticPropertyChanged?.Invoke(value, new PropertyChangedEventArgs(nameof(Instance)));
                 }
             }

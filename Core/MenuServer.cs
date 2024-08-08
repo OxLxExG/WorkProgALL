@@ -132,6 +132,11 @@ namespace Core
         {
             foreach (var menu in Menus)
             {
+                foreach (var rm in Items) if (rm == menu)
+                    {
+                        Items.Remove(menu);
+                        return;
+                    }
                 MenuItemVM? item = null;
                 var m = Recur(Items, (root) =>
                 {

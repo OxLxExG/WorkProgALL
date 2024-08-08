@@ -178,6 +178,9 @@ namespace Main.ViewModels
                             Command = new RelayCommand(() => 
                             {
                                 ProjectFile.CloseRoot(true);
+                                
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
                             })
                         },
                         new CommandMenuItemVM

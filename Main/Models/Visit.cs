@@ -14,7 +14,7 @@ using static Communications.MetaData.BinaryParser;
 
 namespace Main.Models
 {
-    public abstract class ModelVisitItem: INotifyPropertyChanged
+    public abstract class ModelItem: INotifyPropertyChanged
     {
         //protected bool HideId;
 
@@ -45,47 +45,49 @@ namespace Main.Models
             return true;
         }
         #region property Parent        
-        public virtual void UpdateParent(ComplexModelVisitItem? parent)
-        {
-            _Parent = parent;
-        }
-        private ComplexModelVisitItem? _Parent;
-        [XmlIgnore] public ComplexModelVisitItem? Parent
-        {
-            get  => _Parent;
-            set
-            {
-                if (_Parent != value)
-                {
-                    _Parent?.ItemsRemove(this); 
-                    _Parent = value;
-                    _Parent?.ItemsAdd(this);    
-                }
-            }
-        }
+        //public virtual void UpdateParent(ComplexModelItem? parent)
+        //{
+        //    _Parent = parent;
+        //}
+        //private ComplexModelItem? _Parent;
+        //[XmlIgnore] public ComplexModelItem? Parent
+        //{
+        //    get  => _Parent;
+        //    set
+        //    {
+        //        if (_Parent != value)
+        //        {
+        //            _Parent?.ItemsRemove(this); 
+        //            _Parent = value;
+        //            _Parent?.ItemsAdd(this);    
+        //        }
+        //    }
+        //}
         #endregion
+
+
     }
-    public abstract class ComplexModelVisitItem : ModelVisitItem
+    public abstract class ComplexModelItem : ModelItem
     {
-        public abstract void ItemsRemove(ModelVisitItem item);
-        public abstract void ItemsAdd(ModelVisitItem item);
+        public abstract void ItemsRemove(ModelItem item);
+        public abstract void ItemsAdd(ModelItem item);
     }
     /// <summary>
     /// сделал класс только для человекочитаемости XML файла сериализации
     /// </summary>
     /// <typeparam name="CHILDS"> Device,Bus,Pipe,Trip</typeparam>
-    public abstract class ComplexModelVisitItem<CHILDS> : ComplexModelVisitItem 
-        where CHILDS : ModelVisitItem
+    public abstract class ComplexModelItem<CHILDS> : ComplexModelItem 
+        where CHILDS : ModelItem
     {
         [XmlIgnore]
         public ObservableCollection<CHILDS> Items { get; set; } = new ObservableCollection<CHILDS>();
 
-        public override void UpdateParent(ComplexModelVisitItem? parent)
-        {
-            base.UpdateParent(parent);
-            foreach (var item in Items) item.UpdateParent(this);
-        }
-        public override  void ItemsAdd(ModelVisitItem item)
+        //public override void UpdateParent(ComplexModelItem? parent)
+        //{
+        //    base.UpdateParent(parent);
+        //    foreach (var item in Items) item.UpdateParent(this);
+        //}
+        public override  void ItemsAdd(ModelItem item)
         {
             if (item is CHILDS t)
             {
@@ -93,13 +95,13 @@ namespace Main.Models
             }
             else throw new InvalidOperationException();
         }
-        public override void ItemsRemove(ModelVisitItem item)
+        public override void ItemsRemove(ModelItem item)
         {
             if (item is CHILDS t) Items.Remove(t);
             else throw new InvalidOperationException();
         }
     }
-    public class Device : ModelVisitItem
+    public class Device : ModelItem
     {
         public static readonly Device Empty = new Device();
     }
@@ -145,7 +147,7 @@ namespace Main.Models
     /// для циклоопроса сенсоров на шине bus
     /// если нет хотябы одного Device то убить Bus
     /// </summary>
-    public class Bus: ComplexModelVisitItem<Device> //Icomparable? // сериализуем
+    public class Bus: ComplexModelItem<Device> //Icomparable? // сериализуем
         //where DEVICE : Device
     {
         public static readonly Bus Empty = new Bus();
@@ -173,29 +175,56 @@ namespace Main.Models
     /// & Bus
     /// если нет хотябы одного Bus то убить Pipe
     /// </summary>
-    public class Pipe: ComplexModelVisitItem<Bus> // IComparable сравнивать по IConnection
+    public class Pipe: ComplexModelItem<Bus> // IComparable сравнивать по IConnection
     {
         public static readonly Pipe Empty = new Pipe();
 
         [XmlIgnore]
-        public IConnection? Connection { get; private set; }
+        public IConnection? Connection => connectionObj;
 
-        private AbstractConnection? con;
 
-        [XmlElement("connection", IsNullable = false)]
-        public AbstractConnection? connectionObj
-        {
-            get { return con; }
-            set { con = value; Connection = con; }
-        }
+        //[XmlElement("connection", IsNullable = false)]
+        protected AbstractConnection? connectionObj;
         public ObservableCollection<Bus> Buses { get => Items; set { Items = value; } }
         public bool ShouldSerializeBuses() => Items.Count > 0;
     }
-    /// <summary>
-    /// Рейс
-    /// based on witsml:BhaRun
-    /// </summary>
-    public class Trip: ComplexModelVisitItem<Pipe>
+    public class SerialPipe : Pipe
+    {
+        [XmlElement("connection", IsNullable = false)]
+        public SerialConn? SerialConn
+        {
+            get => (SerialConn?)connectionObj;
+            set
+            {
+                SerialConn? v = null;
+                if (SetProperty(ref v, value))
+                {
+                    connectionObj = v;
+                }
+            }
+        }
+    }
+        public class NetPipe : Pipe
+        {
+            [XmlElement("connection", IsNullable = false)]
+            public NetConn? NetConn
+            {
+                get => (NetConn?)connectionObj;
+                set
+                {
+                    NetConn? v = null;
+                    if (SetProperty(ref v, value))
+                    {
+                        connectionObj = v;
+                    }
+                }
+            }
+        }
+            /// <summary>
+            /// Рейс
+            /// based on witsml:BhaRun
+            /// </summary>
+    public class Trip: ComplexModelItem<Pipe>
     {
         public static readonly Trip Empty = new Trip();
         public int TripStatus { get; set; } // TODO:
@@ -217,7 +246,7 @@ namespace Main.Models
     /// <summary>
     /// Заезд 
     /// </summary>
-    public class Visit: ComplexModelVisitItem<Trip>
+    public class Visit: ComplexModelItem<Trip>
     {
         public const string SCH = @"D:\Projects\C#\Communications\Project\XMLSchemaVisit.xsd";
         public const string NS = "http://tempuri.org/horizont.pb";
@@ -240,8 +269,8 @@ namespace Main.Models
                             typeof(DevicePB),
                             typeof(DeviceTelesystem),
                             typeof(DeviceTelesystem2),
-                            typeof(SerialConn),
-                            typeof(NetConn),
+                            typeof(SerialPipe),
+                            typeof(NetPipe),
                             typeof(BusPB)
         },null, NS,null);
     }

@@ -13,10 +13,11 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using System.Runtime.Intrinsics.Arm;
 using System.Xml.Serialization;
+using System.Diagnostics.Tracing;
 
 namespace Connections //Horizont.Drilling.Connections
 {
-    public abstract class AbstractConnection : IConnection
+    public abstract class AbstractConnection : IConnection, IAbstractConnection, IDisposable
     {   //current buffer
         protected volatile int offset = 0;
         // нужно для события монитора (не удалять!)
@@ -28,10 +29,13 @@ namespace Connections //Horizont.Drilling.Connections
         private volatile int crcOffset = 0;
         private ushort _crc;
         protected readonly AutoResetEvent crcOk = new AutoResetEvent(false);
+        protected Thread? readthread;
 
         protected DataReq? currenRq;
         protected CancellationTokenSource? Cts;
         public CancellationTokenSource? CancelTokenSource { get { return Cts; } }
+
+        protected CancellationTokenSource? Ctsreadthread;
         protected bool IsReading;
         protected bool disposed = false;
         protected object _lock = new object();
@@ -58,9 +62,26 @@ namespace Connections //Horizont.Drilling.Connections
         }
         protected bool canceled;
         public bool IsCanceled => canceled;
-        public abstract Task Close(int timout = 5000);
+        public virtual Task Close(int timout = 5000)
+        {
+            if (readthread != null && Ctsreadthread != null)
+            {
+                Ctsreadthread.Cancel();
+                rxRowEvent.Set();
+                while (readthread.IsAlive && --timout > 0) Thread.Sleep(1);
+                Ctsreadthread.Dispose();
+                Ctsreadthread = null;
+                readthread = null;
+            }
+            return Task.CompletedTask;
+        }
         public virtual Task Open(int timout = 10000)
         {
+            if (readthread != null && Ctsreadthread != null) return Task.CompletedTask; 
+            Ctsreadthread = new();
+            readthread = new Thread(() => rxBufferThread(Ctsreadthread.Token));
+            readthread.IsBackground = true;
+            readthread.Start();
             return Task.CompletedTask;
         }
 
@@ -124,10 +145,6 @@ namespace Connections //Horizont.Drilling.Connections
         public AbstractConnection()
         {
             rxBuf = new byte[IConnection.MIN_RX_BUF];
-            var readthread = new Thread(rxBufferThread);
-            readthread.IsBackground = true;
-            readthread.Start();
-
             OnRowDataHandler += OnRowDataEvent;
         }
         // dectructor
@@ -141,13 +158,14 @@ namespace Connections //Horizont.Drilling.Connections
             GC.SuppressFinalize(this); 
         }
         protected virtual void Dispose(bool disposing)
-        { 
+        {
+            if (disposed) return;
+            disposed = true;
+            OnRowDataHandler -= OnRowDataEvent;
             IsReading = false;
-            rxRowEvent.Set();
-            disposed = true; 
             Cts?.Dispose();
-            rxRowEvent.Dispose();
-            crcOk.Dispose();
+            rxRowEvent?.Dispose();
+            crcOk?.Dispose();
         }
         // reset offsets, crc - helper
         protected void BeginTransaction(DataReq dataReq )
@@ -184,7 +202,7 @@ namespace Connections //Horizont.Drilling.Connections
             if (of >= currenRq?.rxCount)
                 if (_crc == 0) crcOk.Set();
         }
-        private void rxBufferThread()
+        private void rxBufferThread(CancellationToken tok)
         {
           //  var scope = App.logger?.BeginScope(this);
 
@@ -192,7 +210,7 @@ namespace Connections //Horizont.Drilling.Connections
             {
                 rxRowEvent.WaitOne();
 
-                if (disposed) {
+                if (tok.IsCancellationRequested) {
                     //scope?.Dispose();
                     return; }
 

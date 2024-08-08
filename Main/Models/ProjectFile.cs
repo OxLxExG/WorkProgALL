@@ -3,6 +3,7 @@ using Connections;
 using Core;
 using Main.Properties;
 using Main.ViewModels;
+using System;
 using System.Collections.Specialized;
 using System.IO;
 using System.Xml.Serialization;
@@ -67,14 +68,14 @@ namespace Main.Models
 
                 v.VisitVM
                     .Add(new Trip { DTimStart = System.DateTime.Now })
-                    .Add(new Pipe { connectionObj = new SerialConn() })
+                    .Add(new SerialPipe { SerialConn = new SerialConn() })
                     .Add(new BusPB())
-                    .Add(new DevicePB());// { metaData = BinaryParser.Parse(BinaryParser.Meta_Ind) });
+                    .Add(new DevicePB { metaData = BinaryParser.Parse(BinaryParser.Meta_Ind) });
                 v.VisitVM
                     .Add(new Trip { DTimStart = System.DateTime.Now })
-                    .Add(new Pipe { connectionObj = new SerialConn() })
+                    .Add(new NetPipe { NetConn = new NetConn() })
                     .Add(new BusPB())
-                    .Add(new DevicePB());// { metaData= BinaryParser.Parse(BinaryParser.Meta_NNK) });
+                    .Add(new DevicePB { metaData= BinaryParser.Parse(BinaryParser.Meta_NNK) });
 
                 v.IsDirty = true;
 
@@ -98,6 +99,7 @@ namespace Main.Models
         }
         internal static void CreateOldProject(string file)
         {
+
             var ext = Path.GetExtension(file);
             if ((ext == ".vst") || (ext == ".vstgrp"))
             {

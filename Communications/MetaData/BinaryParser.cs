@@ -1006,7 +1006,9 @@ namespace Communications.MetaData
             public void ReadXml(XmlReader reader)
             {
                 XReadAttrs(reader,attrs,this);
-                reader.Read(); // #Text or  EndElement/>
+                if (reader.IsEmptyElement) return;
+                reader.Read(); 
+                //reader.Read(); // #Text or  EndElement/>
                 if (reader.NodeType == XmlNodeType.Text)
                 {
                     LastValue = reader.Value == string.Empty ? null : unmValue.StringToValue(reader.Value, ShowHex, ArrayLen);

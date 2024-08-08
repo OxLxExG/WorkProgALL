@@ -12,6 +12,8 @@ namespace Connections
         private string host;
         private int port;
         private Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+        private Thread? netThread;
+
         static NetConn()
         {
             _ConnectionTypes.Add(typeof(NetConn));
@@ -25,9 +27,6 @@ namespace Connections
         {
             host = "192.168.4.1";
             port = 5000;
-            var netThread = new Thread(NetReadThread);
-            netThread.IsBackground = true;
-            netThread.Start();
         }
         public string Host
         {
@@ -51,7 +50,13 @@ namespace Connections
         public override Task Close(int timout = 5000)
         {
             socket.Close();
-            return Task.CompletedTask;
+            if (netThread != null && Ctsreadthread != null)
+            {
+                Ctsreadthread?.Cancel();
+                while (netThread.IsAlive && --timout > 0) Thread.Sleep(1);
+                netThread = null;
+            }
+            return base.Close(timout);
         }
         public override Task Open(int timout)
         {
@@ -62,6 +67,16 @@ namespace Connections
                 {
                     try
                     {
+                        await base.Open(timout);
+
+                        if (netThread == null)
+                        {
+                            netThread = new Thread(() => NetReadThread(Ctsreadthread!.Token));
+                            netThread.Name = "====netThread====";
+                            netThread.IsBackground = true;
+                            netThread.Start();
+                        }
+
                         await socket.ConnectAsync(host, port, Cts.Token);
                     }
                     finally
@@ -104,13 +119,13 @@ namespace Connections
                 }
             }
         }
-        private async void NetReadThread()
+        private async void NetReadThread(CancellationToken tok)
         {
             while (true)
             {
                 try
                 {
-                    if (disposed) return;
+                    if (tok.IsCancellationRequested) return;
                     int cntin = currenRq != null ? currenRq.rxCount : rxBuf.Length;
                     if (!socket.Connected || !IsReading || cntin <= 0)
                     {

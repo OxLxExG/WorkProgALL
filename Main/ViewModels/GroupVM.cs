@@ -1,6 +1,7 @@
 ﻿using Core;
 using Main.Models;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -116,8 +117,52 @@ namespace Main.ViewModels
             d.lastClosedFiles?.UserOpenFile(file);
             return d;
         }
+        protected override void SaveWithDialog()
+        {
+            IList<SaveFileItem>? files = null;// new List<SaveFileItem>();
+
+            bool saveVM = NeedAnySave || IsVMDirty;
+
+            if (IsDirty)
+            {
+                if (files == null) files = new List<SaveFileItem>();
+                files.Add(new SaveFileItem { DrityFileName = DrityFileName});
+            }
+
+            foreach (var d in VisitDocs)
+            {
+                if (d.DrityOrHasChildDrity())
+                {
+                    if (files == null) files = new List<SaveFileItem>();
+                    files.Add(d.GenerateDrityTree()!);
+                    saveVM = saveVM || d.DrityOrHasChildVMDrity() || d.NeedAnySave;
+                }
+            }
+
+            if (files != null)   
+            {
+                var sf = ServiceProvider.GetRequiredService<ISaveFilesDialog>();
+
+                switch (sf.Show(files))
+                {
+                    case BoxResult.Yes:
+                        Save();
+                        break;
+
+                    case BoxResult.Cancel:
+                        throw new CancelDialogException();
+                }
+            }
+            else if (saveVM)
+            {
+                Save();
+            }
+        }
         protected override void SaveModelAndViewModel()
         {
+            var l = ServiceProvider.GetRequiredService<ILogger<VisitDocument>>();
+            l.LogTrace("Save VM={} M={} '{}'", IsVMDirty, IsDirty, FileFullName);
+
             // save child
             foreach (var d in VisitDocs) { d.Save(); }
             // save VM
@@ -148,12 +193,19 @@ namespace Main.ViewModels
             }
             return -1;
         }
+        public void RemoveVisit(VisitDocument v)
+        {
+            int i =VisitDocs.IndexOf(v);
+            if (i > -1) RemoveVisit(i);
+        }
+
         public void RemoveVisit(int i)
         {
             // remove VM 
             VisitDocs.RemoveAt(i);
             // remove M
             Model?.LocalPathVisit.RemoveAt(i);
+            IsDirty = true;
         }
         public void AddVisit(VisitDocument visit)
         {
@@ -177,6 +229,7 @@ namespace Main.ViewModels
            DockManagerVM.FormAdded -= FormAddedEvent;
            DockManagerVM.ActiveDocumentChanging -= ActiveDocumentChangingEvent;
            base.Remove(UserCloseFile);
+           foreach (var v in VisitDocs) v.Remove(false); // user remove group ! bat visit
         }
         void FormVisibleChanged(VMBaseForm? vMBaseForm) => IsVMDirty = vMBaseForm != null;
         void FormAddedEvent(object? sender, FormAddedEventArg e) => NeedAnySave = e.formAddedFrom == FormAddedFrom.User;

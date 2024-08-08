@@ -81,7 +81,7 @@ namespace Core
             _Activatetimer.Tick += (s, e) => 
             { 
                 _Activatetimer.Stop(); 
-                if (DynamicItems.Count ==0) OnMenuActivate?.Invoke(); 
+                if (DynamicItems.Count ==0) OnMenuActivate?.Invoke();
             };
 
             _DeActivatetimer = new();
@@ -104,7 +104,7 @@ namespace Core
         #endregion
 
         #region Close
-        public void Close()
+        public virtual void Close()
         {
             DockManagerVM.Remove(this);
         }

@@ -12,8 +12,9 @@
         <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverterKey" />
     </UserControl.Resources>
     <Grid>
-        
-        <!--<Expander Header="{Binding FileName}">-->
+
+        <Expander Header="Visit setup"
+                  IsExpanded="{Binding IsSettingsExpanded}">
         <StackPanel Orientation="Vertical"
                     Visibility="{Binding FileNotFound, Converter={StaticResource BoolToVisibilityConverterKey},ConverterParameter=invers}">
             <CheckBox IsChecked="{Binding IsActive}" 
@@ -24,6 +25,6 @@
             <TextBlock Text="{Binding FileName}"/>
             <TextBlock Text="{Binding FileFullName}" />
         </StackPanel>
-        <!--</Expander>-->
+        </Expander>
     </Grid>
 </UserControl>

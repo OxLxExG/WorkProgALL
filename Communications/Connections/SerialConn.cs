@@ -7,9 +7,11 @@ using System.Threading.Tasks;
 
 namespace Connections
 {
-    public class SerialConn : AbstractConnection, ISerialConnection
+    public class SerialConn : AbstractConnection, ISerialConnection,IDisposable
     {
         private readonly SerialPort port = new SerialPort();
+        private Thread? netThread;
+
 
         static SerialConn()
         {
@@ -21,10 +23,15 @@ namespace Connections
             //port.ReadTimeout = -1;
             //port.ReadBufferSize = 0x8000;
             //port.DataReceived += DataReceivedHandler;
-            var netThread = new Thread(NetReadThread);
-            netThread.Name = "====netThread====";
-            netThread.IsBackground = true;
-            netThread.Start();
+
+            /// TODO: create netThread then port is open
+            /// Destroy netThreadthen port is close
+            /// or in netThread open and close port
+            /// 
+            //var netThread = new Thread(NetReadThread);
+            //netThread.Name = "====netThread====";
+            //netThread.IsBackground = true;
+            //netThread.Start();
         }
         public override string? ToString()
         {
@@ -33,6 +40,10 @@ namespace Connections
         protected override void Dispose(bool disposing)
         {
             port.Dispose();
+
+            rxEndEvent.Dispose();
+            rxDisposeEvent.Dispose();
+
             base.Dispose(disposing);
         }
         public int BaudRate
@@ -40,7 +51,7 @@ namespace Connections
             get { return port.BaudRate; }
             set { port.BaudRate = value; }
         }
-        public string PortName
+        public string PortName// { get; set; }
         {
             get { return port.PortName; }
             set { port.PortName = value; }
@@ -50,18 +61,34 @@ namespace Connections
 
         public override Task Close(int timout = 2000)
         {
-            logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} {dbg} CLOSE {port.PortName}   {port.BaudRate}");
-            port.Close();
-            return Task.CompletedTask;
+            if (netThread != null && Ctsreadthread != null)
+            {
+                logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} {dbg} CLOSE {port.PortName}   {port.BaudRate}");
+                port.Close();
+                Ctsreadthread?.Cancel();
+                while (netThread.IsAlive && --timout > 0) Thread.Sleep(1);
+                netThread = null;
+            }            
+            return base.Close(timout);
         }
 
         public override Task Open(int timout = 500)
         {
             logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} {dbg} OPEN {port.PortName}   {port.BaudRate}");
             port.Open();
-            return base.Open(timout);
+
+            base.Open(timout);
+
+            if (netThread == null)
+            {
+                netThread = new Thread(() => NetReadThread(Ctsreadthread!.Token));
+                netThread.Name = "====netThread====";
+                netThread.IsBackground = true;
+                netThread.Start();
+            }
+            return Task.CompletedTask;
         }
-        protected readonly AutoResetEvent rxEndEvent = new AutoResetEvent(false);
+        protected readonly AutoResetEvent rxEndEvent =  new AutoResetEvent(false);
         protected readonly AutoResetEvent rxDisposeEvent = new AutoResetEvent(false);
         // private bool _portDisposed = false;
         //protected override void RecreateCts()
@@ -178,18 +205,19 @@ namespace Connections
             }
             rxRowEvent.Set();
         }
-        private async void NetReadThread()
+        private async void NetReadThread(CancellationToken tok)
         {
             while (true)
             {
                 try
                 {
-                    if (disposed) return;
+                    if (tok.IsCancellationRequested) return;
                     int cntin = currenRq != null ? currenRq.rxCount : rxBuf.Length;
 
                     if (!port.IsOpen || !IsReading || cntin <= 0 || Cts == null)
                     {
                         rxEndEvent.Set();
+                        Thread.Sleep(100);
                         continue;
                     }
                     rxEndEvent.Reset();
