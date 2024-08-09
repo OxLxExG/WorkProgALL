@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.Input;
 using Core;
-using Main.Models_old;
+using Main.Models;
+using Main.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
@@ -9,12 +10,22 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
 
-namespace Main.ViewModels_old
+namespace Main.ViewModels
 {
-    public class ItemVM : VMBase
+    public abstract class ItemVM: VMBase
     {
+        public bool IsExpanded { get; set; } = true;
+        public bool ShouldSerializeIsExpanded() => !IsExpanded;
+        public bool IsSelected { get; set; }
+        public bool ShouldSerializeIsSelected() => IsSelected;
+        [XmlIgnore] public ObservableCollection<MenuItemVM> CItems { get; set; } = new ObservableCollection<MenuItemVM>();        
+        public ItemVM() 
+        { 
+        }
         #region Parent
         private WeakReference? parent;
         public virtual void SetParent(object? par)
@@ -22,9 +33,9 @@ namespace Main.ViewModels_old
             if (par == null) parent = null;
             else parent = new WeakReference(par);
         }
-        [XmlIgnore] public object? Parent 
+        [XmlIgnore] public object? Parent
         {
-            get 
+            get
             {
                 if (parent == null) return null;
                 return parent.Target;
@@ -34,7 +45,7 @@ namespace Main.ViewModels_old
         protected VMBaseFileDocument? GetRoot()
         {
             object? p = Parent;
-            while (p is ComplexVisitItemVM c) { p = c.Parent; }
+            while (p is ComplexVM c) { p = c.Parent; }
             if (p is VMBaseFileDocument v) return v;
             else return null;
         }
@@ -45,317 +56,190 @@ namespace Main.ViewModels_old
         }
         protected void Remove()
         {
-            if (parent != null && model != null)
+            if (parent != null)
             {
-                SetDrity();
-                ComplexVisitItemVM? m = parent.Target as ComplexVisitItemVM;
-                m?.ItemsRemove(model);
-
+                ComplexVM? m = parent.Target as ComplexVM;
+                m?.ItemsRemove(this);
             }
         }
         #endregion
-        public bool IsExpanded { get; set; } = true;
-        public bool ShouldSerializeIsExpanded() => !IsExpanded;
-        public bool IsSelected { get; set; }
-        public bool ShouldSerializeIsSelected() => IsSelected;
-        [XmlIgnore] public ObservableCollection<MenuItemVM> CItems { get; set; } = new ObservableCollection<MenuItemVM>();
-        
-        public ItemVM() 
+    }
+    public abstract class ComplexVM: ItemVM
+    {
+        private (Trip trip, Device[] devs ) FindTripAndChildDevs(ItemVM vm)
         {
-            CItems.Add(new CommandMenuItemVM
+            ComplexVM? p = (ComplexVM?)vm.Parent;
+            while (p != null && !(p is TripVM))
             {
-                Header = "Delete",
-                Command = new RelayCommand(Remove),
-                ContentID = "DEL",
-                Priority = 10000,
-            });
-        }
+                p = (ComplexVM?)p.Parent;
+            }
+            if (p is TripVM tvm && tvm.Model is Trip t)
+            {
+                List<Device> devices = new List<Device>();
 
-        #region Factory
-        protected static readonly Dictionary<Type, Func<ModelItem, ItemVM>> _factory = new();
-
-        protected static void AddFactory(Type tp, Func<ModelItem, ItemVM> FactoryFunc)
-        {
-            if (!_factory.ContainsKey(tp))
-                _factory.Add(tp, FactoryFunc);
-        }
-        protected static void AddFactory<M, VM>()
-            where VM : ItemVM, new()
-            where M : ModelItem
-        {
-            var tp = typeof(M);
-            if (!_factory.ContainsKey(tp))
-                _factory.Add(tp, m => new VM()
+                void recur(ItemVM root)
                 {
-                    model = (M)m
-                });
+                    if (root is DeviceVM dvm && dvm.Model is Device d) devices.Add(d);
+                    else if (root is ComplexVM c && c.Items != null)
+                    {
+                        foreach (var i in c.Items) recur(i);
+                    }
+                }
+                recur(vm);
+
+                return (t, devices.ToArray());
+            }
+            throw new NotImplementedException();
         }
-        protected static ItemVM GetBaseVisitItemVM(ModelItem m)
+        /// <summary>
+        /// Items-Visit,Trip,pipe,bus VMs
+        /// </summary>
+        /// <param name="item">tripVM,PipeVM,BusVM,DevVM</param>
+        public void ItemsRemove(ItemVM item)
         {
-            Func<ModelItem, ItemVM> f;
-            if (_factory.TryGetValue(m.GetType(), out f!)) ///TODO: Recur Base Type Check ????
-                return f(m);
-            throw new ArgumentException();
+            if (Items != null)
+            {
+                //удаляем рейс из заезда (модель)
+                if (item is TripVM tm && tm.Model is Trip t && this is VisitVM vm && vm.Model is Visit v)
+                {
+                    v.ItemsRemove(t);
+                }
+                // (модель) нахдим родительский рейс и дочерние приборы, их удаляем
+                if (!(item is TripVM))
+                {
+                    var (tr,dvs) = FindTripAndChildDevs(item);
+                    foreach(var  d in dvs) tr.ItemsRemove(d);
+                }
+                // vm
+                Items.Remove(item);
+                if (Items.Count == 0) Items = null;
+                SetDrity();
+            }
         }
-        internal static T GetVM<T>(ModelItem m)
-            where T : ItemVM
+        public void ItemsAdd(ItemVM item)
         {
-            var r = GetBaseVisitItemVM(m);
-            if (r is T t) //ERROR then bus
-                return t;
-            throw new ArgumentException();
+            if (Items == null) Items = new ObservableCollection<ItemVM> { item };
+            else if (!Items.Contains(item)) Items.Add(item);
+            item.Parent = this;
+
+            if (item is TripVM tm && tm.Model is Trip t && this is VisitVM vm && vm.Model is Visit v)
+            {
+                v.ItemsAdd(t);
+            }
+            if (!(item is TripVM))
+            {
+                var (tr, dvs) = FindTripAndChildDevs(item);
+                foreach (var d in dvs) tr.ItemsAdd(d);
+            }
+            SetDrity();
         }
-        #endregion
-        #region Model
-        internal virtual void SetModel(ModelItem? value)
+        public ObservableCollection<ItemVM>? Items {  get; set; }
+        public bool ShouldSerializeItems() => Items != null && Items.Count > 0;
+        public override void SetParent(object? parent)
+        {
+            base.SetParent(parent);
+
+            if (Items != null)
+                foreach(var i in Items) 
+                    i.SetParent(this);
+        }
+    }
+    internal class ItemMprop
+    {
+        private WeakReference<ItemM>? _wr_model;
+        internal virtual void SetModel(ItemM? value)
         {
             if (value == null) _wr_model = null;
             else
-            if (_wr_model == null) _wr_model = new WeakReference<ModelItem>(value);
+            if (_wr_model == null) _wr_model = new WeakReference<ItemM>(value);
             else
             {
-                ModelItem? m;
+                ItemM? m;
                 if (_wr_model.TryGetTarget(out m) && m != value)
                 {
-                    _wr_model = new WeakReference<ModelItem>(value);
+                    _wr_model = new WeakReference<ItemM>(value);
                 }
             }
         }
-        internal void ClearModel() => _wr_model = null;
-
-        private WeakReference<ModelItem>? _wr_model;
-        [XmlIgnore] public ModelItem? model
+        internal ItemM? GetModel()
         {
-            get
-            {
-                ModelItem? m = null;
+            ItemM? m = null;
                 if (_wr_model != null)
                 {
                     _wr_model.TryGetTarget(out m);
                 }
                 return m;
-            }
-            set
-            {
-                SetModel(value);
-            }
-        }
-        #endregion
-    }
-    public abstract class SimpleVisitItemVM : ItemVM
-    {
-        internal override void SetModel(ModelItem? m)
-        {
-            if (m is Device)
-            {
-                if (string.IsNullOrEmpty(ContentID)) ContentID = m.Id.ToString("D");
-                base.SetModel(m);
-            }
-            else throw new ArgumentException();
-        }
-        [XmlIgnore] public new Device? model { get => (Device?)base.model; set => base.model = value; }
-    }
-    public abstract class ComplexVisitItemVM : ItemVM
-    {
-        public abstract void RemoveChildEmptyModel();
-        public abstract void ItemsRemove(ModelItem item);
-        public abstract ItemVM ItemsAdd(ModelItem item);
-        public abstract bool ContainsModel(string modelID);
-    }
-    public abstract class ComplexVisitItemVM<CHILD, CHILDVM> : ComplexVisitItemVM
-        where CHILD : ModelItem
-        where CHILDVM : ItemVM, new()
-    {
-        public override void RemoveChildEmptyModel()
-        {
-            for(int i = Items.Count-1; i >= 0; i--)
-            {
-                var vm = Items[i];
-
-                if (vm.model == null)
-                {
-                    Items.RemoveAt(i);
-                    SetDrity();
-                }
-                else
-                    if (Items[i] is ComplexVisitItemVM m) m.RemoveChildEmptyModel();
-            }
-        }
-        public override void SetParent(object? par)
-        {
-            foreach (var i in Items) i.SetParent(this);
-            base.SetParent(par);
-        }
-        internal override void SetModel(ModelItem? m)
-        {
-            if (m is ComplexModelItem<CHILD> mm) SetModel(mm);
-            else throw new ArgumentException();
-        }
-        internal void SetModel(ComplexModelItem<CHILD>? m)
-        {
-            if (model != null || m == null) throw new InvalidOperationException();
-            base.SetModel(m);
-            var ID = m!.Id.ToString("D");
-            if (string.IsNullOrEmpty(ContentID))
-            {
-                ContentID = ID;
-                Items = new ObservableCollection<CHILDVM>(m.Items.Select(GetVM<CHILDVM>));
-            }
-            else if (ContentID != ID) throw new InvalidOperationException();
-            else
-            {
-                foreach (var item in m.Items)
-                {
-                    var id = item.Id.ToString("D");
-                    var md = GetViewModel(id);
-                    if (md == null)
-                    {
-                        Add(item);
-                    }
-                    else md.model = item;
-                }
-                for (var i = Items.Count - 1; i >= 0; i--)
-                {
-                    var item = Items[i];
-                    if (item.model == null) Items.RemoveAt(i);
-                }
-            }
-        }
-        [XmlIgnore] public new ComplexModelItem<CHILD>? model
-        {
-            get => (ComplexModelItem<CHILD>?)base.model;
-            set => base.model = value;
-        }
-
-        //[XmlIgnore]
-        public ObservableCollection<CHILDVM> Items { get; set; } = new ObservableCollection<CHILDVM>();
-        public bool ShouldSerializeItems() => Items.Count > 0;
-        public CHILDVM? GetViewModel(string modelID) => Items.FirstOrDefault(vm => vm.ContentID == modelID);
-        public override bool ContainsModel(string modelID) => GetViewModel(modelID) != null;
-        //public override void ItemsAdd(VisitItemVM item)
-        //{
-        //    if (item is CHILDVM t)
-        //    {
-        //        if (!Items.Contains(t)) Items.Add(t);
-        //    }
-        //    else throw new InvalidOperationException();
-        //}
-        //public override void ItemsRemove(VisitItemVM item)
-        //{
-        //    if (item is CHILDVM t) Items.Remove(t);
-        //    else throw new InvalidOperationException();
-        //}
-        public override void ItemsRemove(ModelItem item)
-        {
-            if (item is CHILD m)
-            {
-                var vm = GetViewModel(m.Id.ToString("D"));
-                if (vm != null)
-                {
-                    Items.Remove(vm);
-                }
-                model?.ItemsRemove(m);
-            }
-            else throw new InvalidOperationException();
-        }
-        public override ItemVM ItemsAdd(ModelItem item)
-        {
-            CHILDVM? vm;
-            if (item is CHILD m)
-            {
-                vm = GetViewModel(m.Id.ToString("D"));
-                if (vm == null)
-                {
-                    vm = GetVM<CHILDVM>(m);
-                    model?.ItemsAdd(m);
-                    vm.SetParent(this);
-                    Items.Add(vm);
-                }
-                return vm;
-            }
-            else throw new InvalidOperationException();
-        }
-        public CHILDVM Add(ModelItem item) => (CHILDVM)this.ItemsAdd(item);
-    }
-
-
-
-    public class DeviceVM : SimpleVisitItemVM;
-    public class DevicePBVM : DeviceVM;
-    public class DeviceT1VM : DeviceVM;
-    public class DeviceT2VM : DeviceVM;
-    public class BusVM : ComplexVisitItemVM<Device, DeviceVM>
-    {
-        [XmlIgnore] public Bus? bus { get => (Bus?)model; set => model = value; }
-    }
-    public class BusPBVM : BusVM;// ComplexBaseVisitItemVM<DevicePB, DevicePBVM>;
-    public class PipeVM : ComplexVisitItemVM<Bus, BusVM>
-    {
-        [XmlIgnore] public Pipe? pipe { get => (Pipe?)model; set => model = value; }
-    }
-    public class SerialPipeVM : PipeVM
-    {
-        [XmlIgnore] public new SerialPipe? pipe { get => (SerialPipe?)model; set => model = value; }
-    }
-    public class NetPipeVM : PipeVM
-    {
-        [XmlIgnore] public new NetPipe? pipe { get => (NetPipe?)model; set => model = value; }
-    }
-    public class TripVM : ComplexVisitItemVM<Pipe, PipeVM>
-    {
-        [XmlIgnore] public Trip? trip { get => (Trip?)model; set => model = value; }
-    }
-    public class VisitVM : ComplexVisitItemVM<Trip, TripVM>
-    {
-
-        public static implicit operator VisitVM(Visit d)
-        {
-            var r = new VisitVM();
-            r.SetModel(d);
-            r.SetParent(null);
-            return r;
-        }
-        static VisitVM()
-        {
-            AddFactory<Visit, VisitVM>();
-            AddFactory<Trip, TripVM>();
-            AddFactory<Pipe, PipeVM>();
-            AddFactory<SerialPipe, SerialPipeVM>();
-            AddFactory<NetPipe, NetPipeVM>();
-            AddFactory<Bus, BusVM>();
-            AddFactory<BusPB, BusPBVM>();
-            AddFactory<DevicePB, DevicePBVM>();
-            AddFactory<DeviceTelesystem, DeviceT1VM>();
-            AddFactory<DeviceTelesystem2, DeviceT2VM>();
-        }
-        public void RemoveEmptyModel()
-        {
-
         }
     }
 
+    /// <summary>
+    /// Items-----simple
+    /// Model- Device
+    /// </summary>
+    public abstract class DeviceVM : ItemVM
+    {
+        private readonly ItemMprop itemMprop = new ItemMprop();
+        [XmlIgnore] public ItemM? Model { get => itemMprop.GetModel(); set => itemMprop.SetModel(value); }
+    }
+    public abstract class ComplexModelVM : ComplexVM
+    {
+        private readonly ItemMprop itemMprop = new ItemMprop();
+        [XmlIgnore] public ItemM? Model { get => itemMprop.GetModel(); set => itemMprop.SetModel(value); }    
+    }
+    /// <summary>
+    /// Items => Devises
+    /// model----
+    /// </summary>
+    public class BusVM : ComplexVM
+    {
+        
+    }
+    /// <summary>
+    /// Items => Buses
+    /// model----
+    /// </summary>
+    public class PipeVM : ComplexVM
+    {
+
+    }
+    /// <summary>
+    /// Items => Pipes, Devices(unconnected),
+    /// Model Trip 
+    /// </summary>
+    public class TripVM : ComplexModelVM
+    {
+
+    }
+    /// <summary>
+    /// Items => Trips
+    /// model visit
+    /// </summary>
+    public class VisitVM: ComplexModelVM 
+    {
+            
+    }
     public class HeaderHelper : VMBase
     {
         private WeakReference<VisitDocument> wr;
 
         protected VisitDocument? owner
         {
-            get 
+            get
             {
                 VisitDocument? d = null;
                 wr.TryGetTarget(out d);
                 return d;
-            } 
+            }
         }
 
-        public virtual bool IsExpanded 
+        public virtual bool IsExpanded
         {
-            get => owner == null ? true : owner.TripExpanded; set { if (owner != null) owner.TripExpanded = value; } 
+            get => owner == null ? true : owner.TripExpanded; set { if (owner != null) owner.TripExpanded = value; }
         }
         public bool IsSelected { get; set; }
         public virtual string Header => "Trips";
-        public virtual IEnumerable? Items => owner?.VisitVM.Items; 
-        public HeaderHelper(VisitDocument owner) { this.wr = new WeakReference<VisitDocument>(owner);  }
+        public virtual IEnumerable? Items => owner?.VisitVM.Items;
+        public HeaderHelper(VisitDocument owner) { this.wr = new WeakReference<VisitDocument>(owner); }
     }
     public class HeaderDockHelper : HeaderHelper
     {
@@ -371,6 +255,11 @@ namespace Main.ViewModels_old
         public override IEnumerable? Items => null;
         public HeaderFileHelper(VisitDocument owner) : base(owner) { owner.IsExpanded = true; }
     }
+
+    /// <summary>
+    /// if file not found items = null
+    /// Items[0] => visitVM
+    /// </summary>
     public class VisitDocument : ComplexFileDocumentVM
     {
         const string EXT = "vst";
@@ -423,7 +312,7 @@ namespace Main.ViewModels_old
         {
             if (RootFileDocumentVM.Instance is GroupDocument g)
             {
-                g.RemoveVisit( this );
+                g.RemoveVisit(this);
             }
         }
 
@@ -431,10 +320,11 @@ namespace Main.ViewModels_old
 
         public bool IsSettingsExpanded { get; set; } = true;
         public bool ShouldSerializeIsSettingsExpanded() => !IsSettingsExpanded;
-        [XmlIgnore] public new Visit? Model 
-        { 
-            get => (Visit?)base.Model; 
-            set 
+        [XmlIgnore]
+        public new Visit? Model
+        {
+            get => (Visit?)base.Model;
+            set
             {
                 if (base.Model != value)
                 {
@@ -449,17 +339,21 @@ namespace Main.ViewModels_old
             }
         }
         bool _TripExpanded = true;
-        public bool TripExpanded { get => _TripExpanded; set 
+        public bool TripExpanded
+        {
+            get => _TripExpanded; set
             {
                 SetProperty(ref _TripExpanded, value);
-            } 
+            }
         }
         public bool ShouldSerializeTripExpanded() => !FileNotFound && !TripExpanded;
 
         bool _DockExpanded = true;
-        public bool DockExpanded { get=> _DockExpanded; set 
-            
-                =>SetProperty(ref _DockExpanded, value);             
+        public bool DockExpanded
+        {
+            get => _DockExpanded; set
+
+                => SetProperty(ref _DockExpanded, value);
         }
         public bool ShouldSerializeDockExpanded() => !FileNotFound && !DockExpanded;
 
@@ -497,13 +391,13 @@ namespace Main.ViewModels_old
                 return _Items;
             }
         }
-        
+
         private VisitVM? _VisitVM;
         public VisitVM VisitVM
         {
             get
             {
-                if (_VisitVM == null) 
+                if (_VisitVM == null)
                     _VisitVM = new VisitVM();
 
                 return _VisitVM;
@@ -537,7 +431,7 @@ namespace Main.ViewModels_old
         }
         public static VisitDocument Load(string visitModelFile, bool Isroot)
         {
-            Visit model =null!;
+            Visit model = null!;
             VisitDocument d = null!;
             // load M
             try
@@ -554,7 +448,7 @@ namespace Main.ViewModels_old
             }
 
             // load VM
-            var vvm = ProjectFile.GetTmpFile(visitModelFile, ".vstvm");
+            var vvm = Models.ProjectFile.GetTmpFile(visitModelFile, ".vstvm");
             if (File.Exists(vvm))
             {
                 try
@@ -574,7 +468,7 @@ namespace Main.ViewModels_old
 
             if (Isroot)
             {
-                var dms = ProjectFile.GetTmpFile(visitModelFile, ".vstdm");
+                var dms = Models.ProjectFile.GetTmpFile(visitModelFile, ".vstdm");
                 if (File.Exists(dms))
                 {
                     try
@@ -607,7 +501,7 @@ namespace Main.ViewModels_old
             // save VM
             if (IsVMDirty)
             {
-                var vvm = ProjectFile.GetTmpFile(FileFullName, ".vstvm");
+                var vvm = Models.ProjectFile.GetTmpFile(FileFullName, ".vstvm");
                 try
                 {
                     using (var fs = new StreamWriter(vvm, false))
@@ -623,7 +517,7 @@ namespace Main.ViewModels_old
 
             if (IsRoot && (IsVMDirty || NeedAnySave))
             {
-                var dms = ProjectFile.GetTmpFile(FileFullName, ".vstdm");
+                var dms = Models.ProjectFile.GetTmpFile(FileFullName, ".vstdm");
                 try
                 {
                     using (var fs = new StreamWriter(dms, false))

@@ -89,7 +89,7 @@ namespace Main.ViewModels
             }
             // load VM
             GroupDocument d;
-            var vvm = ProjectFile.GetTmpFile(file, ".grpvm");
+            var vvm = Models.ProjectFile.GetTmpFile(file, ".grpvm");
             if (File.Exists(vvm))
             {
                 using (var fs = new StreamReader(vvm, false))
@@ -168,7 +168,7 @@ namespace Main.ViewModels
             // save VM
             if (IsVMDirty)
             {
-                var vvm = ProjectFile.GetTmpFile(FileFullName, ".grpvm");
+                var vvm = Models.ProjectFile.GetTmpFile(FileFullName, ".grpvm");
                 using (var fs = new StreamWriter(vvm, false))
                 {
                     Serializer.Serialize(fs, this);

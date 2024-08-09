@@ -12,7 +12,7 @@ using System.Xml;
 using System.Xml.Serialization;
 using static Communications.MetaData.BinaryParser;
 
-namespace Main.Models
+namespace Main.Models_old
 {
     public abstract class ModelItem: INotifyPropertyChanged
     {
