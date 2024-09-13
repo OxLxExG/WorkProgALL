@@ -7,7 +7,6 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using MS.Internal;
 
 namespace Main.Views
 {
@@ -116,6 +115,17 @@ namespace Main.Views
         }
     }
 
+    public class ProjectExplorerTemplateSelector : DataTemplateSelector
+    {
+        public override DataTemplate SelectTemplate(object item, DependencyObject parentItemsControl)
+        {
+            if (AnyResuorceSelector.Get(HeaderTemplateSelector.Dictionary, item, "Data") is DataTemplate r)
+            {
+                return r;
+            }
+            else return base.SelectTemplate(item, parentItemsControl);
+        }
+    }
     public class SubHeaderTemplateSelector : DataTemplateSelector
     {
         static SubHeaderTemplateSelector _Instance = null!;
@@ -172,7 +182,7 @@ namespace Main.Views
                 if (v.IsRoot) return new VisitDocument[] { v };
                 else return v.VisitVM.Items;
             }
-            else if (value is ComplexVisitItemVM c)
+            else if (value is ComplexVM c)
             {
                 return c.GetType().GetProperty("Items")!.GetValue(c, null)!;
             }

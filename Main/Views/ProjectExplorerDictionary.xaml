@@ -2,9 +2,11 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:v="clr-namespace:Main.Views"
                     xmlns:c="clr-namespace:Core;assembly=Core"
+                    xmlns:con="clr-namespace:Connections;assembly=Communications"
                     xmlns:vm="clr-namespace:Main.ViewModels">
 
     <c:MenuTemplateSelector x:Key="MenuTemplateSelectorVMKey" />
+    <v:ProjectExplorerTemplateSelector x:Key="DataTemplateSelectorKey" />
 
 
     <!--<Style x:Key="VMBaseStyle"
@@ -12,6 +14,8 @@
            BasedOn="{StaticResource {x:Type TreeViewItem}}">
     </Style>-->
 
+    <SolidColorBrush x:Key="BPHighlLightKey"
+                     Color="#80a1a1f1" />
     <SolidColorBrush x:Key="TreeViewItem.TreeArrow.Static.Stroke"
                      Color="#FF818181" />
     <SolidColorBrush x:Key="TreeViewItem.TreeArrow.Static.Fill"
@@ -131,6 +135,8 @@
                                       ClickMode="Press"
                                       IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource Mode=TemplatedParent}}"
                                       Style="{StaticResource ExpandCollapseToggleStyle}" />
+                            
+
                         <Border x:Name="Bd"
                                 Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
@@ -179,7 +185,10 @@
                                  Value="true">
                             <Setter Property="Background"
                                     TargetName="Bd"
-                                    Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
+                                    Value="{StaticResource BPHighlLightKey}" />
+                            <!--<Setter Property="BorderBrush"
+                                    TargetName="Bd"
+                                    Value="Red"/>-->
                             <Setter Property="TextElement.Foreground"
                                     TargetName="PART_Header"
                                     Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}" />
@@ -235,8 +244,9 @@
     <HierarchicalDataTemplate x:Key="VisitDocumentHeader"
                               DataType="{x:Type vm:VisitDocument}"
                               ItemsSource="{Binding Items}">
-        
-        <TextBlock Text="{Binding FileName}"
+
+        <TextBlock Foreground="BlueViolet"
+                   Text="{Binding FileName}"
                    Style="{StaticResource DataTemplateStyle}" />
         
     </HierarchicalDataTemplate>
@@ -252,7 +262,7 @@
                               DataType="{x:Type vm:TripVM}"
                               ItemsSource="{Binding Items}">
         <TextBlock Text="Рейс"
-                   Foreground="Red"
+                   Foreground="BlueViolet"
                    Style="{StaticResource DataTemplateStyle}" />
     </HierarchicalDataTemplate>
 
@@ -268,39 +278,44 @@
         <!--</StackPanel>-->
     </DataTemplate>
 
-    <HierarchicalDataTemplate x:Key="PipeVMHeader"
+    <!--<HierarchicalDataTemplate x:Key="PipeVMHeader"
                               DataType="{x:Type vm:PipeVM}"
                               ItemsSource="{Binding Items}">
         <TextBlock Text="{Binding pipe.Connection.IsOpen}"
                    Style="{StaticResource DataTemplateStyle}" />
     </HierarchicalDataTemplate>
-    
-    <HierarchicalDataTemplate x:Key="SerialPipeVMHeader" 
-                              DataType="{x:Type vm:SerialPipeVM}"
-                              ItemsSource="{Binding Items}"
-                              >
 
-        <TextBlock Text="Serial Connection">
-            <TextBlock.ContextMenu>
+    <HierarchicalDataTemplate x:Key="SerialPipeVMHeader"
+                              DataType="{x:Type vm:SerialPipeVM}"
+                              ItemsSource="{Binding Items}">
+        <TextBlock Foreground="Red" Style="{StaticResource DataTemplateStyle}">
+            <Run Text="Serial Connection " />
+            <Bold>
+            <Run Text="{Binding PortName}" />
+            </Bold>
+            <Run FontSize="10" Text=" Speed: " />
+            <Run FontSize="10"
+                 Text="{Binding BaudRate}" />
+            --><!--<TextBlock.ContextMenu>
                 <ContextMenu Style="{StaticResource ContextMenuStypeKey}" />
-            </TextBlock.ContextMenu>
+            </TextBlock.ContextMenu>--><!--
         </TextBlock>
-    </HierarchicalDataTemplate>
+    </HierarchicalDataTemplate>-->
     
-    <DataTemplate x:Key="SerialPipeVMSubHeader"
+    <!--<DataTemplate x:Key="SerialPipeVMSubHeader"
                               DataType="{x:Type vm:SerialPipeVM}">
         <StackPanel Style="{StaticResource DataTemplateStyle}">
-            <!--<StackPanel.ContextMenu>
+            --><!--<StackPanel.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header=" sdaacdcasd" />
                 </ContextMenu>
-            </StackPanel.ContextMenu>-->
-            <TextBlock Text="{Binding pipe.SerialConn.BaudRate}" />
-            <TextBlock Text="{Binding pipe.SerialConn.PortName}" />
+            </StackPanel.ContextMenu>--><!--
+            <TextBlock Text="{Binding BaudRate}" />
+            <TextBlock Text="{Binding PortName}" />
         </StackPanel>
-    </DataTemplate>
+    </DataTemplate>-->
 
-    <HierarchicalDataTemplate x:Key="NetPipeVMHeader"
+    <!--<HierarchicalDataTemplate x:Key="NetPipeVMHeader"
                               DataType="{x:Type vm:NetPipeVM}"
                               ItemsSource="{Binding Items}">
         <TextBlock Text="Net Connection"
@@ -310,24 +325,105 @@
     <DataTemplate x:Key="NetPipeVMSubHeader"
                               DataType="{x:Type vm:NetPipeVM}">
         <StackPanel Style="{StaticResource DataTemplateStyle}">
-            <TextBlock Text="{Binding pipe.NetConn.Port}" />
-            <TextBlock Text="{Binding pipe.NetConn.Host}" />
+            <TextBlock Text="{Binding Port}" />
+            <TextBlock Text="{Binding Host}" />
+        </StackPanel>
+    </DataTemplate>-->
+    <DataTemplate x:Key="SerialVMData"
+                  DataType="{x:Type vm:SerialVM}">
+        <TextBlock Foreground="Red">
+            <Run Text="Port: " />
+            <Bold>
+            <Run Text="{Binding PortName}" />
+            </Bold>
+            <Run FontSize="10" Text=" Baud: " />
+            <Run FontSize="10" Text="{Binding BaudRate}" />
+        </TextBlock>
+    </DataTemplate>
+
+    <DataTemplate x:Key="NetVMData"
+                  DataType="{x:Type vm:NetVM}">
+        <TextBlock Foreground="Red">
+            <Run Text="Host: " />
+            <Bold>
+                <Run Text="{Binding Host}" />
+            </Bold>
+            <Run Text=":" />
+            <Run Text="{Binding Port}" />
+        </TextBlock>
+    </DataTemplate>
+
+    <HierarchicalDataTemplate x:Key="BusPBVMHeader"
+                              DataType="{x:Type vm:BusPBVM}"
+                              ItemsSource="{Binding Items}">
+        <StackPanel Orientation="Horizontal">
+        <TextBlock Style="{StaticResource DataTemplateStyle}"
+                   Foreground="Blue">
+            <Bold>
+                <Run Text="{Binding Name}" />
+            </Bold>
+        </TextBlock>
+            <TextBlock Foreground="Blue">
+            <Run Text=" интервал опроса " />
+                <Run Text="{Binding Interval}" />
+            <!--<Bold>
+                <InlineUIContainer BaselineAlignment="Center">
+                    <TextBox  Foreground="Blue"
+                              BorderBrush="Transparent"
+                              Text="{Binding Interval}" />
+                </InlineUIContainer>
+            </Bold>-->
+            <Run Text="ms" />
+            </TextBlock>
+        </StackPanel>
+    </HierarchicalDataTemplate>
+
+    <DataTemplate x:Key="BusPBVMSubHeader"
+                              DataType="{x:Type vm:BusPBVM}">
+        <StackPanel >
+            <ContentPresenter Content="{Binding VMConn}" ContentTemplateSelector="{StaticResource DataTemplateSelectorKey}" />
         </StackPanel>
     </DataTemplate>
 
-    <HierarchicalDataTemplate x:Key="BusVMHeader"
-                              DataType="{x:Type vm:BusVM}"
-                              ItemsSource="{Binding Items}">
-        <TextBlock Text="{Binding bus.Name}"
-                   Style="{StaticResource DataTemplateStyle}" />
-    </HierarchicalDataTemplate>
 
     <DataTemplate x:Key="DeviceVMHeader"
                   DataType="{x:Type vm:DeviceVM}">
         <StackPanel Style="{StaticResource DataTemplateStyle}">
-                <TextBlock Text="Device" />
-                <TextBlock Text="{Binding model.Id}" />
-            </StackPanel>
+            <TextBlock Text="Device" />
+            <TextBlock Text="{Binding Model.Id}" />
+        </StackPanel>
+    </DataTemplate>
+
+    <DataTemplate x:Key="DevicePBVMHeader"
+                  DataType="{x:Type vm:DevicePBVM}">
+            <TextBlock Style="{StaticResource DataTemplateStyle}" Foreground="BlueViolet">
+				<Run Text="Прибор: " />
+				<Bold>
+				<Italic>
+				<Run Text="{Binding Model.Name, Mode=OneWay}" />
+				</Italic>
+				 </Bold>
+				<Run Text=" номер: " />                
+				<Bold>
+                <Run Text="{Binding Model.serial, Mode=OneWay}" />
+				</Bold>
+				<Run FontSize="10" Text=" адр: " />
+        		<Run FontSize="10" Text="{Binding Model.Address, Mode=OneWay}" />
+				<Run FontSize="10" Text=" чип: " />
+                <Run FontSize="10" Text="{Binding Model.chip, Mode=OneWay}" />
+				<Run FontSize="10" Text=" порт: " />
+                <Run FontSize="10" Text="{Binding MaskPort, Mode=OneWay}" />
+            </TextBlock>
+            <!--<TextBlock Text="{Binding Model.serial, Mode=OneWay, StringFormat='серийный номер {0}'}" />-->
+    </DataTemplate>
+    
+    <DataTemplate x:Key="DevicePBVMSubHeader"
+                  DataType="{x:Type vm:DevicePBVM}">
+        <!--<StackPanel Style="{StaticResource DataTemplateStyle}">-->
+            <TextBlock FontSize="10"
+                       FontWeight="DemiBold"
+                       Foreground="SeaGreen" Text="{Binding Model.info, Mode=OneWay, StringFormat='Info: {0}'}" />
+        <!--</StackPanel>-->
     </DataTemplate>
 
 </ResourceDictionary>

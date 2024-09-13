@@ -1,13 +1,8 @@
 ﻿using Connections.Interface;
 using ExceptionExtensions;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Runtime.Intrinsics.Arm;
+using Microsoft.Extensions.Logging;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Communications
 {
@@ -33,9 +28,11 @@ namespace Communications
     {
         static private List<ConectionItem> conections = new ();
 
+        static public ILogger? logger { get; set; }
+
         public IAbstractConnection? Get(string ConnectionID, object Subscruber)
         {
-            var f = conections.FirstOrDefault(c => c.Id == ConnectionID);
+            ConectionItem? f = conections.FirstOrDefault(c => c.Id == ConnectionID);
             if ( f != null)
             {
                 f.Add(Subscruber);
@@ -53,6 +50,19 @@ namespace Communications
             if (Get(ConnectionID, Subscruber) != null) 
                 throw new FlagsArgumentOutOfRangeException("ConnectionID", ConnectionID, "Used");
             conections.Add(new ConectionItem(Connection, ConnectionID, Subscruber));
+
+            if (logger != null)
+            {
+                foreach (var c in conections)
+                {
+                    StringBuilder sb = new StringBuilder();
+                    foreach (var item in c.Subscrubers)
+                    {
+                        sb.Append(item.ToString());
+                    }
+                    logger.LogTrace("{} = {}", c.Id, sb);
+                }
+            }
         }
     }
     #endregion

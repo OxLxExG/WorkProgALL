@@ -18,17 +18,8 @@ namespace Main.Models
     /// </summary>
     public abstract class ItemM : INotifyPropertyChanged
     {
-        private Guid _id = Guid.Empty;
-        public Guid Id
-        {
-            get
-            {
-                if (_id == Guid.Empty)
-                    _id = Guid.NewGuid();
-                return _id;
-            }
-            set => _id = value;
-        }
+        public Guid Id { get; set; } = Guid.NewGuid();
+
         public event PropertyChangedEventHandler? PropertyChanged;
         protected bool SetProperty<T>([NotNullIfNotNull(nameof(newValue))] ref T field, T newValue, [CallerMemberName] string? propertyName = null)
         {
@@ -80,11 +71,15 @@ namespace Main.Models
     /// реальные классы
     /// </summary>
     public sealed class DeviceTelesystem : Device;
-    public sealed class DeviceTelesystem2: Device;
+    public sealed class DeviceTelesystem2 : Device;
 
+    public record class RamReadInfo(string RAMFileName, int from, int too)
+    {
+        public RamReadInfo() : this(string.Empty, 0, 0) { }
+    }
     public sealed class DevicePB : Device
     {
-        public Models.RamReadInfo? ramReadInfo { get; set; }
+        public RamReadInfo? ramReadInfo { get; set; }
         public bool ShouldSerializeramReadInfo() => ramReadInfo != null;
 
         #region timout

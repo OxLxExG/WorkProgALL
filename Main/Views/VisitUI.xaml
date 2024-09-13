@@ -17,9 +17,13 @@
                   IsExpanded="{Binding IsSettingsExpanded}">
         <StackPanel Orientation="Vertical"
                     Visibility="{Binding FileNotFound, Converter={StaticResource BoolToVisibilityConverterKey},ConverterParameter=invers}">
-            <CheckBox IsChecked="{Binding IsActive}" 
-                      Content="Active" />
-            <CheckBox IsChecked="{Binding FileNotFound}"
+                <CheckBox IsChecked="{Binding IsDirty}"
+                          Content="Drity" />
+                <CheckBox IsChecked="{Binding IsVMDirty}"
+                          Content="VmDrity" />
+                <CheckBox IsChecked="{Binding IsActive}"
+                          Content="Active" />
+                <CheckBox IsChecked="{Binding FileNotFound}"
                       IsEnabled="False"
                       Content="FileNotFound" />
             <TextBlock Text="{Binding FileName}"/>

@@ -81,6 +81,8 @@ namespace Main.ViewModels
 
         public static GroupDocument Load(string file)
         {
+            DockManagerVM.State = FormAddedFrom.DeSerialize;
+
             GroupFile model;
             // load M
             using (var fs = new StreamReader(file, false))
@@ -115,6 +117,8 @@ namespace Main.ViewModels
             d.Model = model;
             d.FileFullName = file;
             d.lastClosedFiles?.UserOpenFile(file);
+
+            DockManagerVM.State = FormAddedFrom.User;
             return d;
         }
         protected override void SaveWithDialog()
@@ -148,7 +152,13 @@ namespace Main.ViewModels
                     case BoxResult.Yes:
                         Save();
                         break;
-
+                    case BoxResult.No:
+                        foreach (var d in VisitDocs)
+                        {
+                            d.IsDirty = false;
+                            d.IsVMDirty = false;
+                        }
+                        break;
                     case BoxResult.Cancel:
                         throw new CancelDialogException();
                 }

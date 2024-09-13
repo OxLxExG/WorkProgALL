@@ -54,58 +54,105 @@ namespace Core
     /// будет удалено автоматически
     /// </para>
     /// </summary>
-    public abstract class VMBaseForm : VMBase
-    {               
-        //public delegate void OnCloseHandler(object sender);
-        //public static event OnCloseHandler? OnClose;
+    public class DynamicItemsAdapter: IDisposable
+    {
+        public delegate void ActivateHandler();
+        public event ActivateHandler? OnActivateDynItems;
+        public event ActivateHandler? OnDeActivateDynItems;
 
-        #region Dynamic Tools And Menus 
-        protected List<PriorityItemBase> DynamicItems = new List<PriorityItemBase>();
+        public List<PriorityItemBase> DynamicItems = new List<PriorityItemBase>();
         private DispatcherTimer _Activatetimer;
         private DispatcherTimer _DeActivatetimer;
-        private void ActivateMenu()
+        private bool disposedValue;
+
+        public void ActivateMenu()
         {
             _DeActivatetimer.Stop();
             _Activatetimer.Start();
         }
-        private void DeActivateMenu()
+        public void DeActivateMenu()
         {
             _Activatetimer.Stop();
             _DeActivatetimer.Start();
         }
 
-        public VMBaseForm()
+        public DynamicItemsAdapter()
         {
             _Activatetimer = new();
             _Activatetimer.Interval = new(TimeSpan.TicksPerMillisecond * 500);
-            _Activatetimer.Tick += (s, e) => 
-            { 
-                _Activatetimer.Stop(); 
-                if (DynamicItems.Count ==0) OnMenuActivate?.Invoke();
+            _Activatetimer.Tick += (s, e) =>
+            {
+                _Activatetimer.Stop();
+                if (DynamicItems.Count == 0) OnActivateDynItems?.Invoke();
             };
 
             _DeActivatetimer = new();
             _DeActivatetimer.Interval = new(TimeSpan.TicksPerMillisecond * 100);
-            _DeActivatetimer.Tick += (s, e) => 
-            { 
-                _DeActivatetimer.Stop();
-                if (DynamicItems.Count > 0) OnMenuDeActivate?.Invoke();
-                if (DynamicItems.Count > 0)
-                {
-                    ToolBarServer.Remove(DynamicItems.OfType<ToolButton>());
-                    MenuItemServer.Remove(DynamicItems.OfType<MenuItemVM>());
-                    DynamicItems.Clear();
-                }
-            };
+            _DeActivatetimer.Tick += EventDeActivateTimer;
 
-            OnActivate += ActivateMenu;
-            OnDeActivate += DeActivateMenu;
+            //OnActivate += ActivateMenu;
+            //OnDeActivate += DeActivateMenu;
         }
-        #endregion
+        void EventDeActivateTimer(object? sender, EventArgs e)
+        {
+            _DeActivatetimer.Stop();
+            if (DynamicItems.Count > 0) OnDeActivateDynItems?.Invoke();
+            if (DynamicItems.Count > 0)
+            {
+                VMBase.ToolBarServer.Remove(DynamicItems.OfType<ToolButton>());
+                VMBase.MenuItemServer.Remove(DynamicItems.OfType<MenuItemVM>());
+                DynamicItems.Clear();
+            }
+        }
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: освободить управляемое состояние (управляемые объекты)
+                }
 
+                // TODO: освободить неуправляемые ресурсы (неуправляемые объекты) и переопределить метод завершения
+                // TODO: установить значение NULL для больших полей
+
+                EventDeActivateTimer(null, EventArgs.Empty);
+
+                disposedValue = true;
+            }
+        }
+
+        // // TODO: переопределить метод завершения, только если "Dispose(bool disposing)" содержит код для освобождения неуправляемых ресурсов
+        ~DynamicItemsAdapter()
+        {
+            // Не изменяйте этот код. Разместите код очистки в методе "Dispose(bool disposing)".
+            Dispose(disposing: false);
+        }
+
+        public void Dispose()
+        {
+            // Не изменяйте этот код. Разместите код очистки в методе "Dispose(bool disposing)".
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+    }
+    public abstract class VMBaseForm : VMBase
+    {
+        //public delegate void OnCloseHandler(object sender);
+        //public static event OnCloseHandler? OnClose;
+        private DynamicItemsAdapter? dynamicItemsAdapter;
+        public DynamicItemsAdapter DynAdapter 
+        { 
+            get 
+            {
+                if (dynamicItemsAdapter == null) dynamicItemsAdapter = new DynamicItemsAdapter();
+                return dynamicItemsAdapter;
+            } 
+        }
         #region Close
         public virtual void Close()
         {
+            if (dynamicItemsAdapter != null) dynamicItemsAdapter.Dispose();
             DockManagerVM.Remove(this);
         }
         RelayCommand _closeCommand = null!;
@@ -161,8 +208,8 @@ namespace Core
                 {
                     _isVisible = value;
 
-                    if (!_isVisible) DeActivateMenu();
-                    else if (_isActive) ActivateMenu();
+                    if (!_isVisible) dynamicItemsAdapter?.DeActivateMenu();
+                    else if (_isActive) dynamicItemsAdapter?.ActivateMenu();
 
                     OnPropertyChanged(nameof(IsVisible));
                     OnVisibleChange(this);
@@ -208,11 +255,8 @@ namespace Core
 
         #region IsActive
 
-        protected delegate void ActivateHandler();
-        private event ActivateHandler? OnActivate;
-        private event ActivateHandler? OnDeActivate;
-        protected event ActivateHandler? OnMenuActivate;
-        protected event ActivateHandler? OnMenuDeActivate;
+        //private event ActivateHandler? OnActivate;
+        //private event ActivateHandler? OnDeActivate;
         private bool _isActive = false;
         public bool IsActive
         {
@@ -221,10 +265,10 @@ namespace Core
             {
                 if (_isActive != value)
                 {
-                    if (_isActive && !value) 
-                        OnDeActivate?.Invoke();
-                    else 
-                        OnActivate?.Invoke();
+                    if (_isActive && !value)
+                        dynamicItemsAdapter?.DeActivateMenu(); // OnDeActivate?.Invoke();
+                    else
+                        dynamicItemsAdapter?.ActivateMenu(); // OnActivate?.Invoke();
 
                     _isActive = value;
                     OnPropertyChanged(nameof(IsActive));
@@ -384,8 +428,8 @@ namespace Core
     }
     public enum FormAddedFrom
     {
+        User,
         DeSerialize,
-        User
     }
     public class FormAddedEventArg : EventArgs
     {
@@ -439,10 +483,11 @@ namespace Core
         public static event EventHandler? FormClosed;
         public delegate void OnVisibleChangedHandler(VMBaseForm? sender);
         public static event OnVisibleChangedHandler? FormVisibleChanged;
-
+        private static FormAddedFrom _state = FormAddedFrom.User;
+        public static FormAddedFrom State { get => _state; set => _state = value; }
         public static void OnVisibleChange(VMBaseForm? sender)
         {
-            FormVisibleChanged?.Invoke(sender);
+           if (_state == FormAddedFrom.User) FormVisibleChanged?.Invoke(sender);
         }
         public static void Clear()
         {
@@ -460,6 +505,7 @@ namespace Core
         }
         public static VMBaseForm Add(VMBaseForm vmbase, FormAddedFrom formAddedFrom )
         {
+            _state = formAddedFrom;
             if (vmbase is ToolVM t) Instance._tools.Add(t);
             else if (vmbase is DocumentVM d) Instance._docs.Add(d);
             FormAdded?.Invoke(vmbase, new FormAddedEventArg(formAddedFrom));
@@ -467,6 +513,7 @@ namespace Core
         }
         public static VMBaseForm AddOrGet(string ContentID, FormAddedFrom formAddedFrom)
         {
+            _state = formAddedFrom;
             var c = Contains(ContentID);
             if (c != null)
             {

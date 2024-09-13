@@ -62,20 +62,36 @@ namespace Main.Models
                     var d = Path.GetDirectoryName(visitFile)!;
                     Directory.CreateDirectory(d);
                     Directory.CreateDirectory(d + "\\.hb\\");
+
                     v = VisitDocument.CreateAndSave(visitFile, false);
                     //v.VisitVM.ItemsAdd(new TripVM());
                 }
 
-                v.VisitVM
-                    .Add(new Trip { DTimStart = System.DateTime.Now })
-                    .Add(new SerialPipe { SerialConn = new SerialConn() })
-                    .Add(new BusPB())
-                    .Add(new DevicePB { metaData = BinaryParser.Parse(BinaryParser.Meta_Ind) });
-                v.VisitVM
-                    .Add(new Trip { DTimStart = System.DateTime.Now })
-                    .Add(new NetPipe { NetConn = new NetConn() })
-                    .Add(new BusPB())
-                    .Add(new DevicePB { metaData= BinaryParser.Parse(BinaryParser.Meta_NNK) });
+                // TripVM tripVM = (TripVM) new Trip { Delay = DateTime.Now };
+
+                var trip = v.VisitVM.Add((TripVM)new Trip
+                {
+                    DTimStart = DateTime.Now,
+                    Delay = DateTime.Now
+                }
+                );
+                var bus = trip.Add(new BusPBVM { VMConn = new SerialVM() });
+                bus.ItemsAdd(new DevicePB { metaData = BinaryParser.Parse(BinaryParser.Meta_Ind) });
+                bus.ItemsAdd(new DevicePB { metaData = BinaryParser.Parse(BinaryParser.Meta_NNK) });
+                bus.Interval = 4200;
+
+                bus = trip.Add(new BusPBVM { VMConn = new NetVM() });
+                bus.ItemsAdd(new DevicePB { metaData = BinaryParser.Parse(BinaryParser.Meta_CAL) });
+                //v.VisitVM
+                //    .Add(new Trip { DTimStart = System.DateTime.Now })
+                //    .Add(new SerialPipe { SerialConn = new SerialConn() })
+                //    .Add(new BusPB())
+                //    .Add(new DevicePB { metaData = BinaryParser.Parse(BinaryParser.Meta_Ind) });
+                //v.VisitVM
+                //    .Add(new Trip { DTimStart = System.DateTime.Now })
+                //    .Add(new NetPipe { NetConn = new NetConn() })
+                //    .Add(new BusPB())
+                //    .Add(new DevicePB { metaData= BinaryParser.Parse(BinaryParser.Meta_NNK) });
 
                 v.IsDirty = true;
 

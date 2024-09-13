@@ -81,13 +81,13 @@ namespace Main.ViewModels
             FloatingTop = (SystemParameters.PrimaryScreenHeight - 200) / 2;
             FloatingLeft = (SystemParameters.PrimaryScreenWidth - 400) / 2;
             CanDockAsTabbedDocument = true;
-            OnMenuActivate += ActivateDynItems;
-            OnMenuDeActivate += DeActivateDynItems;
+            DynAdapter.OnActivateDynItems += ActivateDynItems;
+            DynAdapter.OnDeActivateDynItems += DeActivateDynItems;
         }
         public override void Close()
         {
-            OnMenuActivate -= ActivateDynItems;
-            OnMenuDeActivate -= DeActivateDynItems;
+            DynAdapter.OnActivateDynItems -= ActivateDynItems;
+            DynAdapter.OnDeActivateDynItems -= DeActivateDynItems;
             base.Close();
         }
 
@@ -111,7 +111,7 @@ namespace Main.ViewModels
                 ToolTip = new ToolTip { Content = Properties.Resources.m_Freeze + " (" + Title + ")" },
                 ContentID = "Freeze" + ContentID,
                 IconSource = "pack://application:,,,/Images/Freeze.png",
-                Priority = 101,
+                Priority = 1001,
                 IsChecked = Freeze,
                 // binding  buttonVM.Command=>formVM.Freeze=>buttonVM.IsChecked
                 Command = new RelayCommand(() => Freeze = !Freeze),
@@ -122,14 +122,14 @@ namespace Main.ViewModels
                 ToolTip = new ToolTip { Content = Properties.Resources.m_Clear + " (" + Title + ")" },
                 ContentID = "Clear" + ContentID,
                 IconSource = "pack://application:,,,/Images/Clear.png",
-                Priority = 100,
+                Priority = 1000,
                 Command = new RelayCommand(() => OnClear?.Invoke())
             };
             var range = new[] { ftb, clb };
 
-            IToolServer toolServer = ServiceProvider.GetRequiredService<IToolServer>();
-            toolServer.Add("ToolGlyph", range);
-            DynamicItems.AddRange(range);
+            //IToolServer toolServer = ServiceProvider.GetRequiredService<IToolServer>();
+            ToolBarServer.Add("ToolGlyph", range);
+            DynAdapter.DynamicItems.AddRange(range);
 
             var l = ServiceProvider.GetRequiredService<ILogger<LogTextBlock>>();
             l.LogTrace(" ActivateToolMenu {} ", ContentID);

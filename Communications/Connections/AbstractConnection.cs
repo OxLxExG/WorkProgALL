@@ -1,24 +1,30 @@
 ﻿using Connections.Interface;
 using CRCModbusRTU;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Runtime.Intrinsics.X86;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-//using System.Windows.Data;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.DependencyInjection;
-using System.Runtime.Intrinsics.Arm;
+using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
-using System.Diagnostics.Tracing;
 
 namespace Connections //Horizont.Drilling.Connections
 {
-    public abstract class AbstractConnection : IConnection, IAbstractConnection, IDisposable
-    {   //current buffer
+    public abstract class AbstractConnection :INotifyPropertyChanged, IConnection, IAbstractConnection, IDisposable
+    {
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected bool SetProperty<T>([NotNullIfNotNull(nameof(newValue))] ref T field, T newValue, [CallerMemberName] string? propertyName = null)
+        {
+            if (EqualityComparer<T>.Default.Equals(field, newValue))
+            {
+                return false;
+            }
+            field = newValue;
+
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+            return true;
+        }
+
+        //current buffer
         protected volatile int offset = 0;
         // нужно для события монитора (не удалять!)
         protected volatile int oldOffset = 0;

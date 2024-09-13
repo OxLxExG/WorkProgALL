@@ -14,15 +14,16 @@
   <ItemGroup>
     <None Remove="appsettings.json" />
     <None Remove="icon.ico" />
+    <None Remove="Images\CycleDev.png" />
     <None Remove="Images\DockBottom.PNG" />
     <None Remove="Images\DockPane.PNG" />
+    <None Remove="Images\Freeze.png" />
     <None Remove="Images\HTabGroup.png" />
     <None Remove="Images\InfoLog.png" />
     <None Remove="Images\TraceLog.png" />
     <None Remove="Images\Warning.png" />
     <None Remove="Images\ExceptLog.png" />
     <None Remove="Images\Except.png" />
-    <None Remove="Images\Freeze.png" />
     <None Remove="Images\Clear.png" />
     <None Remove="Images\Project.png" />
     <None Remove="Images\Project16.png" />
@@ -85,15 +86,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Images\CycleDev.png" />
     <Resource Include="Images\DockBottom.PNG" />
     <Resource Include="Images\DockPane.PNG" />
+    <Resource Include="Images\Freeze.png" />
     <Resource Include="Images\HTabGroup.png" />
     <Resource Include="Images\Warning.png" />
     <Resource Include="Images\ExceptLog.png" />
     <Resource Include="Images\Except.png" />
     <Resource Include="Images\InfoLog.png" />
     <Resource Include="Images\TraceLog.png" />
-    <Resource Include="Images\Freeze.png" />
+    <Resource Include="Images\Cycle.png" />
     <Resource Include="Images\Clear.png" />
     <Resource Include="Images\Project16.png" />
     <Resource Include="Images\Project.png" />

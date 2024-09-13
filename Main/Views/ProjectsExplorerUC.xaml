@@ -19,7 +19,8 @@
         <local:TreeViewEx DataContext="{Binding Source={x:Static c:RootFileDocumentVM.Instance}}"
                           ItemsSource="{Binding Converter={StaticResource InstanceConverterKey}}"
                           ItemTemplateSelector="{StaticResource UITemplateSelectorKey}"
-                          ItemContainerStyleSelector="{StaticResource ContainerStyleSelectorKey}" />
+                          ItemContainerStyleSelector="{StaticResource ContainerStyleSelectorKey}"
+                          />
 
     </Grid>
 </UserControl>

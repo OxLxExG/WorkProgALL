@@ -12,6 +12,8 @@ using System.Xml;
 using System.Xml.Serialization;
 using Microsoft.Extensions.Logging;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Core
 {
@@ -68,7 +70,7 @@ namespace Core
         }
         protected void PropertyChangedEvent(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName != nameof(IsVMDirty))
+            if (e.PropertyName == nameof(IsExpanded))
             {
                 IsVMDirty = true;
             }
@@ -137,9 +139,16 @@ namespace Core
         public bool ShouldSerializeCanActive() => CanActive;
         public bool IsReadOnly { get; set; }
         public bool ShouldSerializeIsReadOnly() => IsReadOnly;
-        
+
+        protected bool SetPropertyWithDrity<T>([NotNullIfNotNull(nameof(newValue))] ref T field, T newValue, [CallerMemberName] string? propertyName = null)
+        {
+            var res = SetProperty<T>(ref field, newValue);
+            if (res && DockManagerVM.State == FormAddedFrom.User) IsVMDirty = true;
+            return res;
+        }
+
         bool _IsExpanded = true;
-        public bool IsExpanded { get=>_IsExpanded; set => SetProperty(ref _IsExpanded, value); }
+        public bool IsExpanded { get=>_IsExpanded; set => SetPropertyWithDrity(ref _IsExpanded, value); }
         public bool ShouldSerializeIsExpanded() => !IsExpanded;
        
         bool _IsSelected;

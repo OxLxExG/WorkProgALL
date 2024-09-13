@@ -1,7 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.Input;
+using Connections.Interface;
+using Connections;
 using Core;
 using Main.Models;
-using Main.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
@@ -10,24 +11,80 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
+using Xceed.Wpf.Toolkit;
+using System.Xml.Linq;
+using Communications;
+using System.Windows.Controls;
+using TextBlockLogging;
+using System.Text;
 
 namespace Main.ViewModels
 {
-    public abstract class ItemVM: VMBase
+    public abstract class ItemVM: VMBase, IDisposable
     {
-        public bool IsExpanded { get; set; } = true;
-        public bool ShouldSerializeIsExpanded() => !IsExpanded;
-        public bool IsSelected { get; set; }
-        public bool ShouldSerializeIsSelected() => IsSelected;
-        [XmlIgnore] public ObservableCollection<MenuItemVM> CItems { get; set; } = new ObservableCollection<MenuItemVM>();        
-        public ItemVM() 
-        { 
+        public static implicit operator ItemVM(ItemM m)
+        {
+            if (m is Visit v) return new VisitVM { Model = v } ;
+            else if (m is Trip t) return new TripVM { Model = t };
+            else if (m is Device d)
+            {
+                var dvm = VisitVM.GetVM(d);
+                if (dvm != null) return dvm;
+            }
+            throw new InvalidCastException();
         }
+        public ItemVM()
+        {
+            CItems.Add(new CommandMenuItemVM
+            {
+                Header = $"Delete {ModelName}",
+                Command = new RelayCommand(Remove),
+                ContentID = "DEL",
+                Priority = 10000,
+            });
+        }
+        [XmlIgnore] public virtual string ModelName => string.Empty;
+
+        private bool _IsExpanded = true;
+        public bool IsExpanded { get => _IsExpanded; set
+            {
+                if (SetProperty(ref _IsExpanded, value))
+                {
+                    SetDrity(true);
+                }
+            }
+        }
+        public bool ShouldSerializeIsExpanded() => !_IsExpanded;
+
+        private DynamicItemsAdapter? dynamicItemsAdapter;
+        public DynamicItemsAdapter DynAdapter
+        {
+            get
+            {
+                if (dynamicItemsAdapter == null) dynamicItemsAdapter = new DynamicItemsAdapter();
+                return dynamicItemsAdapter;
+            }
+        }
+
+        private bool _IsSelected;
+        public bool IsSelected { get=> _IsSelected; 
+            set 
+            { 
+                if (SetProperty(ref _IsSelected, value))
+                {
+                    if  (_IsSelected) dynamicItemsAdapter?.ActivateMenu();
+                    else dynamicItemsAdapter?.DeActivateMenu();
+                }
+            } 
+        }
+        public bool ShouldSerializeIsSelected() => _IsSelected;
+        [XmlIgnore] public ObservableCollection<MenuItemVM> CItems { get; set; } = new ObservableCollection<MenuItemVM>();        
+
         #region Parent
         private WeakReference? parent;
+        private bool disposedValue;
+
         public virtual void SetParent(object? par)
         {
             if (par == null) parent = null;
@@ -49,10 +106,14 @@ namespace Main.ViewModels
             if (p is VMBaseFileDocument v) return v;
             else return null;
         }
-        protected void SetDrity()
+        protected void SetDrity(bool VMOnly = false)
         {
             var v = GetRoot();
-            if (v != null) v.IsDirty = true;
+            if (v != null)
+            {
+                if (VMOnly) v.IsVMDirty = true;
+                else v.IsDirty = true;
+            }
         }
         protected void Remove()
         {
@@ -61,11 +122,66 @@ namespace Main.ViewModels
                 ComplexVM? m = parent.Target as ComplexVM;
                 m?.ItemsRemove(this);
             }
+            if (dynamicItemsAdapter != null) dynamicItemsAdapter.Dispose();
         }
         #endregion
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: освободить управляемое состояние (управляемые объекты)
+                }
+                if (dynamicItemsAdapter != null) dynamicItemsAdapter.Dispose();
+                // TODO: освободить неуправляемые ресурсы (неуправляемые объекты) и переопределить метод завершения
+                // TODO: установить значение NULL для больших полей
+                disposedValue = true;
+            }
+        }
+
+        // // TODO: переопределить метод завершения, только если "Dispose(bool disposing)" содержит код для освобождения неуправляемых ресурсов
+        ~ItemVM()
+        {
+            // Не изменяйте этот код. Разместите код очистки в методе "Dispose(bool disposing)".
+            Dispose(disposing: false);
+        }
+
+        public void Dispose()
+        {
+            // Не изменяйте этот код. Разместите код очистки в методе "Dispose(bool disposing)".
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
     }
     public abstract class ComplexVM: ItemVM
     {
+        /// <summary>
+        /// loaded event action
+        /// </summary>
+        public void RemoveChildEmptyModel()
+        {
+            if (Items == null || Items.Count == 0)
+            {       // auto remove empty BUS,PIPE
+                if (!(this is ComplexModelVM) && (Parent is ComplexVM p)) p.ItemsRemove(this);
+                return;
+            }
+            for (int i = Items.Count - 1; i >= 0; i--)
+            {
+                var vm = Items[i];
+
+                if ((vm is ComplexModelVM cm && cm.Model == null) || (vm is DeviceVM d && d.Model == null))
+                {
+                    Items.RemoveAt(i);
+                    SetDrity();
+                }
+                else
+                    if (vm is ComplexVM cvm) cvm.RemoveChildEmptyModel();
+            }
+        }
+
         private (Trip trip, Device[] devs ) FindTripAndChildDevs(ItemVM vm)
         {
             ComplexVM? p = (ComplexVM?)vm.Parent;
@@ -112,11 +228,17 @@ namespace Main.ViewModels
                 }
                 // vm
                 Items.Remove(item);
-                if (Items.Count == 0) Items = null;
+                if (Items.Count == 0)
+                {
+                    Items = null;
+                    // remove bus,pipe if not child devices
+                    if (!(this is ComplexModelVM) && (Parent is ComplexVM p)) p.ItemsRemove(this);
+                }
+
                 SetDrity();
             }
         }
-        public void ItemsAdd(ItemVM item)
+        public ItemVM ItemsAdd(ItemVM item)
         {
             if (Items == null) Items = new ObservableCollection<ItemVM> { item };
             else if (!Items.Contains(item)) Items.Add(item);
@@ -132,6 +254,12 @@ namespace Main.ViewModels
                 foreach (var d in dvs) tr.ItemsAdd(d);
             }
             SetDrity();
+            return item;
+        }
+        public T Add<T>(T item) where T : ItemVM
+        {
+            ItemsAdd(item);
+            return item;
         }
         public ObservableCollection<ItemVM>? Items {  get; set; }
         public bool ShouldSerializeItems() => Items != null && Items.Count > 0;
@@ -144,21 +272,24 @@ namespace Main.ViewModels
                     i.SetParent(this);
         }
     }
+    public static class ItemVMmodelEx
+    {
+        public static void SetModel(this ItemVM vm, ItemM m)
+        {
+            if (vm is ComplexModelVM cm) cm.Model = m;
+            else if (vm is DeviceVM dm) dm.Model = m;
+        }
+    }
     internal class ItemMprop
     {
         private WeakReference<ItemM>? _wr_model;
-        internal virtual void SetModel(ItemM? value)
+        internal virtual void SetModel(ItemVM vm, ItemM? value)
         {
             if (value == null) _wr_model = null;
             else
-            if (_wr_model == null) _wr_model = new WeakReference<ItemM>(value);
-            else
-            {
-                ItemM? m;
-                if (_wr_model.TryGetTarget(out m) && m != value)
-                {
-                    _wr_model = new WeakReference<ItemM>(value);
-                }
+            {                  
+                _wr_model = new WeakReference<ItemM>(value);
+                vm.ContentID = value.Id.ToString("D");
             }
         }
         internal ItemM? GetModel()
@@ -178,13 +309,45 @@ namespace Main.ViewModels
     /// </summary>
     public abstract class DeviceVM : ItemVM
     {
+
         private readonly ItemMprop itemMprop = new ItemMprop();
-        [XmlIgnore] public ItemM? Model { get => itemMprop.GetModel(); set => itemMprop.SetModel(value); }
+        [XmlIgnore] public ItemM? Model { get => itemMprop.GetModel(); set => itemMprop.SetModel(this,value); }
+    }
+    public class DevicePBVM: DeviceVM
+    {
+        public DevicePBVM() 
+        {
+            DynAdapter.OnActivateDynItems += ActivateDynItems;
+        }
+        bool Freeze;
+
+        private void ActivateDynItems()
+        {
+            if (Parent is BusPBVM bvm)
+            {
+                var ftb = new CheckToolButton
+                {
+
+                    ToolTip = new ToolTip { Content = $"Циклоопрос устройства {Model?.Name}" },
+                    ContentID = "Cycle" + ContentID,
+                    IconSource = "pack://application:,,,/Images/CycleDev.png",
+                    Priority = 101,
+                    IsChecked = Freeze,
+                    Command = new RelayCommand(() => Freeze = !Freeze),
+                };
+                ToolBarServer.Add("ToolGlyph", ftb);
+                DynAdapter.DynamicItems.Add(ftb);
+            }
+        }
+
+        [XmlIgnore] public string MaskPort => Model != null ? Convert.ToString(Model.SupportUartSpeed,2) : string.Empty;
+        [XmlIgnore] public override string ModelName => "Device PB";
+        [XmlIgnore] public new DevicePB? Model { get =>(DevicePB?) base.Model; set => base.Model = value; }
     }
     public abstract class ComplexModelVM : ComplexVM
     {
         private readonly ItemMprop itemMprop = new ItemMprop();
-        [XmlIgnore] public ItemM? Model { get => itemMprop.GetModel(); set => itemMprop.SetModel(value); }    
+        [XmlIgnore] public ItemM? Model { get => itemMprop.GetModel(); set => itemMprop.SetModel(this,value); }    
     }
     /// <summary>
     /// Items => Devises
@@ -192,23 +355,86 @@ namespace Main.ViewModels
     /// </summary>
     public class BusVM : ComplexVM
     {
-        
-    }
-    /// <summary>
-    /// Items => Buses
-    /// model----
-    /// </summary>
-    public class PipeVM : ComplexVM
-    {
+        [XmlIgnore] public override string ModelName => "BUS";
+        public string Name { get; set; } = string.Empty;
+        public virtual bool ShouldSerializeName() => Name != string.Empty;
+
+        ConVM? _VMConn;
+        public ConVM? VMConn { get=> _VMConn; set 
+            { 
+                if (SetProperty(ref _VMConn,value) && _VMConn != null)
+                {
+                    _VMConn.PropertyChanged += (o,e) => SetDrity(true);
+                }
+            } 
+        }
+        public bool ShouldSerializeConn() => VMConn != null;
 
     }
+    public class BusPBVM : BusVM
+    {
+        const string PBNAME = "ПБ (1ware)";
+        static BusPBVM()
+        {
+            ConnectionCash.logger = VMBase.ServiceProvider.GetRequiredService<ILogger<BusPBVM>>();
+        }
+        public BusPBVM() 
+        { 
+            
+           // ContentID = (Guid.NewGuid()).ToString("D");
+            Name = PBNAME;
+            DynAdapter.OnActivateDynItems += ActivateDynItems;
+            DynAdapter.OnDeActivateDynItems += DeActivateDynItems;
+        }
+        private void DeActivateDynItems()
+        {
+            var l = ServiceProvider.GetRequiredService<ILogger<BusPBVM>>();
+            l.LogTrace("~~DeActivateDynItems {} ", ContentID);
+        }
+        bool Freeze;
+        private void ActivateDynItems()
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (var di in Items!) if (di is DevicePBVM pb && pb.Model is DevicePB d)  { sb.Append($" {d.Name}"); }
+            var ftb = new CheckToolButton
+            {
+
+                ToolTip = new ToolTip { Content = $"Циклоопрос устройств: {sb}" },
+                ContentID = "Cycle" + ContentID,
+                IconSource = "pack://application:,,,/Images/Cycle.png",
+                Priority = 101,
+                IsChecked = Freeze,
+                // binding  buttonVM.Command=>formVM.Freeze=>buttonVM.IsChecked
+                Command = new RelayCommand(() => Freeze = !Freeze),
+            };
+
+            ToolBarServer.Add("ToolGlyph", ftb);
+            DynAdapter.DynamicItems.Add(ftb);
+
+            var m = new MenuItemVM { ContentID = "bus", Header = "bus", Priority = 1 };
+            MenuItemServer.Add("PEDinMenu", m);
+            //var range = new PriorityItemBase[]  { m };
+            DynAdapter.DynamicItems.Add(m);
+            var l = ServiceProvider.GetRequiredService<ILogger<BusPBVM>>();
+            l.LogTrace("ActivateDynItems {} ", ContentID);
+        }
+
+        public override bool ShouldSerializeName() => Name != PBNAME;
+
+        #region Interval
+        private int _Interval = 2100;
+        public int Interval { get => _Interval; set { if (SetProperty(ref _Interval, value)) SetDrity(true); } }
+        public bool ShouldSerializeInterval() => _Interval != 2100;
+        #endregion
+    }
     /// <summary>
-    /// Items => Pipes, Devices(unconnected),
+    /// Items => buses, Devices(unconnected),
     /// Model Trip 
     /// </summary>
     public class TripVM : ComplexModelVM
     {
-
+        [XmlIgnore] public override string ModelName => "Trip";
+        [XmlIgnore] public Trip trip => (Trip) Model!; 
     }
     /// <summary>
     /// Items => Trips
@@ -216,8 +442,52 @@ namespace Main.ViewModels
     /// </summary>
     public class VisitVM: ComplexModelVM 
     {
-            
+        [XmlIgnore] public override string ModelName => "Visit";
+        [XmlIgnore] public Visit visit => (Visit)Model!;
+        static VisitVM()
+        {
+            AddFactory<DevicePB, DevicePBVM>();
+            //AddFactory<DeviceTelesystem, DeviceT1VM>();
+            //AddFactory<DeviceTelesystem2, DeviceT2VM>();
+        }
+        #region Factory
+        protected static readonly Dictionary<Type, Func<Device, DeviceVM>> _factory = new();
+        public static void AddFactory(Type tp, Func<Device, DeviceVM> FactoryFunc)
+        {
+            if (!_factory.ContainsKey(tp))
+                _factory.Add(tp, FactoryFunc);
+        }
+        protected static void AddFactory<M, VM>()
+            where VM : DeviceVM, new()
+            where M : Device
+        {
+            var tp = typeof(M);
+            if (!_factory.ContainsKey(tp))
+                _factory.Add(tp, m => new VM()
+                {
+                    Model = m
+                });
+        }
+        public static DeviceVM GetVM(Device m)
+        {
+            Func<Device, DeviceVM> f;
+            Type? tp = m.GetType();
+
+            //while (tp != null)
+            //{
+            if (_factory.TryGetValue(tp, out f!)) ///TODO: Recur Base Type Check ????
+                return f(m);
+            //    tp = tp.BaseType;               
+            //}
+            throw new ArgumentException();
+        }
+        #endregion
     }
+
+    /// <summary>
+    /// ***********  visit  document **********************
+    /// </summary>
+
     public class HeaderHelper : VMBase
     {
         private WeakReference<VisitDocument> wr;
@@ -318,10 +588,92 @@ namespace Main.ViewModels
 
         [XmlIgnore] public ObservableCollection<MenuItemVM> CItems { get; set; } = new ObservableCollection<MenuItemVM>();
 
-        public bool IsSettingsExpanded { get; set; } = true;
-        public bool ShouldSerializeIsSettingsExpanded() => !IsSettingsExpanded;
-        [XmlIgnore]
-        public new Visit? Model
+        bool _IsSettingsExpanded = true;
+        public bool IsSettingsExpanded { get=>_IsSettingsExpanded; set => SetPropertyWithDrity(ref _IsSettingsExpanded, value); } 
+        public bool ShouldSerializeIsSettingsExpanded() => !_IsSettingsExpanded;
+
+        /// <summary>
+        /// loaded or new event action 
+        /// </summary>
+        public void SetModel(Visit visit)
+        {
+            var ID = visit.Id.ToString("D");
+            if (string.IsNullOrEmpty(VisitVM.ContentID))
+            {
+                //новый заезд
+                VisitVM.ContentID = ID;
+                VisitVM.Model = visit;
+                if (visit.Items != null)
+                {
+                    ///
+                    /// Добавляем рейсы, и к ресам сразу приборы
+                    /// это происходит при открытии модели на другом компе (создать флаг для VM оконченного заезда)
+                    ///
+                    foreach (var vi in visit.Items) if (vi is Trip t)
+                    {
+                        TripVM tripVM = new TripVM { Model = t };
+                        VisitVM.ItemsAdd(tripVM);
+                        if (t.Items  != null) 
+                                foreach(var ti in t.Items) if (ti is Device d)
+                                   tripVM.ItemsAdd(VisitVM.GetVM(d));
+                    }
+                }
+            }
+            else // bad model
+               if (VisitVM.ContentID != ID) throw new InvalidOperationException("bad model ContentID != ID");
+            else
+            {
+                /// событие при загрузке
+                /// только добавляем ВМ если нет
+                /// 
+                VisitVM.Model = visit;
+                if (visit.Items == null) return;
+                else foreach (var titem in visit.Items) if (titem is Trip t)
+                        {
+                            /// add or check trips
+                            TripVM? tripvm = getVM(VisitVM.Items, t) as TripVM;
+                            if (tripvm == null)
+                            {
+                                tripvm = new TripVM { Model = t };
+                                VisitVM.ItemsAdd(tripvm);
+                            }
+                            if (t.Items != null) foreach (var ditem in t.Items)
+                                {
+                                    DeviceVM? dvm = DeepGetVM(tripvm.Items, ditem);
+                                    if (dvm == null && ditem is Device d)
+                                    {
+                                        tripvm.ItemsAdd(VisitVM.GetVM(d));
+                                    }
+                                }
+                        }
+                static ItemVM? getVM(ObservableCollection<ItemVM>? RootItems, ItemM model)
+                {
+                    var rz = RootItems == null ? null : RootItems.FirstOrDefault((vm) => model.Id.ToString("D") == vm.ContentID);
+                    rz?.SetModel(model);
+                    return rz;
+                }
+                static DeviceVM? DeepGetVM(ObservableCollection<ItemVM>? RootItems, ItemM model)
+                {
+                    var rz = getVM(RootItems, model);
+                    if (rz != null && rz is DeviceVM dvm) return dvm;
+                    if (RootItems != null)
+                        foreach (var ri in RootItems)
+                            if (ri is ComplexVM cri)
+                            {
+                                var rzi = DeepGetVM(cri.Items, model);
+                                if (rzi != null) return rzi;
+                            }
+                    return null;
+                }
+            }
+
+        }
+        public void ClearModel()
+        {
+            VisitVM.Model = null;
+        }
+
+        [XmlIgnore] public new Visit? Model
         {
             get => (Visit?)base.Model;
             set
@@ -330,9 +682,9 @@ namespace Main.ViewModels
                 {
                     base.Model = value;
 
-                    if (value == null) VisitVM.ClearModel();
+                    if (value == null) ClearModel();
                     else
-                        VisitVM.SetModel(value);
+                        SetModel(value);
                 }
                 VisitVM.SetParent(this);
                 VisitVM.RemoveChildEmptyModel();
@@ -343,7 +695,7 @@ namespace Main.ViewModels
         {
             get => _TripExpanded; set
             {
-                SetProperty(ref _TripExpanded, value);
+                SetPropertyWithDrity(ref _TripExpanded, value);
             }
         }
         public bool ShouldSerializeTripExpanded() => !FileNotFound && !TripExpanded;
@@ -353,7 +705,7 @@ namespace Main.ViewModels
         {
             get => _DockExpanded; set
 
-                => SetProperty(ref _DockExpanded, value);
+                => SetPropertyWithDrity(ref _DockExpanded, value);
         }
         public bool ShouldSerializeDockExpanded() => !FileNotFound && !DockExpanded;
 
@@ -383,7 +735,6 @@ namespace Main.ViewModels
         {
             get
             {
-
                 if (_Items == null)
                 {
                     _Items = Update_Items();
@@ -406,17 +757,19 @@ namespace Main.ViewModels
             {
                 _VisitVM = value;
                 _VisitVM.SetParent(this);
-                VisitVM.RemoveChildEmptyModel();
+               // VisitVM.RemoveChildEmptyModel(); ????
             }
         }
         public static XmlSerializer Serializer => new XmlSerializer(typeof(VisitDocument), null, new[]
         {
                             typeof(DevicePBVM),
-                            typeof(DeviceT1VM),
-                            typeof(DeviceT2VM),
-                            typeof(SerialPipeVM),
-                            typeof(NetPipeVM),
-                             typeof(BusPBVM),
+                            typeof(DeviceVM),
+                            typeof(VisitVM),
+                            typeof(TripVM),
+                            typeof(SerialVM),
+                            typeof(NetVM),
+                            typeof(BusVM),
+                            typeof(BusPBVM),
          }, null, null, null);
         public static VisitDocument CreateAndSave(string visitModelFile, bool isroot)
         {
@@ -431,52 +784,35 @@ namespace Main.ViewModels
         }
         public static VisitDocument Load(string visitModelFile, bool Isroot)
         {
+            FormAddedFrom SaveState = DockManagerVM.State;
             Visit model = null!;
             VisitDocument d = null!;
-            // load M
             try
             {
-                using (var fs = new StreamReader(visitModelFile, false))
-                {
-                    model = (Visit)Visit.Serializer.Deserialize(fs)!;
-                }
-                if (model == null) throw new IOException($"BAD File {visitModelFile} can't load Visit!");
-            }
-            catch (Exception e)
-            {
-                App.LogError(e, e.Message);
-            }
-
-            // load VM
-            var vvm = Models.ProjectFile.GetTmpFile(visitModelFile, ".vstvm");
-            if (File.Exists(vvm))
-            {
+                DockManagerVM.State = FormAddedFrom.DeSerialize;
+                // load M
                 try
                 {
-                    using (var fs = new StreamReader(vvm, false))
+                    using (var fs = new StreamReader(visitModelFile, false))
                     {
-                        d = (VisitDocument)Serializer.Deserialize(fs)!;
+                        model = (Visit)Visit.Serializer.Deserialize(fs)!;
                     }
+                    if (model == null) throw new IOException($"BAD File {visitModelFile} can't load Visit!");
                 }
                 catch (Exception e)
                 {
                     App.LogError(e, e.Message);
                 }
-            }
-            else
-                d = new VisitDocument();
 
-            if (Isroot)
-            {
-                var dms = Models.ProjectFile.GetTmpFile(visitModelFile, ".vstdm");
-                if (File.Exists(dms))
+                // load VM
+                var vvm = Models.ProjectFile.GetTmpFile(visitModelFile, ".vstvm");
+                if (File.Exists(vvm))
                 {
                     try
                     {
-                        using (var fs = new StreamReader(dms, false))
+                        using (var fs = new StreamReader(vvm, false))
                         {
-                            var s = new XmlSerializer(typeof(DockManagerSerialize));
-                            s.Deserialize(fs);
+                            d = (VisitDocument)Serializer.Deserialize(fs)!;
                         }
                     }
                     catch (Exception e)
@@ -484,13 +820,40 @@ namespace Main.ViewModels
                         App.LogError(e, e.Message);
                     }
                 }
+                else
+                    d = new VisitDocument();
+
+                if (Isroot)
+                {
+                    var dms = Models.ProjectFile.GetTmpFile(visitModelFile, ".vstdm");
+                    if (File.Exists(dms))
+                    {
+                        try
+                        {
+                            using (var fs = new StreamReader(dms, false))
+                            {
+                                var s = new XmlSerializer(typeof(DockManagerSerialize));
+                                s.Deserialize(fs);
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            App.LogError(e, e.Message);
+                        }
+                    }
+                }
+
+                if (d == null) d = new VisitDocument();//?? if (File.Exists(vvm)) need dialog to recreate visit doc
+
+                d.Model = model;
+                d.FileFullName = visitModelFile;
+                d.IsRoot = Isroot;
+                d.lastClosedFiles?.UserOpenFile(visitModelFile);
             }
-
-
-            d.Model = model;
-            d.FileFullName = visitModelFile;
-            d.IsRoot = Isroot;
-            d.lastClosedFiles?.UserOpenFile(visitModelFile);
+            finally
+            {
+                DockManagerVM.State = SaveState;
+            }
             return d;
         }
         protected override void SaveModelAndViewModel()
@@ -579,6 +942,16 @@ namespace Main.ViewModels
             }
             else if (UserCloseFile && RootFileDocumentVM.Instance is GroupDocument g) g.RemoveVisit(this);
             base.Remove(UserCloseFile);
+
+            void Disp(ItemVM? root)
+            {
+                if (root == null) return;
+                root.Dispose();
+                if (root is ComplexVM c && c.Items != null) 
+                    foreach (var i in c.Items) Disp(i);
+            }
+            Disp(_VisitVM);
+
             Model = null;
             //VisitVM.ClearModel();
             _Items = null;
