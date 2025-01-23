@@ -231,7 +231,7 @@ namespace Commands
         {
             string readMetaData = Resources.strReadMetaData;
             var (rq, p) = MetaData(adr, 0, 3, false, resp, timout);
-            var r = await con.SendAsync(rq);
+            var r = await con.Transaction(rq);
             var md = new List<byte>();
             if (!p.Check(r)) throw new MetaDataException(CreateCheckExceptionMessage(readMetaData, r,p));            
             var len = p.GetMetaDataLen(r);
@@ -240,7 +240,7 @@ namespace Commands
             {
                 byte l = (byte)(len > p.MaxTxDataLen ? p.MaxTxDataLen : len);
                 (rq, p) = MetaData(adr, from, l, true, resp, timout);
-                r = await con.SendAsync(rq);
+                r = await con.Transaction(rq);
                 if (r.rxCount < 0) throw new MetaDataException(CreateCheckExceptionMessage(readMetaData, r, p));
                 ushort readed = (ushort)(r.rxCount - p.SizeOfAC - 2);
                 len -= readed;
@@ -271,7 +271,7 @@ namespace Commands
             int i = 0;
             do
             {
-                r = await con.SendAsync(rq);
+                r = await con.Transaction(rq);
                 if (con.IsCanceled)
                 {
                     string readRamCancel = Resources.strReadRamCancel;
@@ -319,7 +319,7 @@ namespace Commands
             {
                 byte l = (byte)(count > p.MaxTxDataLen ? p.MaxTxDataLen : count);
                 (rq, p) = Eeprom_Read(adr, from, l);
-                var r = await con.SendAsync(rq);
+                var r = await con.Transaction(rq);
                 if (!p.Check(r)) throw new EEPROMException(CreateCheckExceptionMessage(Resources.strEEPRead, r, p));
                 ushort readed = (ushort)(r.rxCount - p.SizeOfAC - 2);
                 count -= readed;
@@ -360,7 +360,7 @@ namespace Commands
                 var a = new byte[l];
                 Array.Copy(data, index, a, 0, l);
                 (rq, p) = Eeprom_Write(adr, from, a);
-                var r = await con.SendAsync(rq);
+                var r = await con.Transaction(rq);
                 if (!p.Check(r))
                 {
                     if (bad++ < 5) continue;   
@@ -390,7 +390,7 @@ namespace Commands
         public static async Task<(DataResp, Protocol)> ReadWork(IConnection con, byte adr, ushort cnt)
         {
             var (rq, p) = Work(adr, cnt);
-            var r = await con.SendAsync(rq);
+            var r = await con.Transaction(rq);
             if (!p.Check(r)) throw new WorkException(CreateCheckExceptionMessage("чтения информации", r, p));
             return (r, p);
         }
@@ -411,7 +411,7 @@ namespace Commands
         public static async Task<(DataResp, Protocol)> SetDelay(IConnection con,int kadr, bool Bt2 = false)
         {
             var (rq, p) = Delay(kadr, Bt2);
-            var r = await con.SendAsync(rq);
+            var r = await con.Transaction(rq);
             return (r, p);
         }
         #endregion
@@ -432,7 +432,7 @@ namespace Commands
         public static async Task<(DataResp, Protocol)> SetTurbo(IConnection con, byte speed, bool Bt2 = false)
         {
             var (rq, p) = Turbo(speed, Bt2);
-            var r = await con.SendAsync(rq);
+            var r = await con.Transaction(rq);
             return (r, p);
         }
         #endregion

@@ -440,6 +440,7 @@ namespace Communications.MetaData
         eu      = 0xF2,
         title   = 0xF3,
         hint    = 0xF4,
+        password= 0xF5,
     }
     public static class AttrDefs
     {

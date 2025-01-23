@@ -42,16 +42,22 @@ namespace Connections
             ts2M = 4,
             ts2_25M = 5,
             ts3M = 6,
+            ts6M = 7,
+            ts8M = 8,
+            ts12M = 9,
         }
         public static readonly Dictionary<Turbos, int> TSD = new()
         {
-            { Turbos.ts125K,DEF_SPEED},
-            {Turbos.ts500K,500_000},
+            { Turbos.ts125K,DEF_SPEED },
+            { Turbos.ts500K,500_000 },
             { Turbos.ts1M,1_000_000 },
             { Turbos.ts1_5M,1_500_000 },
             { Turbos.ts2M,2_000_000 },
             { Turbos.ts2_25M,2_250_000 },
             { Turbos.ts3M,3_000_000 },
+            { Turbos.ts6M,6_000_000 },
+            { Turbos.ts8M,8_000_000 },
+            { Turbos.ts12M,12_000_000 },
         };
         public readonly ushort Adr;
         public readonly Turbos Turbo;
@@ -163,7 +169,7 @@ namespace Connections
                             logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} TURBO (END) start TURBO");
                             if (src is ISerialConnection) ((ISerialConnection)src).BaudRate = br;                            
                         }
-                        int timOut = (int)opt.BufferSize * 1000 * 10 * 2 / br;
+                        int timOut = (int) ((double)opt.BufferSize * 1000 * 10 * 2 / br);
                         try
                         {
                             ((AbstractConnection)src).dbg = "ReadRam";
@@ -180,9 +186,9 @@ namespace Connections
                                 while (from < opt.Total)
                                 {
                                     uint cnt = from + bufferSize > total ? total - from : bufferSize;
-                                    var (rsp, pro) = await Protocol.ReadRam(src, opt.Adr, from, cnt, timOut);
+                                    var (rsp, pro) = await Protocol.ReadRam(src, opt.Adr, from, cnt, timOut, 3, logger);
                                     progress.Update(cnt);
-                                    //App.logger?.LogInformation($" cnt: {cnt:X}");
+                                    //logger?.LogInformation($" cnt: {cnt:X}");
                                     await dest.WriteAsync(rsp.rxBuf, (int)ac, (int)cnt);
                                     if ((progress.Elapsed - old).TotalMilliseconds > 2000)
                                     {

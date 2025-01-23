@@ -183,7 +183,7 @@ namespace Connections
         public bool IsCanceled { get => _calcelCtx.IsCancellationRequested; }
 
         private bool _isopen;
-        public Task Open(int timout = 10000)
+        public Task Open(int timout = 10000, bool RxNeed = true)
         {
             lock (_lock) 
             {

@@ -25,6 +25,7 @@
     <xs:attribute name="from" type="xs:unsignedShort"/>
     <xs:attributeGroup ref="AnyVarA"/>
   </xs:attributeGroup>
+  
   <xs:attributeGroup name="DataVarA">
     <xs:attributeGroup ref="AnyVarA"/>
     <xs:attribute name="array" type="xs:unsignedInt" use="optional"/>

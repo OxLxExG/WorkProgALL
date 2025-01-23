@@ -11,7 +11,7 @@ namespace Connections.Interface
 {
     public interface IAbstractConnection : IDisposable
     {
-        Task Open(int timout = 10000);
+        Task Open(int timout = 10000, bool RxNeed = true);
         Task Close(int timout = 5000);
         bool IsOpen { get; }
 
@@ -48,10 +48,18 @@ namespace Connections.Interface
             return cnt < IConnection.MIN_RX_BUF ? IConnection.MIN_RX_BUF : cnt;
         }
     }
+
+    /// <summary>
+    /// UDP Socket or SerialPort
+    /// </summary>
     public interface IConnection : IAbstractConnection
     {
         const int MIN_RX_BUF = 4096;
-        Task<DataResp> SendAsync(DataReq dataReq);
+        // низкоуровневые методы
+        Task Send(DataReq dataReq);
+        Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken);
+        // высокоуровневые методы 
+        Task<DataResp> Transaction(DataReq dataReq);
     }
     public interface INetConnection : IConnection
     {

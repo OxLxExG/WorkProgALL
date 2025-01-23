@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SerialPortTest"
         xmlns:con="clr-namespace:TextBlockLogging;assembly=ExceptLog"
+        xmlns:ScottPlot="clr-namespace:ScottPlot.WPF;assembly=ScottPlot.WPF"
         mc:Ignorable="d"
         Closing="Window_Closing"
         Title="MainWindow" Height="550" Width="800">
@@ -20,9 +21,11 @@
                         <RowDefinition Height="auto"></RowDefinition>
                         <RowDefinition ></RowDefinition>
                         <RowDefinition Height="auto"></RowDefinition>
-                        <RowDefinition ></RowDefinition>
-                        <RowDefinition Height="auto"  ></RowDefinition>
-                    </Grid.RowDefinitions>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition Height="auto"></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition Height="auto"></RowDefinition>
+            </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition></ColumnDefinition>
                         <ColumnDefinition Width="auto"></ColumnDefinition>
@@ -42,20 +45,49 @@
                            IsThreeState ="False"
                            IsChecked="True"
                            Click="btNet_Checked" />
+                        <ComboBox x:Name="cbUSO" Height="18"
+                          Width="80"
+                          PreviewMouseLeftButtonDown="cbUSO_PreviewMouseLeftButtonDown"/>
                         <TextBox x:Name="comPortName" Margin="5" Width="50">
                             <TextBox.Text>
-                                COM9
+                                COM16
                             </TextBox.Text>
                         </TextBox>
-                    </WrapPanel>
-                    <ScrollViewer Grid.Row="1" VerticalAlignment="Stretch" HorizontalScrollBarVisibility="Visible">
-                        <con:LogTextBlock x:Name="memo"                                         
-                                            TextWrapping="Wrap" 
-                                            Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}" FontFamily="Courier New"/>
-                    </ScrollViewer>
-                    <GridSplitter Grid.Row="2" Background="Black" 
+                <Button x:Name="btStartUSO32"
+                        Margin="5"
+                        Content="StartUSO32"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Click="btStartUSO32_Click" />
+                <Button x:Name="btStopUSO32"
+                        Margin="5"
+                        Content="SropUSO32"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Click="btStopUSO32_Click" />
+                <ToggleButton  x:Name="btHP"
+                               Margin="5"
+                               Content="HP"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               IsThreeState="False"
+                               IsChecked="True"
+                               Click="btHP_Click" />
+
+
+            </WrapPanel>
+
+
+            <ScrollViewer Grid.Row="1" VerticalAlignment="Stretch" HorizontalScrollBarVisibility="Visible">
+                    <con:LogTextBlock x:Name="memo"
+                                      TextWrapping="Wrap"
+                                      Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}"
+                                      FontFamily="Courier New" />
+            </ScrollViewer>
+            <ScottPlot:WpfPlot Grid.Row="5" x:Name="WpfPlot1" Height="100" />
+            <GridSplitter Grid.Row="2" Background="Black" 
                       ShowsPreview="True" Height="2" HorizontalAlignment="Stretch" VerticalAlignment="Center"></GridSplitter>
-                    <GridSplitter Grid.Row="2" Grid.Column="2" Background="Black" 
+            <GridSplitter Grid.Row="2" Grid.Column="2" Background="Black" 
                       ShowsPreview="True" Height="2" HorizontalAlignment="Stretch" VerticalAlignment="Center"></GridSplitter>
                     <WrapPanel  Grid.Row="4" VerticalAlignment="Bottom">
                         <Button x:Name="btCleare" Margin="5" Content="Clear" HorizontalAlignment="Left" VerticalAlignment="Top" Click="btCleare_Click" />

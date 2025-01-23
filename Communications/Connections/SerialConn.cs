@@ -9,9 +9,7 @@ namespace Connections
 {
     public class SerialConn : AbstractConnection, ISerialConnection,IDisposable
     {
-        private readonly SerialPort port = new SerialPort();
-        private Thread? netThread;
-
+        public readonly SerialPort port = new SerialPort();
 
         static SerialConn()
         {
@@ -20,18 +18,6 @@ namespace Connections
         public SerialConn() : base()
         {
             port.BaudRate = 125000;
-            //port.ReadTimeout = -1;
-            //port.ReadBufferSize = 0x8000;
-            //port.DataReceived += DataReceivedHandler;
-
-            /// TODO: create netThread then port is open
-            /// Destroy netThreadthen port is close
-            /// or in netThread open and close port
-            /// 
-            //var netThread = new Thread(NetReadThread);
-            //netThread.Name = "====netThread====";
-            //netThread.IsBackground = true;
-            //netThread.Start();
         }
         public override string? ToString()
         {
@@ -39,11 +25,9 @@ namespace Connections
         }
         protected override void Dispose(bool disposing)
         {
+            if (disposed) return;
             port.Dispose();
-
-            rxEndEvent.Dispose();
             rxDisposeEvent.Dispose();
-
             base.Dispose(disposing);
         }
         public int BaudRate
@@ -51,7 +35,7 @@ namespace Connections
             get { return port.BaudRate; }
             set { port.BaudRate = value; }
         }
-        public string PortName// { get; set; }
+        public string PortName
         {
             get { return port.PortName; }
             set { port.PortName = value; }
@@ -61,86 +45,52 @@ namespace Connections
 
         public override Task Close(int timout = 2000)
         {
-            if (netThread != null && Ctsreadthread != null)
-            {
-                logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} {dbg} CLOSE {port.PortName}   {port.BaudRate}");
-                port.Close();
-                Ctsreadthread?.Cancel();
-                while (netThread.IsAlive && --timout > 0) Thread.Sleep(1);
-                netThread = null;
-            }            
+            logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} {dbg} CLOSE {port.PortName}   {port.BaudRate}");
+            port.Close();
             return base.Close(timout);
         }
 
-        public override Task Open(int timout = 500)
+        public override Task Open(int timout = 500, bool RxNeed = true)
         {
             logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} {dbg} OPEN {port.PortName}   {port.BaudRate}");
             port.Open();
-
-            base.Open(timout);
-
-            if (netThread == null)
-            {
-                netThread = new Thread(() => NetReadThread(Ctsreadthread!.Token));
-                netThread.Name = "====netThread====";
-                netThread.IsBackground = true;
-                netThread.Start();
-            }
-            return Task.CompletedTask;
+            PortDisposed = false;
+            return base.Open(timout, RxNeed);
         }
-        protected readonly AutoResetEvent rxEndEvent =  new AutoResetEvent(false);
         protected readonly AutoResetEvent rxDisposeEvent = new AutoResetEvent(false);
-        // private bool _portDisposed = false;
-        //protected override void RecreateCts()
-        //{
-        //    lock (_lock)
-        //    {
-        //        base.RecreateCts();
-        //    }
-        //    Cts.Token.Register(() =>
-        //    {
-        //        lock (_lock)
-        //        {
-        //            App.logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} {dbg} Cancel Event port.Dispose() {port.PortName}   {port.BaudRate}");
-        //            port.Dispose();// Close();
-        //            Open();
-        //            _disposed = true;
-        //        }
-        //    });
-        //}
+
+        private volatile bool PortDisposed = false;
         protected override void BeginRead()
         {
             base.BeginRead();
-            if (Cts != null)
+            if (CtsCancel != null)
             {
                 rxDisposeEvent.Reset();
-                Cts.Token.Register(() =>
+                CtsCancel.Token.Register(() =>
                 {
                     logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} {dbg} Cancel Event port.Dispose() {port.PortName}   {port.BaudRate}");
+                    PortDisposed = true;
                     port.Dispose();// Close();
-
                     rxDisposeEvent.Set();
                 });
             }
             else rxDisposeEvent.Set();
+            rxEndBad.Reset();
         }
         protected override void EndRead()
         {
-            // WaitHandle.WaitAll(new[] { rxDisposeEvent, rxEndEvent });
-            // if (!IsOpen) Open();
-
             if (IsReading)
             {
-                logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} {dbg}  EndRead(BEGIN): IsReading =True");
+                logger?.LogInformation($"ERR {Thread.CurrentThread.ManagedThreadId} {dbg} EndRead(BEGIN): IsReading =True");
 
-                if (Cts != null)
+                if (CtsCancel != null)
                 {
-                    if (!Cts.IsCancellationRequested)
+                    if (!CtsCancel.IsCancellationRequested)
                     {
-                        Cts.Cancel();
-                        logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} {dbg} EndRead(CONTINUE): Cts.Cancel()");
+                        CtsCancel.Cancel();
+                        logger?.LogInformation($"ERR {Thread.CurrentThread.ManagedThreadId} {dbg} EndRead(CONTINUE): Cts.Cancel()");
                     }
-                    WaitHandle.WaitAll(new[] { rxDisposeEvent, rxEndEvent });
+                    WaitHandle.WaitAll(new[] { rxDisposeEvent, rxEndBad });
                     try
                     {
                         Open();
@@ -148,131 +98,44 @@ namespace Connections
                     catch (Exception ex)
                     {
                         Thread.Sleep(300);
-                        logger?.LogInformation($"ERR {Thread.CurrentThread.ManagedThreadId} {dbg}  Open {ex}");
+                        logger?.LogInformation($"ERR {Thread.CurrentThread.ManagedThreadId} {dbg} ERR_Open {ex}");
                         Open();
                     }
 
                 }
                 IsReading = false;
-                logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} {dbg}  EndRead(END) Wait ALL");
+                logger?.LogInformation($"ERR  {Thread.CurrentThread.ManagedThreadId} {dbg}  EndRead(END) Wait ALL");
             }
             else
             {
-                if (Cts != null && Cts.IsCancellationRequested)
+                if (CtsCancel != null && CtsCancel.IsCancellationRequested)
                 {
                     rxDisposeEvent.WaitOne();
                     Open();
-                    logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} {dbg} EndRead(END) Wait rxDisposeEvent Only ");
+                    logger?.LogInformation($"ERR  {Thread.CurrentThread.ManagedThreadId} {dbg} EndRead(END) Wait rxDisposeEvent Only ");
                 }
-                //  else
-                //      App.logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} {dbg} EndRead(END) EasyEnd ");
+                else
+                    logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} {dbg} EndRead(END) EasyEnd ");
             }
             base.EndRead();
         }
 
-        protected override Task Send(DataReq dataReq)
+        public override Task Send(DataReq dataReq)
         {
             return Task.Run(async () =>
             {
-                if (!IsOpen)
-                {
-                    logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} {dbg} =====================");
-                }
-                await port.BaseStream.FlushAsync();
-                await port.BaseStream.WriteAsync(dataReq.txBuf, 0, dataReq.txBuf.Length);
+                //if (!IsOpen)
+                //{
+                //    logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} {dbg} =====================");
+                //}
+                if (!PortDisposed) await port.BaseStream.FlushAsync();
+                if (!PortDisposed) await port.BaseStream.WriteAsync(dataReq.txBuf, 0, dataReq.txBuf.Length);
             });
         }
-
-        private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
+        public override async Task<int> ReadAsync(byte[] buffer, int offs, int count, CancellationToken cancellationToken)
         {
-            int cnt = port.BytesToRead;
-
-            logger?.LogTrace("I:{cnt}", cnt);
-
-            if ((cnt == 0) || IsCanceled) return;
-            if (cnt + offset > rxBuf.Length)
-            {
-                logger?.LogError("Buffer OverFlow rxBuf.Length {rxBufLength } < {cntoff} {off} {cnt} ",
-                    rxBuf.Length, cnt + offset, offset, cnt);
-                Array.Resize(ref rxBuf, offset + cnt);
-            }
-            int incnt = port.Read(rxBuf, offset, cnt);
-            if (incnt == 0) return;
-            lock (_lock)
-            {
-                oldOffset = offset;
-                offset += incnt;
-            }
-            rxRowEvent.Set();
+            if (!PortDisposed) return await port.BaseStream.ReadAsync(buffer, offs, count, cancellationToken);
+            else return 0;
         }
-        private async void NetReadThread(CancellationToken tok)
-        {
-            while (true)
-            {
-                try
-                {
-                    if (tok.IsCancellationRequested) return;
-                    int cntin = currenRq != null ? currenRq.rxCount : rxBuf.Length;
-
-                    if (!port.IsOpen || !IsReading || cntin <= 0 || Cts == null)
-                    {
-                        rxEndEvent.Set();
-                        Thread.Sleep(100);
-                        continue;
-                    }
-                    rxEndEvent.Reset();
-                    try
-                    {
-                        int cntout = 0;
-                        while (port.IsOpen && cntout == 0 && !Cts.IsCancellationRequested)
-                        {
-                            // if (offset > 200) App.logger?.LogInformation("I");
-                            cntout = await port.BaseStream.ReadAsync(rxBuf, offset, cntin - offset, Cts.Token);
-                            if (cntout == 0) logger?.LogInformation("Z");
-                            if (cntout > 0 && cntout < 3)
-                            {
-                                Thread.Sleep(0);
-                                cntout += await port.BaseStream.ReadAsync(rxBuf, offset + cntout, cntin - offset - cntout, Cts.Token);
-                            }
-                            //if (offset > 200) App.logger?.LogInformation("E");
-                        }
-                        if (Cts.IsCancellationRequested)
-                        {
-                            IsReading = false;
-                            rxEndEvent.Set();
-                            continue;
-                        }
-                        if (cntout + offset > rxBuf.Length) { throw new Exception("Buffer OverFlow"); }
-
-                        lock (_lock)
-                        {
-                            oldOffset = offset;
-                            offset += cntout;
-
-                            if (offset >= cntin)
-                            {
-                                IsReading = false;
-                            }
-                            rxRowEvent.Set();
-                        }
-
-                        // App.logger?.LogTrace("I:{cnt} {off}", cntout, offset);
-
-                    }
-                    catch (Exception e)
-                    {
-                        IsReading = false;
-                        logger?.LogInformation($"ERR {Thread.CurrentThread.ManagedThreadId} {dbg} NetReadThread exit rxEndEvent.Set() {e}");
-                        rxEndEvent.Set();
-                    }
-                }
-                catch (Exception e)
-                {
-                    logger?.LogError(e.Message, e);
-                }
-            }
-
-        }
-
     }
 }

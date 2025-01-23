@@ -1,5 +1,4 @@
 ﻿using Connections.Interface;
-using CRCModbusRTU;
 using Microsoft.Extensions.Logging;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
@@ -8,6 +7,21 @@ using System.Xml.Serialization;
 
 namespace Connections //Horizont.Drilling.Connections
 {
+    public delegate void OnRowNewDataHandler(byte[] buf, int oldof, int of);
+
+    /// <summary>
+    /// высокоуровневый драйвер транзакций ПБ. УСО телесистемы
+    /// </summary>
+    public abstract class AbstractTransactionDriver
+    {
+        public abstract void BeginTransaction(AbstractConnection Conn, DataReq dataReq);
+        public abstract Task<int> RowRead(AbstractConnection Conn, CancellationToken cancellationToken);
+        public abstract void Produce(AbstractConnection Conn, int Count);
+        public abstract void Consume(AbstractConnection Conn);
+        public abstract DataResp EndTransaction(AbstractConnection Conn, DataReq dataReq, int EndStatus);
+    }
+
+
     public abstract class AbstractConnection :INotifyPropertyChanged, IConnection, IAbstractConnection, IDisposable
     {
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -24,32 +38,36 @@ namespace Connections //Horizont.Drilling.Connections
             return true;
         }
 
-        //current buffer
-        protected volatile int offset = 0;
-        // нужно для события монитора (не удалять!)
-        protected volatile int oldOffset = 0;
-        protected byte[] rxBuf;
-        protected readonly AutoResetEvent rxRowEvent = new AutoResetEvent(false);
-        // current CRC
-        private volatile int crcOldOffset = 0;
-        private volatile int crcOffset = 0;
-        private ushort _crc;
-        protected readonly AutoResetEvent crcOk = new AutoResetEvent(false);
-        protected Thread? readthread;
+        public readonly AutoResetEvent ProdusEvent = new AutoResetEvent(false);
+        public readonly AutoResetEvent EndReadEvent = new AutoResetEvent(false);
+        protected readonly AutoResetEvent rxEndBad = new AutoResetEvent(false);
 
-        protected DataReq? currenRq;
-        protected CancellationTokenSource? Cts;
-        public CancellationTokenSource? CancelTokenSource { get { return Cts; } }
+        protected Thread? RxConsumerThread { get; set; }
+        protected Thread? RxProduserThread { get; set; }
+        protected CancellationTokenSource? CtsConsumerProduser { get; set; }
+        public AbstractTransactionDriver? Driver { get; set; }
 
-        protected CancellationTokenSource? Ctsreadthread;
-        protected bool IsReading;
-        protected bool disposed = false;
-        protected object _lock = new object();
-        private int running = 0;
+        // row data events
+        public event OnRowNewDataHandler? OnRowSendHandler;
+        public event OnRowNewDataHandler? OnRowDataHandler;
+        public void OnRowDataEvent(byte[] buf, int oldof, int of) => OnRowDataHandler?.Invoke(buf, oldof, of);
+        public void OnRowSendEvent(byte[] buf, int oldof, int of) => OnRowSendHandler?.Invoke(buf, oldof, of);
+        public DataReq? CurrenRq { get; set; }
+        public bool IsReading { get; set; }
+        
         // private IDisposable? _scope;
         [XmlIgnore]
         public string dbg = "";
+
+        [XmlIgnore]
+        public ILogger? logger { get; set; }
+
+
         // interface
+        public abstract bool IsOpen { get; }
+
+        #region LOCK
+        private int running = 0;
         public bool Lock()
         {
             int r = Interlocked.CompareExchange(ref running, 1, 0);
@@ -60,100 +78,103 @@ namespace Connections //Horizont.Drilling.Connections
             Interlocked.Exchange(ref running, 0);
         }
         public bool IsLocked { get { return running == 1; } }
+        #endregion
+
+        #region Cancel
+        protected CancellationTokenSource? CtsCancel { get; set; }
         public virtual void Cancel()
         {
             logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} {dbg} Cts.Cancel()");
             canceled = true;
-            Cts?.Cancel();
+            CtsCancel?.Cancel();
         }
         protected bool canceled;
         public bool IsCanceled => canceled;
+        #endregion
+
+        #region OPEN CLOSE
         public virtual Task Close(int timout = 5000)
         {
-            if (readthread != null && Ctsreadthread != null)
+            if (RxConsumerThread != null && CtsConsumerProduser != null && RxProduserThread != null)
             {
-                Ctsreadthread.Cancel();
-                rxRowEvent.Set();
-                while (readthread.IsAlive && --timout > 0) Thread.Sleep(1);
-                Ctsreadthread.Dispose();
-                Ctsreadthread = null;
-                readthread = null;
+                CtsConsumerProduser.Cancel();
+                ProdusEvent.Set();
+                while (RxProduserThread.IsAlive && --timout > 0) Thread.Sleep(1);
+                while (RxConsumerThread.IsAlive && --timout > 0) Thread.Sleep(1);
+                CtsConsumerProduser.Dispose();
+                CtsConsumerProduser = null;
+                RxConsumerThread = null;
+                RxProduserThread = null;
             }
             return Task.CompletedTask;
         }
-        public virtual Task Open(int timout = 10000)
+        public virtual Task Open(int timout = 10000, bool RxNeed = true)
         {
-            if (readthread != null && Ctsreadthread != null) return Task.CompletedTask; 
-            Ctsreadthread = new();
-            readthread = new Thread(() => rxBufferThread(Ctsreadthread.Token));
-            readthread.IsBackground = true;
-            readthread.Start();
+            if (RxNeed)
+            {
+                if (RxConsumerThread != null && CtsConsumerProduser != null &&
+                    RxProduserThread != null) return Task.CompletedTask;
+                CtsConsumerProduser = new();
+                RxConsumerThread = new Thread(() => ConsumerThreadRun(CtsConsumerProduser.Token));
+                RxConsumerThread.IsBackground = true;
+                RxConsumerThread.Start();
+
+                RxProduserThread = new Thread(() => ProduserThreadRun(CtsConsumerProduser.Token));
+                RxProduserThread.IsBackground = true;
+                RxProduserThread.Start();
+            }
             return Task.CompletedTask;
         }
+        #endregion
 
-        public async Task<DataResp> SendAsync(DataReq dataReq)
+        // low level methods
+        public abstract Task Send(DataReq dataReq);
+        public abstract Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken);
+
+        public async Task<DataResp> Transaction(DataReq dataReq)
         {
-            BeginTransaction(dataReq);
+            logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} {dbg} ===> begin--- {dataReq.rxCount}");
+            lock (this)
+            {
+                CurrenRq = dataReq;
+                Driver?.BeginTransaction(this, dataReq);
+            }
             await Send(dataReq);
-           // App.logger?.LogTrace("SE:{}", dataReq.rxCount);
             OnRowSendHandler?.Invoke(dataReq.txBuf, 0, dataReq.txBuf.Length);
             return await Read(dataReq);
         }
-        protected abstract Task Send(DataReq dataReq);
         protected virtual void BeginRead()
         {
             canceled = false;
-            if (currenRq!.rxCount > 0)
+            if (CurrenRq!.rxCount > 0)
             {
                 IsReading = true;
-                Cts = new CancellationTokenSource();
+                CtsCancel = new CancellationTokenSource();
             }
         }
         protected virtual void EndRead()
         {
-            Cts?.Dispose();
-            Cts = null;
+            CtsCancel?.Dispose();
+            CtsCancel = null;
             IsReading = false;
         }
-        protected virtual Task<DataResp> Read(DataReq dataReq)
+        private Task<DataResp> Read(DataReq dataReq)
         {
             return Task.Run(() =>
             {
                 BeginRead();  
-                var hCts = Cts != null? Cts.Token.WaitHandle: crcOk;
-                int s = WaitHandle.WaitAny(new[] { crcOk, hCts }, dataReq.timout);
-                int cnt;
-                if (s == 1) cnt = -2; // abort
-                else if (s != 0) cnt = -1; // timout
-                else cnt = offset; //crcGood
+                var hAbort = CtsCancel != null? CtsCancel.Token.WaitHandle: EndReadEvent;
+                int s = WaitHandle.WaitAny(new[] { EndReadEvent, hAbort }, dataReq.timout);
 
-                if (dataReq.rxCount != offset) 
-                    logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} {dbg} ReadTask {dataReq.rxCount} != {offset}");
-                else if (cnt < 0) 
-                    logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} {dbg} ReadTask BAD CRC!!! 0 != {_crc:x4}");
+                var r = Driver!.EndTransaction(this,dataReq, s);
 
-                var r = new DataResp(dataReq, rxBuf, cnt);
-                // time out for monitor
-                if (cnt < 0) OnRowDataHandler.Invoke(rxBuf, 0, cnt);
-                dataReq.OnResponse?.Invoke(this, r);
                 EndRead();
                 return r;
             });
         }
-        public abstract bool IsOpen { get; }
-        // row data events
-        public delegate void OnRowNewDataHandler(byte[] buf, int oldof, int of);
-        public event OnRowNewDataHandler? OnRowSendHandler;
-        public event OnRowNewDataHandler OnRowDataHandler;
-        //constructor
-        [XmlIgnore]
-        public ILogger? logger { get; set; }
-        public AbstractConnection()
-        {
-            rxBuf = new byte[IConnection.MIN_RX_BUF];
-            OnRowDataHandler += OnRowDataEvent;
-        }
+
         // dectructor
+        #region Dispose
         ~AbstractConnection() 
         { 
             Dispose(disposing: false); 
@@ -163,72 +184,77 @@ namespace Connections //Horizont.Drilling.Connections
             Dispose(disposing: true);  
             GC.SuppressFinalize(this); 
         }
+        protected bool disposed = false;
         protected virtual void Dispose(bool disposing)
         {
             if (disposed) return;
             disposed = true;
-            OnRowDataHandler -= OnRowDataEvent;
             IsReading = false;
-            Cts?.Dispose();
-            rxRowEvent?.Dispose();
-            crcOk?.Dispose();
+            CtsCancel?.Dispose();
+            rxEndBad.Dispose();
+            ProdusEvent?.Dispose();
+            EndReadEvent?.Dispose();
         }
-        // reset offsets, crc - helper
-        protected void BeginTransaction(DataReq dataReq )
-        {            
-            lock (_lock)
-            {
-                logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} {dbg} ===> begin--- {dataReq.rxCount}");
-                oldOffset = 0;
-                offset = 0;
-                crcOldOffset = 0;
-                crcOffset = 0;
-                _crc = 0xFFFF;
-                rxBuf = new byte[DataResp.RxCount(dataReq.rxCount)];
-                currenRq = dataReq;
-            }
-        }
-        private void OnRowDataEvent(byte[] buf, int oldof, int of)
+        #endregion
+        private async void ProduserThreadRun(CancellationToken token)
         {
-            if (of <= 0) return;
-
-            lock (_lock)
-            {
-                crcOldOffset = crcOffset;
-                crcOffset = of;
-            }
-
-            //if (of > 30000) logger?.LogInformation($"[Old: {crcOldOffset} New: {crcOffset} {of}]");
-
-            var n = crcOffset - crcOldOffset;
-            if (n > 0) _crc = Crc.ComputeCrc(_crc, buf, crcOldOffset, crcOffset - crcOldOffset);
-            // двойные события возможны, их игнорируем
-            else return;
-
-            if (of >= currenRq?.rxCount)
-                if (_crc == 0) crcOk.Set();
-        }
-        private void rxBufferThread(CancellationToken tok)
-        {
-          //  var scope = App.logger?.BeginScope(this);
-
             while (true)
             {
-                rxRowEvent.WaitOne();
+                try
+                {
+                    if (token.IsCancellationRequested) return;                   
 
-                if (tok.IsCancellationRequested) {
+                    if (!IsOpen || !IsReading || CtsCancel == null)
+                    {
+                        continue;
+                    }
+                    try
+                    {
+                        int cntout = 0;
+                        while (IsOpen && cntout == 0 && CtsCancel != null && !CtsCancel.IsCancellationRequested)
+                        {
+                            cntout = await Driver!.RowRead(this, CtsCancel.Token);
+                        }
+
+                        Driver?.Produce(this, cntout);
+
+                        if (CtsCancel != null && CtsCancel.IsCancellationRequested)
+                        {
+                            IsReading = false;
+                            rxEndBad.Set();
+                            continue;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        IsReading = false;
+                        logger?.LogInformation($"ERR {Thread.CurrentThread.ManagedThreadId} {dbg} Produser exit rxEndBad.Set() {e}");
+                        rxEndBad.Set();
+                    }
+                }
+                catch (Exception e)
+                {
+                    logger?.LogError(e.Message, e);
+                }
+            }
+
+        }
+        private void ConsumerThreadRun(CancellationToken tok)
+        {
+            //  var scope = App.logger?.BeginScope(this);
+            while (true)
+            {
+                ProdusEvent.WaitOne();
+
+                if (tok.IsCancellationRequested) 
+                {
                     //scope?.Dispose();
-                    return; }
+                    return; 
+                }
 
                 try
                 {
-                    int locof, locOld;
-                    lock (_lock)
-                    {
-                        locOld = oldOffset;
-                        locof = offset;
-                    }
-                    OnRowDataHandler.Invoke(rxBuf, locOld, locof);
+                    Driver?.Consume(this);
                 }
                 catch (Exception)
                 {
