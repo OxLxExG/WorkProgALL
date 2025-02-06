@@ -75,13 +75,18 @@ namespace Main.Models
                     Delay = DateTime.Now
                 }
                 );
-                var bus = trip.Add(new BusPBVM { VMConn = new SerialVM() });
+                var bus = trip.Add(new BusPBVM { VMConn = new SerialVM {BaudRate = 125000, PortName = "COM5", } });
                 bus.ItemsAdd(new DevicePB { metaData = BinaryParser.Parse(BinaryParser.Meta_Ind) });
                 bus.ItemsAdd(new DevicePB { metaData = BinaryParser.Parse(BinaryParser.Meta_NNK) });
                 bus.Interval = 4200;
 
                 bus = trip.Add(new BusPBVM { VMConn = new NetVM() });
                 bus.ItemsAdd(new DevicePB { metaData = BinaryParser.Parse(BinaryParser.Meta_CAL) });
+
+                var bus32 = trip.Add(new BusUSO32VM { VMConn = new NopConVM() });
+                bus32.ItemsAdd(new DeviceTelesystem());
+                
+
                 //v.VisitVM
                 //    .Add(new Trip { DTimStart = System.DateTime.Now })
                 //    .Add(new SerialPipe { SerialConn = new SerialConn() })

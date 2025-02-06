@@ -31,7 +31,8 @@ namespace Connections
         }
         public static void CheckLocked(this IAbstractConnection c)
         {
-            if (c.IsLocked) EConnectionLocked.Whrow(c);
+            if (c.IsLocked)  throw new Exception(String.Format(Resources.errConnectionLocked, c));
+            //EConnectionLocked.Whrow(c);
         }
     }
 }

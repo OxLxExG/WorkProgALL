@@ -14,20 +14,31 @@
   <ItemGroup>
     <None Remove="appsettings.json" />
     <None Remove="icon.ico" />
+    <None Remove="Images\Cycle.png" />
     <None Remove="Images\CycleDev.png" />
     <None Remove="Images\DockBottom.PNG" />
     <None Remove="Images\DockPane.PNG" />
+    <None Remove="Images\FindPort.png" />
+    <None Remove="Images\FindPortidle.png" />
+    <None Remove="Images\FoundPort.png" />
     <None Remove="Images\Freeze.png" />
     <None Remove="Images\HTabGroup.png" />
     <None Remove="Images\InfoLog.png" />
+    <None Remove="Images\NewProject.png" />
     <None Remove="Images\TraceLog.png" />
+    <None Remove="Images\Uso32ClrHP.png" />
+    <None Remove="Images\Uso32Err.png" />
+    <None Remove="Images\Uso32Run0.png" />
+    <None Remove="Images\Uso32Run1.png" />
+    <None Remove="Images\Uso32SetHP.png" />
+    <None Remove="Images\Uso32Start.png" />
+    <None Remove="Images\Uso32Terminate.png" />
     <None Remove="Images\Warning.png" />
     <None Remove="Images\ExceptLog.png" />
     <None Remove="Images\Except.png" />
     <None Remove="Images\Clear.png" />
     <None Remove="Images\Project.png" />
     <None Remove="Images\Project16.png" />
-    <None Remove="Images\NewProject.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -38,9 +49,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.1" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
+    <PackageReference Include="ScottPlot" Version="5.0.54" />
+    <PackageReference Include="ScottPlot.WPF" Version="5.0.54" />
     <!--<PackageReference Include="System.Drawing.Common" Version="8.0.6" />-->
   </ItemGroup>
 
@@ -86,22 +99,36 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Images\Cycle.png" />
     <Resource Include="Images\CycleDev.png" />
     <Resource Include="Images\DockBottom.PNG" />
     <Resource Include="Images\DockPane.PNG" />
+    <Resource Include="Images\FindPort.png" />
+    <Resource Include="Images\FindPortidle.png" />
+    <Resource Include="Images\FoundPort.png" />
     <Resource Include="Images\Freeze.png" />
     <Resource Include="Images\HTabGroup.png" />
+    <Resource Include="Images\Monitor16.png" />
+    <Resource Include="Images\NewProject.png" />
+    <Resource Include="Images\TraceLog.png" />
+    <Resource Include="Images\Uso32ClrHP.png" />
+    <Resource Include="Images\Uso32Err.png" />
+    <Resource Include="Images\Uso32Run0.png" />
+    <Resource Include="Images\Uso32Run1.png" />
+    <Resource Include="Images\Uso32SetHP.png" />
+    <Resource Include="Images\Uso32Start.png" />
+    <Resource Include="Images\Uso32Terminate.png" />
     <Resource Include="Images\Warning.png" />
     <Resource Include="Images\ExceptLog.png" />
     <Resource Include="Images\Except.png" />
     <Resource Include="Images\InfoLog.png" />
-    <Resource Include="Images\TraceLog.png" />
-    <Resource Include="Images\Cycle.png" />
+    <Resource Include="Images\Osc.png" />
+    <Resource Include="Images\Uso32Terminated.png" />
     <Resource Include="Images\Clear.png" />
     <Resource Include="Images\Project16.png" />
     <Resource Include="Images\Project.png" />
     <Resource Include="Images\OpenProject.png" />
-    <Resource Include="Images\NewProject.png" />
+    <Resource Include="Images\TxOnly.png" />
   </ItemGroup>
 
   <ItemGroup>

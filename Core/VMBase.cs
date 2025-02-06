@@ -29,6 +29,7 @@ namespace Core
         /// <param name="RootContentID"> RootContentID.AnyData.AnyData...) </param>
         // при загрузки DockManager  ContentID присваивается генерирующейся VM viewмодели AddOrGet(string ContentID);
         // например для монитора СОМ если нет модели MM (COM) то закрыть (удалить) окно
-        public virtual string? ContentID { get; set; }
+        string? _ContentID;
+        public virtual string? ContentID { get=>_ContentID; set=>SetProperty(ref _ContentID,value); }
     }
 }

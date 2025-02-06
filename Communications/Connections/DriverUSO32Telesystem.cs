@@ -1,8 +1,10 @@
 ﻿using Connections.Interface;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Buffers.Binary;
 using System.Collections.Concurrent;
 using System.IO.Ports;
+using System.Windows;
 
 namespace Connections
 {
@@ -11,32 +13,40 @@ namespace Connections
     public class DriverUSO32Telesystem : AbstractTransactionDriver
     {
         public ILogger? logger { get; set; }
+        static object lockObj = new object();
         public static string[] FindUSO32SerialPort()
         {
             string[] ports = SerialPort.GetPortNames();
             List<string> USO32Ports = new List<string>();
-            foreach (string port in ports) 
-            { 
+            IConnectionServer? cs = (Application.Current as IServiceProvider)?.GetRequiredService<IConnectionServer>();
 
-                var p = new SerialPort(port,57600);
-                try
+            foreach (string port in ports) 
+            {
+                var ac = cs?.Get(port);
+                if (ac != null && ac.IsLocked) continue;
+                lock (lockObj)
                 {
-                    if (p.IsOpen) continue;
-                    p.Open();
-                    p.Write(new byte[] { 0xAA }, 0, 1);
-                    Thread.Sleep(1);
-                    if (p.BytesToRead == 1)
+                                        
+                    var p = new SerialPort(port, 57600);
+                    try
                     {
-                        var r = new byte[1];
-                        int rn = p.Read(r, 0, 1);
+                        if (p.IsOpen) continue;
+                        p.Open();
+                        p.Write(new byte[] { 0xAA }, 0, 1);
+                        if (ac is AbstractConnection a) a.OnRowSendEvent(new byte[] { 0xAA }, 0, 1);
+                        Thread.Sleep(1);
+                        var btr = p.BytesToRead;
+                        var r = new byte[btr];
+                        int rn = p.Read(r, 0, btr);
+                        if (ac is AbstractConnection ra) ra.OnRowDataEvent(r, 0, rn);
                         if (rn == 1 && r[0] == 0x55) USO32Ports.Add(port);
+                        p.Close();
                     }
-                    p.Close();
-                }
-                finally
-                {
-                    p.Dispose();
-                }
+                    finally
+                    {
+                        p.Dispose();
+                    }
+                };
             }
             return USO32Ports.ToArray();
         }
@@ -45,8 +55,20 @@ namespace Connections
         private byte[] rxBuf = new byte[IConnection.MIN_RX_BUF];   
         private ConcurrentQueue<byte[]> rxQ = new ConcurrentQueue<byte[]>();
         public bool Terminate { get; set; } = false;
-        public bool SetHP { get; set; } = false;
-        public bool ClrHP { get; set; } = false;
+
+        bool SetHP;
+        bool ClrHP;
+        Action? DoneHP;
+        public void DoSetHP(Action Done)
+        {
+            DoneHP = Done;
+            SetHP = true;
+        }
+        public void DoClrHP(Action Done)
+        {
+            DoneHP = Done;
+            ClrHP = true;
+        }
 
         private int ADCIdx;
 
@@ -60,6 +82,8 @@ namespace Connections
             else
             {
                 Wachdog = true;
+                timer?.Dispose();
+                timer = null;
                 (state as AbstractConnection)?.Cancel();
             }                    
         }
@@ -113,6 +137,7 @@ namespace Connections
                 await Conn.Send(d);
                 Conn.OnRowSendEvent(d.txBuf, 0, d.txBuf.Length);
                 SetHP = false;
+                DoneHP?.Invoke();
             }
             if (ClrHP)
             {
@@ -120,6 +145,7 @@ namespace Connections
                 await Conn.Send(d);
                 Conn.OnRowSendEvent(d.txBuf, 0, d.txBuf.Length);
                 ClrHP = false;
+                DoneHP?.Invoke();
             }
         }
         private byte[] ADCData = new byte[4];

@@ -75,6 +75,7 @@ namespace Connections.Interface
     public interface IConnectionServer
     {
         IAbstractConnection? Get(string ConnectionID, object Subscruber);
+        IAbstractConnection? Get(string ConnectionID);
         void Set(string ConnectionID, IAbstractConnection Connection, object Subscruber);
 
     }

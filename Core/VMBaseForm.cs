@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -80,26 +81,28 @@ namespace Core
         {
             _Activatetimer = new();
             _Activatetimer.Interval = new(TimeSpan.TicksPerMillisecond * 500);
-            _Activatetimer.Tick += (s, e) =>
-            {
-                _Activatetimer.Stop();
-                if (DynamicItems.Count == 0) OnActivateDynItems?.Invoke();
-            };
+            _Activatetimer.Tick += (s, e) => UserActivate();
 
             _DeActivatetimer = new();
             _DeActivatetimer.Interval = new(TimeSpan.TicksPerMillisecond * 100);
-            _DeActivatetimer.Tick += EventDeActivateTimer;
+            _DeActivatetimer.Tick += (s, e) => UserDeactivate();
 
             //OnActivate += ActivateMenu;
             //OnDeActivate += DeActivateMenu;
         }
-        void EventDeActivateTimer(object? sender, EventArgs e)
+        public void UserActivate()
+        {
+            _Activatetimer.Stop();
+            if (DynamicItems.Count == 0) OnActivateDynItems?.Invoke();
+        }
+
+        public void UserDeactivate() 
         {
             _DeActivatetimer.Stop();
             if (DynamicItems.Count > 0) OnDeActivateDynItems?.Invoke();
             if (DynamicItems.Count > 0)
             {
-                VMBase.ToolBarServer.Remove(DynamicItems.OfType<ToolButton>());
+                VMBase.ToolBarServer.Remove(DynamicItems.OfType<ToolItem>());
                 VMBase.MenuItemServer.Remove(DynamicItems.OfType<MenuItemVM>());
                 DynamicItems.Clear();
             }
@@ -115,8 +118,8 @@ namespace Core
 
                 // TODO: освободить неуправляемые ресурсы (неуправляемые объекты) и переопределить метод завершения
                 // TODO: установить значение NULL для больших полей
-
-                EventDeActivateTimer(null, EventArgs.Empty);
+                _Activatetimer.Stop();
+                UserDeactivate();
 
                 disposedValue = true;
             }
@@ -181,7 +184,7 @@ namespace Core
 
         #region Title
         private string _title = string.Empty;
-        public string Title
+        [XmlIgnore] public string Title
         {
             get => _title; set => SetProperty(ref _title, value);
             //{
@@ -197,9 +200,9 @@ namespace Core
 
         #region IsVisible
         public static void OnVisibleChange(VMBaseForm? sender) => DockManagerVM.OnVisibleChange(sender);
-        
-        public bool _isVisible = true;
-        public bool IsVisible
+
+        [XmlIgnore] public bool _isVisible = true;
+        [XmlIgnore] public bool IsVisible
         {
             get => _isVisible;
             set
@@ -233,7 +236,7 @@ namespace Core
         protected event SelectHandler? OnSelect;
         protected event SelectHandler? OnDeSelect;
         private bool _isSelected = false;
-        public bool IsSelected
+        [XmlIgnore] public bool IsSelected
         {
             get { return _isSelected; }
             set
@@ -258,7 +261,7 @@ namespace Core
         //private event ActivateHandler? OnActivate;
         //private event ActivateHandler? OnDeActivate;
         private bool _isActive = false;
-        public bool IsActive
+        [XmlIgnore] public bool IsActive
         {
             get { return _isActive; }
             set
@@ -279,25 +282,25 @@ namespace Core
         #endregion
 
         #region FloatingWidth
-        public double FloatingWidth { get; set; } = 0.0;
+        [XmlIgnore] public double FloatingWidth { get; set; } = 0.0;
 
         #endregion
 
         #region FloatingHeight
 
-        public double FloatingHeight { get; set; } = 0.0;
+        [XmlIgnore] public double FloatingHeight { get; set; } = 0.0;
 
         #endregion
 
         #region FloatingLeft
 
-        public double FloatingLeft { get; set; } = 0.0;
+        [XmlIgnore] public double FloatingLeft { get; set; } = 0.0;
 
         #endregion
 
         #region FloatingTop
 
-        public double FloatingTop { get; set; } = 0.0;
+        [XmlIgnore] public double FloatingTop { get; set; } = 0.0;
         #endregion
 
         //#region IsFloating
@@ -324,6 +327,7 @@ namespace Core
 
         #region CanClose
         bool _canClose = true;
+        [XmlIgnore]
         public bool CanClose
         { 
             get=> _canClose;
@@ -340,25 +344,25 @@ namespace Core
         #endregion
 
         #region CanFloat
-        public bool CanFloat { get; set; } = true;
+        [XmlIgnore] public bool CanFloat { get; set; } = true;
         #endregion
 
         #region ToolTip
-        public bool ToolTipEnable=> ToolTip != null;
-        public string? ToolTip { get; set; } = null;
+        [XmlIgnore] public bool ToolTipEnable=> ToolTip != null;
+        [XmlIgnore] public string? ToolTip { get; set; } = null;
         #endregion
 
     }
     public class DocumentVM : VMBaseForm
     {
         #region Description
-        public string? Description { get; set; } = null;
+        [XmlIgnore] public string? Description { get; set; } = null;
 
-        public bool DescriptionEnable => Description != null;
+        [XmlIgnore] public bool DescriptionEnable => Description != null;
         #endregion
 
         #region CanMove
-        public bool CanMove { get; set; } = true;
+        [XmlIgnore] public bool CanMove { get; set; } = true;
         #endregion
 
     }
@@ -378,46 +382,46 @@ namespace Core
             CanClose = false;
         }
         #region AutoHideWidth
-        public double AutoHideWidth { get; set; } = 200;
+        [XmlIgnore] public double AutoHideWidth { get; set; } = 200;
 
         #endregion
 
         #region AutoHideMinWidth
 
-        public double AutoHideMinWidth { get; set; } = 20;
+        [XmlIgnore] public double AutoHideMinWidth { get; set; } = 20;
 
         #endregion
 
         #region AutoHideHeight
 
-        public double AutoHideHeight { get; set; } = 200;
+        [XmlIgnore] public double AutoHideHeight { get; set; } = 200;
         #endregion
 
         #region AutoHideMinHeight
 
-        public double AutoHideMinHeight { get; set; } = 20;
+        [XmlIgnore] public double AutoHideMinHeight { get; set; } = 20;
 
         #endregion
 
         #region CanHide
 
-        public bool CanHide { get; set; } = true;
+        [XmlIgnore] public bool CanHide { get; set; } = true;
 
         #endregion
 
         #region CanAutoHide
 
-        public bool CanAutoHide { get; set; }=true;
+        [XmlIgnore] public bool CanAutoHide { get; set; }=true;
 
         #endregion
 
         #region CanDockAsTabbedDocument
 
-        public bool CanDockAsTabbedDocument { get; set; } = true;
+        [XmlIgnore] public bool CanDockAsTabbedDocument { get; set; } = true;
         #endregion
 
         #region ShowStrategy
-        public ShowStrategy? ShowStrategy { get; set; } = null;
+        [XmlIgnore] public ShowStrategy? ShowStrategy { get; set; } = null;
         #endregion
     }
 
@@ -436,6 +440,7 @@ namespace Core
         public FormAddedFrom formAddedFrom;
         public FormAddedEventArg(FormAddedFrom formAddedFrom) { this.formAddedFrom = formAddedFrom; }
     }
+
     public class DockManagerVM : VMBase//, IFormsServer
     {
         #region Instance
@@ -443,16 +448,23 @@ namespace Core
         public static DockManagerVM Instance 
         { 
             get 
-            { 
-                if (_instance == null) _instance = new DockManagerVM();
+            {
+                if (_instance == null) throw new Exception("_instance == null");                
                 return _instance;
-            } 
+            }
+            //set
+            //{
+            //    if (_instance != null) Clear();
+            //    //if (value != null && _instance != null && _instance != value) 
+            //    _instance = value; 
+            //}
         }
         #endregion
-        public DockManagerVM() { _instance = this; }
+        public DockManagerVM() { if (_instance == null) _instance = this; }
 
         #region Docs and Tools properties
-        ObservableCollection<DocumentVM> _docs = new ObservableCollection<DocumentVM>();
+        [XmlArray("Documents")]
+        public ObservableCollection<DocumentVM> _docs { get; set; }  = new ObservableCollection<DocumentVM>();
         ReadOnlyObservableCollection<DocumentVM> _readonyDocs = null!;
         public static ReadOnlyObservableCollection<DocumentVM> Docs
         {
@@ -464,7 +476,8 @@ namespace Core
                 return Instance._readonyDocs;
             }
         }
-        ObservableCollection<ToolVM> _tools = new ObservableCollection<ToolVM>();
+        [XmlArray("Tools")]
+        public ObservableCollection<ToolVM> _tools { get; set; } = new ObservableCollection<ToolVM>();
         ReadOnlyObservableCollection<ToolVM> _readonyTools = null!;
         public static ReadOnlyObservableCollection<ToolVM> Tools
         {
@@ -552,6 +565,7 @@ namespace Core
             if (f != null) Remove(f);
         }
         static Dictionary<string, Func<VMBaseForm>> _RegForm = new();
+        static List<Type> _SerializerTypes = new();
         //    /// <summary>
         //    /// регистрируем генератор модели представления
         //    /// </summary>
@@ -560,8 +574,23 @@ namespace Core
         public static void Register<T>(string RootContentID, Func<VMBaseForm> RegFunc) where T : VMBaseForm
         {
             _RegForm.TryAdd(RootContentID, RegFunc);
+            if (!_SerializerTypes.Contains(typeof(T))) _SerializerTypes.Add(typeof(T));
+        }
+        public static XmlSerializer Serializer => new XmlSerializer(typeof(DockManagerVM), null, _SerializerTypes.ToArray(), null, null, null);
+
+        public static void Serialize(StreamWriter fs)
+        {
+            Serializer.Serialize(fs, Instance);
         }
 
+        public static void DeSerialize(StreamReader fs)
+        {
+            DockManagerVM tmp = (DockManagerVM) DockManagerVM.Serializer.Deserialize(fs)!;
+            Instance._tools.Clear();
+            Instance._docs.Clear();
+            foreach (var t in tmp._tools) Instance._tools.Add(t);
+            foreach (var d in tmp._docs) Instance._docs.Add(d);
+        }
         public static IEnumerable<ToolVM> Hiddens => Tools.Where(t => !t.IsVisible/* && !t.IsClosed*/);
 
         #region ActiveDocument
@@ -584,7 +613,7 @@ namespace Core
 
                     var l = ServiceProvider.GetRequiredService<ILogger<VMBaseForm>>();
                     var s = Instance._activeDocument != null ? Instance._activeDocument.ContentID : "NUL";
-                    l.LogInformation(" ActiveDocument {0} => {1} ", s, value.ContentID);
+                    l.LogTrace(" ActiveDocument {0} => {1} ", s, value.ContentID);
 
                     Instance._activeDocument = value;
                     Instance.OnPropertyChanged(nameof(ActiveDocument));

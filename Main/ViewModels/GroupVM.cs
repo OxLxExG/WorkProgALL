@@ -40,6 +40,17 @@ namespace Main.ViewModels
         /// </summary>
         [XmlIgnore] public ObservableCollection<VisitDocument> VisitDocs { get; set; } = new ObservableCollection<VisitDocument>();
 
+        public override VMBase? Find(string id)
+        {
+            foreach(var v in VisitDocs)
+            {
+                var r = v.Find(id);
+                if (r != null) return r;
+            }
+            return null;
+        }
+
+
         public static XmlSerializer Serializer => new XmlSerializer(typeof(GroupDocument));
 
         public GroupDocument()         
@@ -68,6 +79,8 @@ namespace Main.ViewModels
             DockManagerVM.ActiveDocumentChanging += ActiveDocumentChangingEvent;
             DockManagerVM.FormVisibleChanged += FormVisibleChanged;
         }
+
+
         public static GroupDocument CreateAndSave(string file)
         {
             var v = new GroupDocument();
@@ -89,6 +102,23 @@ namespace Main.ViewModels
             {
                 model = (GroupFile)GroupFile.Serializer.Deserialize(fs)!;
             }
+
+            var dmvms = Models.ProjectFile.GetTmpFile(file, ".grpdmvm");
+            if (File.Exists(dmvms))
+            {
+                try
+                {
+                    using (var fs = new StreamReader(dmvms, false))
+                    {
+                        DockManagerVM.DeSerialize(fs);
+                    }
+                }
+                catch (Exception e)
+                {
+                    App.LogError(e, e.Message);
+                }
+            }
+
             // load VM
             GroupDocument d;
             var vvm = Models.ProjectFile.GetTmpFile(file, ".grpvm");
@@ -183,6 +213,11 @@ namespace Main.ViewModels
                 {
                     Serializer.Serialize(fs, this);
                 }
+                var dmvm = Models.ProjectFile.GetTmpFile(FileFullName, ".grpdmvm");
+                using (var fs = new StreamWriter(dmvm, false))
+                {
+                    DockManagerVM.Serialize(fs);
+                }
             }
             // save M
             if (IsDirty)
@@ -206,7 +241,10 @@ namespace Main.ViewModels
         public void RemoveVisit(VisitDocument v)
         {
             int i =VisitDocs.IndexOf(v);
-            if (i > -1) RemoveVisit(i);
+            if (i > -1)
+            {
+                RemoveVisit(i);
+            }
         }
 
         public void RemoveVisit(int i)
@@ -245,5 +283,4 @@ namespace Main.ViewModels
         void FormAddedEvent(object? sender, FormAddedEventArg e) => NeedAnySave = e.formAddedFrom == FormAddedFrom.User;
         void ActiveDocumentChangingEvent(object? sender, ActiveDocumentChangedEventArgs e) => IsVMDirty = e.OldActive != null;
     }
-
 }

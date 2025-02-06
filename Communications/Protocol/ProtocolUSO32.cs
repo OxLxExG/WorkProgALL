@@ -1,4 +1,5 @@
 ﻿using Connections.Interface;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,35 +38,38 @@ namespace Connections.Uso32
 
     public class ProtocolUSO32
     {
-        public static DriverUSO32Telesystem? StartUSO32(IConnection con, Uso32_Bias c, Uso32_Freqs fq, OnUSO32DataHandler onUSO32Data, OnResponseEvent? OnResponse = null)
+        public static void StartUSO32(IConnection con, Uso32_Bias c, Uso32_Freqs fq, OnUSO32DataHandler onUSO32Data, OnResponseEvent? OnResponse = null)
         {
-            DriverUSO32Telesystem? d = null;
-            if (con is AbstractConnection ac)
+            if (con is AbstractConnection ac && ac.Driver is DriverUSO32Telesystem d && !ac.IsLocked)
             {
-                if (!(ac.Driver is DriverUSO32Telesystem))
-                {
-                    d = new DriverUSO32Telesystem();
-                    ac.Driver = d;
-                }
-                else d = ac.Driver as DriverUSO32Telesystem;
-                d!.OnUSO32Data += onUSO32Data;
                 Task.Run(async () =>
                 {
+
                     con.CheckLock();
+                    var re = new DataReq(new byte[] { (byte)(0x90 + c), (byte)fq }, 0x01, OnResponse, -1);
+                    d.OnUSO32Data += onUSO32Data;
                     try
                     {
-                        await ac.Open();
-                        var r = await ac.Transaction(new DataReq(new byte[] { (byte)(0x90 + c), (byte)fq }, 0x01, OnResponse, -1));
+                        try
+                        {
+                            await ac.Open();
+                        }
+                        catch
+                        {
+                            OnResponse?.Invoke(con, new DataResp(re, -1));
+                            throw;
+                        }
+                        var r = await ac.Transaction(re);
                     }
                     finally
                     {
-                        d!.OnUSO32Data -= onUSO32Data;
+                        d.OnUSO32Data -= onUSO32Data;
                         con.UnLock();
                         await ac.Close();
                     }
                 });
             }
-            return d;
+            else throw new Exception("USO32 StartUSO32");
         }
     }
 }

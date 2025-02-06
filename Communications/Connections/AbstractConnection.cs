@@ -45,7 +45,16 @@ namespace Connections //Horizont.Drilling.Connections
         protected Thread? RxConsumerThread { get; set; }
         protected Thread? RxProduserThread { get; set; }
         protected CancellationTokenSource? CtsConsumerProduser { get; set; }
-        public AbstractTransactionDriver? Driver { get; set; }
+
+        public AbstractTransactionDriver? _Driver;
+        public AbstractTransactionDriver? Driver { get => _Driver;
+            set 
+            { 
+                if (value != null && _Driver != null && _Driver != value)
+                    throw new Exception("Driver already set");
+                _Driver = value; 
+            }
+        }
 
         // row data events
         public event OnRowNewDataHandler? OnRowSendHandler;
@@ -211,9 +220,9 @@ namespace Connections //Horizont.Drilling.Connections
                     try
                     {
                         int cntout = 0;
-                        while (IsOpen && cntout == 0 && CtsCancel != null && !CtsCancel.IsCancellationRequested)
+                        while (IsOpen && cntout == 0 && CtsCancel != null && !CtsCancel.IsCancellationRequested && Driver != null)
                         {
-                            cntout = await Driver!.RowRead(this, CtsCancel.Token);
+                            cntout = await Driver.RowRead(this, CtsCancel.Token);
                         }
 
                         Driver?.Produce(this, cntout);

@@ -6,10 +6,15 @@
         <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />
     </DataTemplate>
 
-    
-    <Style x:Key="ToolButtonStyle" 
-           TargetType="{x:Type Button}" 
+
+    <Style x:Key="ToolButtonBaseStyle"
+           TargetType="{x:Type Button}"
            BasedOn="{StaticResource ResourceKey={x:Static ToolBar.ButtonStyleKey}}">
+    </Style>
+
+    <Style x:Key="ToolButtonStyle" 
+           TargetType="{x:Type Button}"
+           BasedOn="{StaticResource ToolButtonBaseStyle}">
         <Setter Property="IsEnabled" Value="{Binding IsEnable}" />
         <Setter Property="Visibility" Value="{Binding Visibility}" />
         <Setter Property="Command" Value="{Binding Command}"/>
@@ -55,6 +60,36 @@
         <ToggleButton Style="{StaticResource TogleToolButtonStyle}"/>
     </DataTemplate>
 
+    <Style x:Key="ToolComboBoxStyle"
+           TargetType="{x:Type ComboBox }"
+           BasedOn="{StaticResource ResourceKey={x:Static ToolBar.ComboBoxStyleKey}}">
+        <Setter Property="VerticalAlignment"
+                Value="Stretch" />
+        <!--<Setter Property="FontSize" Value="18" />-->
+        <Setter Property="Background"
+                Value="{Binding Background, ElementName=toolBarTry}" />
+        <Setter Property="IsEnabled"
+                Value="{Binding IsEnable}" />
+        <Setter Property="Visibility"
+                Value="{Binding Visibility}" />
+        <Setter Property="ToolTip"
+                Value="{Binding ToolTip}" />
+
+        <Setter Property="ItemStringFormat"
+                Value="{Binding ItemStringFormat}" />
+        <Setter Property="ItemsSource"
+                Value="{Binding ItemsSource}" />
+        <Setter Property="Text"
+                Value="{Binding Text}" />
+        <Setter Property="IsEditable"
+                Value="{Binding IsEditable}" />
+        <Setter Property="IsReadOnly"
+                Value="{Binding IsReadOnly}" />
+    </Style>
+
+    <DataTemplate x:Key="ToolComboBox">
+        <ComboBox Style="{StaticResource ToolComboBoxStyle}" />
+    </DataTemplate>
 
 
 </ResourceDictionary>

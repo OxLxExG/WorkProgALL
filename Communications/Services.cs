@@ -45,6 +45,11 @@ namespace Communications
             return f?.conection;
         }
 
+        public IAbstractConnection? Get(string ConnectionID)
+        {
+            return conections.FirstOrDefault(c => c.Id == ConnectionID)?.conection;
+        }
+
         public void Set(string ConnectionID, IAbstractConnection Connection, object Subscruber)
         {
             if (Get(ConnectionID, Subscruber) != null) 

@@ -1,22 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.Input;
+using Core;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Xml.Serialization;
 using TextBlockLogging;
-using Microsoft.Extensions.DependencyInjection;
-using WpfDialogs;
-using Xceed.Wpf.AvalonDock.Layout;
-using Core;
-using System.Windows.Media.Media3D;
-using Microsoft.Extensions.Logging;
-using System.Diagnostics.Eventing.Reader;
-using System.Threading;
-using System.Windows.Threading;
 
 namespace Main.ViewModels
 {
@@ -92,19 +83,19 @@ namespace Main.ViewModels
         }
 
         private bool freeze = false;
-        public bool Freeze
+        [XmlIgnore] public bool Freeze
         {
             get => freeze;
             set
             {
-                CheckToolButton? tb = null;
                 if (SetProperty(ref freeze, value) 
                     && _freezeToolButton != null 
-                    && _freezeToolButton.TryGetTarget(out tb)) tb.IsChecked = freeze;
+                    && _freezeToolButton.TryGetTarget(out var tb) 
+                    && tb != null) tb.IsChecked = freeze;
             }
         }
         WeakReference<CheckToolButton>? _freezeToolButton;
-        private void ActivateDynItems()
+        protected virtual void ActivateDynItems()
         {
             var ftb = new CheckToolButton
             {
@@ -134,7 +125,7 @@ namespace Main.ViewModels
             var l = ServiceProvider.GetRequiredService<ILogger<LogTextBlock>>();
             l.LogTrace(" ActivateToolMenu {} ", ContentID);
         }
-        private void DeActivateDynItems()
+        protected virtual void DeActivateDynItems()
         {
             var l = ServiceProvider.GetRequiredService<ILogger<LogTextBlock>>();
             l.LogTrace("~ActivateToolMenu {} ", ContentID);

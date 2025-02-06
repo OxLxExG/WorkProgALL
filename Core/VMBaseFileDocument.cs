@@ -91,8 +91,11 @@ namespace Core
         public bool ShouldSerializeChildFormIDs() => ChildFormIDs != null && ChildFormIDs.Count > 0;
         public virtual void AddChildForm(VMBaseForm childForm)
         {
+            var c = childForm.ContentID;
+            if (string.IsNullOrWhiteSpace(c)) return;
             if (ChildFormIDs == null) ChildFormIDs = new();
-            ChildFormIDs.Add(childForm.ContentID);
+            if (!ChildFormIDs.Contains(c))
+                ChildFormIDs.Add(c);
             IsVMDirty = true;
         }
         public virtual void RemoveChildForm(VMBaseForm childForm)
@@ -344,6 +347,7 @@ namespace Core
     }
     public abstract class ComplexFileDocumentVM : VMBaseFileDocument
     {
+        public abstract VMBase? Find(string id);
         #region prop lastClosedFiles сам файл
         //protected LastClosedFilesVM? _lastClosedFiles = null;
         ///// <summary>
@@ -559,6 +563,8 @@ namespace Core
         //    base.FormClosedEvent(sender, e);
         //    IsVMDirty = true;
         //}
+
+        public static VMBase? Find(string id)=> _instance?.Find(id);
         public static void SetDrity()
         {
             if (Instance != null)

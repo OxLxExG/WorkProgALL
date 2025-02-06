@@ -46,6 +46,8 @@ namespace Main.Services
             services.AddTransient<IMenuItemClient, ProjectsExplorerMenuFactory>();
             services.RegisterForm<ProjectsExplorerVM>();
 
+            services.RegisterForm<OscUSO32VM>();
+            services.RegisterForm<MonitorVM>();
 
             if (opt.Logging.Box.Error)
             {

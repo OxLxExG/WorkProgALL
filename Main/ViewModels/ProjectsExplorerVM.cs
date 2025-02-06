@@ -76,29 +76,29 @@ namespace Main.ViewModels
             ShowStrategy = Core.ShowStrategy.Left;
             ContentID = nameof(ProjectsExplorerVM);
             ToolTip = Properties.Resources.tProjectExplorer;
-            DynAdapter.OnActivateDynItems += ActivateDynItems;
-            DynAdapter.OnDeActivateDynItems += DeActivateDynItems;
+            //DynAdapter.OnActivateDynItems += ActivateDynItems;
+            //DynAdapter.OnDeActivateDynItems += DeActivateDynItems;
         }
 
-        public override void Close()
-        {
-            DynAdapter.OnActivateDynItems -= ActivateDynItems;
-            DynAdapter.OnDeActivateDynItems -= DeActivateDynItems;
-            base.Close();
-        }
-        private void DeActivateDynItems()
-        {
-            var l = ServiceProvider.GetRequiredService<ILogger<ProjectsExplorerVM>>();
-            l.LogTrace("~~DeActivateDynItems {} ", ContentID);
-        }
-        private void ActivateDynItems()
-        {
-            var m = new MenuItemVM { ContentID = "PEDinMenu", Header="Обозреватель",Priority=1 };
-            MenuItemServer.Add("ROOT",m);
-            //var range = new PriorityItemBase[]  { m };
-            DynAdapter.DynamicItems.Add(m);
-            var l = ServiceProvider.GetRequiredService<ILogger<ProjectsExplorerVM>>();
-            l.LogTrace("ActivateDynItems {} ", ContentID);
-        }
+        //public override void Close()
+        //{
+        //    DynAdapter.OnActivateDynItems -= ActivateDynItems;
+        //    DynAdapter.OnDeActivateDynItems -= DeActivateDynItems;
+        //    base.Close();
+        //}
+        //private void DeActivateDynItems()
+        //{
+        //    var l = ServiceProvider.GetRequiredService<ILogger<ProjectsExplorerVM>>();
+        //    l.LogTrace("~~DeActivateDynItems {} ", ContentID);
+        //}
+        //private void ActivateDynItems()
+        //{
+        //    var m = new MenuItemVM { ContentID = "PEDinMenu", Header="Обозреватель",Priority=1 };
+        //    MenuItemServer.Add("ROOT",m);
+        //    //var range = new PriorityItemBase[]  { m };
+        //    DynAdapter.DynamicItems.Add(m);
+        //    var l = ServiceProvider.GetRequiredService<ILogger<ProjectsExplorerVM>>();
+        //    l.LogTrace("ActivateDynItems {} ", ContentID);
+        //}
     }
 }

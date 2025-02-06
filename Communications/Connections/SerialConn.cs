@@ -15,10 +15,10 @@ namespace Connections
         {
             _ConnectionTypes.Add(typeof(SerialConn));
         }
-        public SerialConn() : base()
-        {
-            port.BaudRate = 125000;
-        }
+        //public SerialConn() //: base()
+        //{
+        //    port.BaudRate = 125000;
+        //}
         public override string? ToString()
         {
             return PortName;

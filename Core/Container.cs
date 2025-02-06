@@ -13,9 +13,9 @@ using Xceed.Wpf.AvalonDock.Layout;
 
 namespace Core
 {
-    public record StdLogg(bool Error, bool Info, bool Trace)
+    public record StdLogg(bool Error, bool Info, bool Trace, bool Monitor)
     {
-        public StdLogg() : this(true, false, false) { }
+        public StdLogg() : this(true, false, false, false) { }
     }
     public record StdLoggs(StdLogg Box, StdLogg File)
     {

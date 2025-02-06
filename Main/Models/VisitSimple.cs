@@ -70,8 +70,12 @@ namespace Main.Models
     /// <summary>
     /// реальные классы
     /// </summary>
-    public sealed class DeviceTelesystem : Device;
     public sealed class DeviceTelesystem2 : Device;
+    public sealed class DeviceTelesystem : Device
+    {
+        public static string Name => "Telesystem-1";
+    }
+
 
     public record class RamReadInfo(string RAMFileName, int from, int too)
     {

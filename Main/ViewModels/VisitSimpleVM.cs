@@ -41,8 +41,22 @@ namespace Main.ViewModels
                 Header = $"Delete {ModelName}",
                 Command = new RelayCommand(Remove),
                 ContentID = "DEL",
+                //IsEnable = DelEnable,
                 Priority = 10000,
             });
+        }
+        [XmlIgnore] public bool DelEnable 
+        { 
+            get 
+            { 
+                if (this is ComplexVM c)
+                {
+                    if (c.Items == null || c.Items.Count == 0) return true;
+                }
+                else return true;
+
+                return false; 
+            } 
         }
         [XmlIgnore] public virtual string ModelName => string.Empty;
 
@@ -83,7 +97,7 @@ namespace Main.ViewModels
 
         #region Parent
         private WeakReference? parent;
-        private bool disposedValue;
+        protected bool disposedValue;
 
         public virtual void SetParent(object? par)
         {
@@ -115,14 +129,18 @@ namespace Main.ViewModels
                 else v.IsDirty = true;
             }
         }
-        protected void Remove()
+        protected virtual void Remove()
         {
+            if (!DelEnable) return;
+
+            if (dynamicItemsAdapter != null) dynamicItemsAdapter.Dispose();
+
             if (parent != null)
             {
                 ComplexVM? m = parent.Target as ComplexVM;
                 m?.ItemsRemove(this);
             }
-            if (dynamicItemsAdapter != null) dynamicItemsAdapter.Dispose();
+            Dispose();
         }
         #endregion
 
@@ -158,6 +176,22 @@ namespace Main.ViewModels
     }
     public abstract class ComplexVM: ItemVM
     {
+        public VMBase? Find(string id)
+        {
+            if (Items != null)
+            {
+                foreach (var i in Items)
+                {
+                    if (i.ContentID == id) return i;
+                    if (i is ComplexVM c)
+                    {
+                        var r = c.Find(id);
+                        if (r != null) return r;
+                    }
+                }
+            }
+            return null;
+        }
         /// <summary>
         /// loaded event action
         /// </summary>
@@ -181,6 +215,7 @@ namespace Main.ViewModels
                     if (vm is ComplexVM cvm) cvm.RemoveChildEmptyModel();
             }
         }
+
 
         private (Trip trip, Device[] devs ) FindTripAndChildDevs(ItemVM vm)
         {
@@ -224,7 +259,10 @@ namespace Main.ViewModels
                 if (!(item is TripVM))
                 {
                     var (tr,dvs) = FindTripAndChildDevs(item);
-                    foreach(var  d in dvs) tr.ItemsRemove(d);
+                    foreach (var d in dvs)
+                    {                        
+                        tr.ItemsRemove(d);
+                    }
                 }
                 // vm
                 Items.Remove(item);
@@ -232,7 +270,10 @@ namespace Main.ViewModels
                 {
                     Items = null;
                     // remove bus,pipe if not child devices
-                    if (!(this is ComplexModelVM) && (Parent is ComplexVM p)) p.ItemsRemove(this);
+                    /// неверно ???
+                   // if (!(this is ComplexModelVM) && (Parent is ComplexVM p)) p.ItemsRemove(this); 
+                    /// правильно ???
+                    this.Remove();
                 }
 
                 SetDrity();
@@ -368,7 +409,7 @@ namespace Main.ViewModels
                 }
             } 
         }
-        public bool ShouldSerializeConn() => VMConn != null;
+        public virtual bool ShouldSerializeVMConn() => VMConn != null;
 
     }
     public class BusPBVM : BusVM
@@ -394,6 +435,7 @@ namespace Main.ViewModels
         bool Freeze;
         private void ActivateDynItems()
         {
+            if (Items ==  null) return;
             StringBuilder sb = new StringBuilder();
             foreach (var di in Items!) if (di is DevicePBVM pb && pb.Model is DevicePB d)  { sb.Append($" {d.Name}"); }
             var ftb = new CheckToolButton
@@ -412,7 +454,7 @@ namespace Main.ViewModels
             DynAdapter.DynamicItems.Add(ftb);
 
             var m = new MenuItemVM { ContentID = "bus", Header = "bus", Priority = 1 };
-            MenuItemServer.Add("PEDinMenu", m);
+            MenuItemServer.Add("ROOT", m);
             //var range = new PriorityItemBase[]  { m };
             DynAdapter.DynamicItems.Add(m);
             var l = ServiceProvider.GetRequiredService<ILogger<BusPBVM>>();
@@ -447,7 +489,7 @@ namespace Main.ViewModels
         static VisitVM()
         {
             AddFactory<DevicePB, DevicePBVM>();
-            //AddFactory<DeviceTelesystem, DeviceT1VM>();
+            AddFactory<DeviceTelesystem, TelesysVM>();
             //AddFactory<DeviceTelesystem2, DeviceT2VM>();
         }
         #region Factory
@@ -545,7 +587,7 @@ namespace Main.ViewModels
             CItems.Add(new CommandMenuItemVM
             {
                 Header = "Delete",
-                Command = new RelayCommand(Remove),
+                Command = new RelayCommand(()=> Remove()),
                 ContentID = "DEL",
                 Priority = 10000,
             }
@@ -578,13 +620,14 @@ namespace Main.ViewModels
 
         }
 
-        protected void Remove()
-        {
-            if (RootFileDocumentVM.Instance is GroupDocument g)
-            {
-                g.RemoveVisit(this);
-            }
-        }
+        //protected void CmdRemove()
+        //{
+        //    Remove( );
+        //    //if (RootFileDocumentVM.Instance is GroupDocument g)
+        //    //{
+        //    //    g.RemoveVisit(this);
+        //    //}
+        //}
 
         [XmlIgnore] public ObservableCollection<MenuItemVM> CItems { get; set; } = new ObservableCollection<MenuItemVM>();
 
@@ -672,8 +715,25 @@ namespace Main.ViewModels
         {
             VisitVM.Model = null;
         }
-
-        [XmlIgnore] public new Visit? Model
+        public override VMBase? Find(string id)
+        {
+            if (_VisitVM != null)
+            {
+                if (_VisitVM.ContentID == id) return VisitVM;
+                if (_VisitVM.Items != null)
+                    foreach (var i in _VisitVM.Items)
+                    {
+                        if (i.ContentID == id) return i;
+                        if (i is ComplexVM c)
+                        {
+                            var r = c.Find(id);
+                            if (r != null) return r;
+                        }
+                    }
+            }
+            return null;
+        }
+            [XmlIgnore] public new Visit? Model
         {
             get => (Visit?)base.Model;
             set
@@ -762,14 +822,17 @@ namespace Main.ViewModels
         }
         public static XmlSerializer Serializer => new XmlSerializer(typeof(VisitDocument), null, new[]
         {
+                            typeof(TelesysVM),
                             typeof(DevicePBVM),
                             typeof(DeviceVM),
                             typeof(VisitVM),
                             typeof(TripVM),
                             typeof(SerialVM),
+                            typeof(NopConVM),
                             typeof(NetVM),
                             typeof(BusVM),
                             typeof(BusPBVM),
+                            typeof(BusUSO32VM),
          }, null, null, null);
         public static VisitDocument CreateAndSave(string visitModelFile, bool isroot)
         {
@@ -785,8 +848,8 @@ namespace Main.ViewModels
         public static VisitDocument Load(string visitModelFile, bool Isroot)
         {
             FormAddedFrom SaveState = DockManagerVM.State;
-            Visit model = null!;
-            VisitDocument d = null!;
+            Visit VisitModel = null!;
+            VisitDocument visitDocumentVM = null!;
             try
             {
                 DockManagerVM.State = FormAddedFrom.DeSerialize;
@@ -795,9 +858,9 @@ namespace Main.ViewModels
                 {
                     using (var fs = new StreamReader(visitModelFile, false))
                     {
-                        model = (Visit)Visit.Serializer.Deserialize(fs)!;
+                        VisitModel = (Visit)Visit.Serializer.Deserialize(fs)!;
                     }
-                    if (model == null) throw new IOException($"BAD File {visitModelFile} can't load Visit!");
+                    if (VisitModel == null) throw new IOException($"BAD File {visitModelFile} can't load Visit!");
                 }
                 catch (Exception e)
                 {
@@ -812,7 +875,7 @@ namespace Main.ViewModels
                     {
                         using (var fs = new StreamReader(vvm, false))
                         {
-                            d = (VisitDocument)Serializer.Deserialize(fs)!;
+                            visitDocumentVM = (VisitDocument)Serializer.Deserialize(fs)!;
                         }
                     }
                     catch (Exception e)
@@ -821,10 +884,26 @@ namespace Main.ViewModels
                     }
                 }
                 else
-                    d = new VisitDocument();
+                    visitDocumentVM = new VisitDocument();
 
                 if (Isroot)
                 {
+                    var dmvms = Models.ProjectFile.GetTmpFile(visitModelFile, ".vstdmvm");
+                    if (File.Exists(dmvms))
+                    {
+                        try
+                        {
+                            using (var fs = new StreamReader(dmvms, false))
+                            {
+                                DockManagerVM.DeSerialize(fs);
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            App.LogError(e, e.Message);
+                        }
+                    }
+
                     var dms = Models.ProjectFile.GetTmpFile(visitModelFile, ".vstdm");
                     if (File.Exists(dms))
                     {
@@ -843,18 +922,18 @@ namespace Main.ViewModels
                     }
                 }
 
-                if (d == null) d = new VisitDocument();//?? if (File.Exists(vvm)) need dialog to recreate visit doc
+                if (visitDocumentVM == null) visitDocumentVM = new VisitDocument();//?? if (File.Exists(vvm)) need dialog to recreate visit doc
 
-                d.Model = model;
-                d.FileFullName = visitModelFile;
-                d.IsRoot = Isroot;
-                d.lastClosedFiles?.UserOpenFile(visitModelFile);
+                visitDocumentVM.Model = VisitModel;
+                visitDocumentVM.FileFullName = visitModelFile;
+                visitDocumentVM.IsRoot = Isroot;
+                visitDocumentVM.lastClosedFiles?.UserOpenFile(visitModelFile);
             }
             finally
             {
                 DockManagerVM.State = SaveState;
             }
-            return d;
+            return visitDocumentVM;
         }
         protected override void SaveModelAndViewModel()
         {
@@ -880,13 +959,19 @@ namespace Main.ViewModels
 
             if (IsRoot && (IsVMDirty || NeedAnySave))
             {
-                var dms = Models.ProjectFile.GetTmpFile(FileFullName, ".vstdm");
                 try
                 {
+                    var dms = Models.ProjectFile.GetTmpFile(FileFullName, ".vstdm");
                     using (var fs = new StreamWriter(dms, false))
                     {
                         DockManagerSerialize d = new DockManagerSerialize();
                         (new XmlSerializer(typeof(DockManagerSerialize))).Serialize(fs, d);
+                    }
+
+                    var dmvms = Models.ProjectFile.GetTmpFile(FileFullName, ".vstdmvm");
+                    using (var fs = new StreamWriter(dmvms, false))
+                    {
+                        DockManagerVM.Serialize(fs);
                     }
                 }
                 catch (Exception e)
@@ -922,7 +1007,7 @@ namespace Main.ViewModels
                 if (_IsRoot != value)
                 {
                     _IsRoot = value;
-                    if (IsRoot)
+                    if (_IsRoot)
                     {
                         DockManagerVM.FormAdded += FormAddedEvent;
                         DockManagerVM.ActiveDocumentChanging += ActiveDocumentChangingEvent;
@@ -934,6 +1019,14 @@ namespace Main.ViewModels
         #endregion
         public override void Remove(bool UserCloseFile = true)
         {
+            if (UserCloseFile)
+            {
+                while (ChildFormIDs != null && ChildFormIDs.Count > 0)
+                {
+                    DockManagerVM.Remove(ChildFormIDs[0]!);
+                }
+            }
+
             if (IsRoot)
             {
                 DockManagerVM.FormVisibleChanged -= FormVisibleChanged;
@@ -946,9 +1039,9 @@ namespace Main.ViewModels
             void Disp(ItemVM? root)
             {
                 if (root == null) return;
-                root.Dispose();
                 if (root is ComplexVM c && c.Items != null) 
                     foreach (var i in c.Items) Disp(i);
+                root.Dispose();
             }
             Disp(_VisitVM);
 

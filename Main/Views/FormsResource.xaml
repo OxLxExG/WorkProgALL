@@ -15,5 +15,9 @@
         <v:TextLogUC/>
     </DataTemplate>
 
+    <DataTemplate x:Key="OscUSO32VMTemplate">
+        <v:OscUSO32UI />
+    </DataTemplate>
+    
 </ResourceDictionary>
     

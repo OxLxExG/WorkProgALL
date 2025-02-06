@@ -11,19 +11,19 @@ namespace Core
     {
         public void AddBar(ToolBarVM toolBar);
         public void DelBar(string BarContentID);
-        public void Add(string BarContentID, IEnumerable<ToolButton> Tools);
-        public void Add(string BarContentID, ToolButton Tool);
+        public void Add(string BarContentID, IEnumerable<ToolItem> Tools);
+        public void Add(string BarContentID, ToolItem Tool);
         public void Remove(string ContentID);
-        public void Remove(IEnumerable<ToolButton> Tools);
+        public void Remove(IEnumerable<ToolItem> Tools);
         public bool Contains(string ContentID);
-        public bool Contains(ToolButton Tool);
+        public bool Contains(ToolItem Tool);
         public void UpdateSeparatorGroup(string BarContentID);
     }
 
     internal class ToolServer: PriorityServer, IToolServer
     {
         private static List<ToolBarVM> barVMs = new List<ToolBarVM>();
-        public void Add(string BarContentID, IEnumerable<ToolButton> Tools)
+        public void Add(string BarContentID, IEnumerable<ToolItem> Tools)
         {
             foreach (var br in barVMs)
                 if (br.ContentID == BarContentID)
@@ -32,7 +32,7 @@ namespace Core
                     return;
                 }
         }
-        public void Add(string BarContentID, ToolButton Tool) => Add(BarContentID, new[] { Tool });
+        public void Add(string BarContentID, ToolItem Tool) => Add(BarContentID, new[] { Tool });
         
 
         public void AddBar(ToolBarVM toolBar)
@@ -46,7 +46,7 @@ namespace Core
                     if (t.ContentID == ContentID) return true;
            return false;                    
         }
-        public bool Contains(ToolButton Tool)
+        public bool Contains(ToolItem Tool)
         {
             foreach (var br in barVMs)
                 foreach (var t in br.Items)
@@ -76,7 +76,7 @@ namespace Core
                     }
         }
 
-        public void Remove(IEnumerable<ToolButton> Tools)
+        public void Remove(IEnumerable<ToolItem> Tools)
         {
             foreach (var br in barVMs) 
                 foreach (var t in br.Items)

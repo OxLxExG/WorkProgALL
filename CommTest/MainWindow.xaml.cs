@@ -536,8 +536,10 @@ namespace SerialPortTest
                     sc.logger = App.logger;
                     sc.PortName = cbUSO.Text;
                 }
-                driverUSO32 = ProtocolUSO32.StartUSO32(sp, Uso32_Bias.b1, Uso32_Freqs.fq20Hz, OnUSO32Dataf);
-                driverUSO32!.logger = App.logger;
+                driverUSO32 = new DriverUSO32Telesystem();
+                driverUSO32.logger = App.logger;
+                sp.Driver = driverUSO32;
+                ProtocolUSO32.StartUSO32(sp, Uso32_Bias.b1, Uso32_Freqs.fq20Hz, OnUSO32Dataf);
             }
             catch (Exception)
             {
@@ -557,11 +559,8 @@ namespace SerialPortTest
 
         private void btHP_Click(object sender, RoutedEventArgs e)
         {
-            if (driverUSO32 != null)
-            {
-                if (btHP.IsChecked == true) driverUSO32.SetHP = true;
-                else driverUSO32.ClrHP = true;
-            }
+                if (btHP.IsChecked == true) driverUSO32?.DoSetHP(()=> { });
+                else driverUSO32?.DoClrHP(() => { });
         }
     }
 }

@@ -20,38 +20,20 @@ namespace Core
     {
         #region Visibility
         private Visibility _visibility;
-        public Visibility Visibility
-        {
-            get => _visibility;
-            set
-            {
-                if (_visibility != value)
-                {
-                    _visibility = value;
-                    OnPropertyChanged(nameof(Visibility));
-                }
-            }
-        }
+        public Visibility Visibility { get => _visibility; set => SetProperty(ref _visibility, value); }
         #endregion
 
         #region IsEnable
         private bool _IsEnable = true;
-        public bool IsEnable
-        {
-            get { return _IsEnable; }
-            set
-            {
-                if (_IsEnable != value)
-                {
-                    _IsEnable = value;
-                    OnPropertyChanged(nameof(IsEnable));
-                }
-            }
-        }
+        public bool IsEnable { get => _IsEnable; set => SetProperty(ref _IsEnable, value); }
         #endregion
-        public ToolTip? ToolTip { get; set; }
+
+        ToolTip? _toolTip;
+        public ToolTip? ToolTip { get=>_toolTip; set=>SetProperty(ref _toolTip, value); }
         public bool IconSourceEnable => IconSource != null;
-        public string? IconSource { get; set; }
+
+        string? _IconSource;
+        public string? IconSource { get => _IconSource; set => SetProperty(ref _IconSource, value); }
     }
 
     public abstract class PriorityServer

@@ -5,9 +5,13 @@
                     xmlns:con="clr-namespace:Connections;assembly=Communications"
                     xmlns:vm="clr-namespace:Main.ViewModels">
 
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/Core;component/ViewResourceTools.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
     <c:MenuTemplateSelector x:Key="MenuTemplateSelectorVMKey" />
     <v:ProjectExplorerTemplateSelector x:Key="DataTemplateSelectorKey" />
-
+    <v:BoolToVisibilityConverter x:Key="BoolToVisibility" />
 
     <!--<Style x:Key="VMBaseStyle"
            TargetType="{x:Type TreeViewItem}"
@@ -237,7 +241,7 @@
         </Setter>
     </Style>
 
-        <DataTemplate x:Key="VisitDocumentSubHeader" DataType="{x:Type vm:VisitDocument}">
+     <DataTemplate x:Key="VisitDocumentSubHeader" DataType="{x:Type vm:VisitDocument}">
         <v:VisitUI Style="{StaticResource DataTemplateStyle}"/>
     </DataTemplate>
 
@@ -329,16 +333,45 @@
             <TextBlock Text="{Binding Host}" />
         </StackPanel>
     </DataTemplate>-->
+
+    <Style x:Key="MonitorButtonStyle"
+           TargetType="{x:Type Button}"
+           BasedOn="{StaticResource ToolButtonBaseStyle}">
+        <Setter Property="ToolTip"
+                Value="show monitor" />
+        <Setter Property="Height"
+                Value="16" />
+        <Setter Property="VerticalAlignment"
+                Value="Center" />
+        <Setter Property="Visibility"
+                Value="{Binding VisibilityMonitor, Converter={StaticResource BoolToVisibility},Mode=OneTime}" />
+
+        <Setter Property="Command"
+                Value="{Binding ShowMonitor}" />
+        <Setter Property="ContentTemplate">
+            <Setter.Value>
+                <DataTemplate>
+                    <Image  Source="/Images/Monitor.png" />
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <DataTemplate x:Key="SerialVMData"
                   DataType="{x:Type vm:SerialVM}">
-        <TextBlock Foreground="Red">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Foreground="Red">
             <Run Text="Port: " />
             <Bold>
             <Run Text="{Binding PortName}" />
             </Bold>
-            <Run FontSize="10" Text=" Baud: " />
-            <Run FontSize="10" Text="{Binding BaudRate}" />
-        </TextBlock>
+            <Run FontSize="10"
+                 Text=" Baud: " />
+            <Run FontSize="10"
+                 Text="{Binding BaudRate}" />
+            </TextBlock>
+            <Button Style="{StaticResource MonitorButtonStyle}" />
+        </StackPanel>
     </DataTemplate>
 
     <DataTemplate x:Key="NetVMData"
@@ -350,8 +383,73 @@
             </Bold>
             <Run Text=":" />
             <Run Text="{Binding Port}" />
+            <Button Style="{StaticResource MonitorButtonStyle}" />
         </TextBlock>
     </DataTemplate>
+
+    <DataTemplate x:Key="NopConVMData"
+                  DataType="{x:Type vm:NopConVM}">
+        <TextBlock Foreground="Red" Text="not connect" />
+    </DataTemplate>
+
+    <DataTemplate x:Key="BusUSO32VMSubHeader"
+                  DataType="{x:Type vm:BusUSO32VM}">
+        <StackPanel>
+            <ContentPresenter Content="{Binding VMConn}"
+                              ContentTemplateSelector="{StaticResource DataTemplateSelectorKey}" />
+        </StackPanel>
+    </DataTemplate>
+
+    <HierarchicalDataTemplate x:Key="BusUSO32VMHeader"
+                              DataType="{x:Type vm:BusUSO32VM}"
+                              ItemsSource="{Binding Items}">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Style="{StaticResource DataTemplateStyle}"
+                       Foreground="Blue" VerticalAlignment="Center">
+            <Bold>
+                <Run Text="{Binding Name}" />
+            </Bold>
+                <Run Text="фнч:" />
+                <Run Text="{Binding tbxFQ.Text}" />
+                <Run Text="ку:" />
+                <Run Text="{Binding tbxAMP.Text}" />
+            </TextBlock>
+            <Button Style="{StaticResource ToolButtonBaseStyle}"
+                    VerticalAlignment="Center"
+                    Height="16"
+                    ToolTip="Show osciloscope"
+                    Command="{Binding OscCommand}">
+                <Image Source="/Images/Osc.png" />
+            </Button>
+                <!--<TextBlock Foreground="Blue">
+            <Run Text=" интервал опроса " />
+                <Run Text="{Binding Interval}" />
+            --><!--<Bold>
+                <InlineUIContainer BaselineAlignment="Center">
+                    <TextBox  Foreground="Blue"
+                              BorderBrush="Transparent"
+                              Text="{Binding Interval}" />
+                </InlineUIContainer>
+            </Bold>--><!--
+            <Run Text="ms" />
+            </TextBlock>-->
+        </StackPanel>
+    </HierarchicalDataTemplate>
+    
+    <DataTemplate x:Key="TelesysVMHeader"
+                  DataType="{x:Type vm:TelesysVM}">
+        <TextBlock Style="{StaticResource DataTemplateStyle}"
+                   Foreground="BlueViolet">
+				<Run Text="Телесистема: " />
+				<Bold>
+				<Italic>
+				<Run Text="{Binding Model.Name, Mode=OneWay}" />
+				</Italic>
+				 </Bold>
+        </TextBlock>
+        <!--<TextBlock Text="{Binding Model.serial, Mode=OneWay, StringFormat='серийный номер {0}'}" />-->
+    </DataTemplate>
+
 
     <HierarchicalDataTemplate x:Key="BusPBVMHeader"
                               DataType="{x:Type vm:BusPBVM}"
