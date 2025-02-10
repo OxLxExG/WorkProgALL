@@ -14,40 +14,48 @@ namespace Connections
     {
         public ILogger? logger { get; set; }
         static object lockObj = new object();
+        public static bool IsLocked;
         public static string[] FindUSO32SerialPort()
         {
             string[] ports = SerialPort.GetPortNames();
             List<string> USO32Ports = new List<string>();
             IConnectionServer? cs = (Application.Current as IServiceProvider)?.GetRequiredService<IConnectionServer>();
 
-            foreach (string port in ports) 
+            lock (lockObj)
             {
-                var ac = cs?.Get(port);
-                if (ac != null && ac.IsLocked) continue;
-                lock (lockObj)
+                IsLocked = true;
+                try
                 {
-                                        
-                    var p = new SerialPort(port, 57600);
-                    try
+                    foreach (string port in ports)
                     {
-                        if (p.IsOpen) continue;
-                        p.Open();
-                        p.Write(new byte[] { 0xAA }, 0, 1);
-                        if (ac is AbstractConnection a) a.OnRowSendEvent(new byte[] { 0xAA }, 0, 1);
-                        Thread.Sleep(1);
-                        var btr = p.BytesToRead;
-                        var r = new byte[btr];
-                        int rn = p.Read(r, 0, btr);
-                        if (ac is AbstractConnection ra) ra.OnRowDataEvent(r, 0, rn);
-                        if (rn == 1 && r[0] == 0x55) USO32Ports.Add(port);
-                        p.Close();
+                        var ac = cs?.Get(port);
+                        if (ac != null && ac.IsLocked) continue;
+                        var p = new SerialPort(port, 57600);
+                        try
+                        {
+                            if (p.IsOpen) continue;
+                            p.Open();
+                            p.Write(new byte[] { 0xAA }, 0, 1);
+                            if (ac is AbstractConnection a) a.OnRowSendEvent(new byte[] { 0xAA }, 0, 1);
+                            Thread.Sleep(1);
+                            var btr = p.BytesToRead;
+                            var r = new byte[btr];
+                            int rn = p.Read(r, 0, btr);
+                            if (ac is AbstractConnection ra) ra.OnRowDataEvent(r, 0, rn);
+                            if (rn == 1 && r[0] == 0x55) USO32Ports.Add(port);
+                            p.Close();
+                        }
+                        finally
+                        {
+                            p.Dispose();
+                        }
                     }
-                    finally
-                    {
-                        p.Dispose();
-                    }
-                };
-            }
+                } 
+                finally 
+                { 
+                    IsLocked = false; 
+                }
+            };
             return USO32Ports.ToArray();
         }
         public event OnUSO32DataHandler? OnUSO32Data;

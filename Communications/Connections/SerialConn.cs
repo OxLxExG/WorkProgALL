@@ -33,7 +33,14 @@ namespace Connections
         public int BaudRate
         {
             get { return port.BaudRate; }
-            set { port.BaudRate = value; }
+            set 
+            {
+                if (port.BaudRate != value)
+                {
+                    if (IsLocked || IsOpen) throw new InvalidOperationException($"Port is locked={IsLocked} or open={IsOpen}");
+                    port.BaudRate = value;
+                }
+            }
         }
         public string PortName
         {

@@ -26,6 +26,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xceed.Wpf.AvalonDock.NET5",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xceed.Wpf.Toolkit.NET5", "..\Device3\wpftoolkit\ExtendedWPFToolkitSolution\Src\Xceed.Wpf.Toolkit\Xceed.Wpf.Toolkit.NET5.csproj", "{7FDA8298-F416-419C-AE63-D06A91977E52}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xceed.Wpf.AvalonDock.Themes.Aero.NET5", "..\Device3\wpftoolkit\ExtendedWPFToolkitSolution\Src\Xceed.Wpf.AvalonDock.Themes.Aero\Xceed.Wpf.AvalonDock.Themes.Aero.NET5.csproj", "{47836D01-6877-4BDB-9192-BDEBFBE29331}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xceed.Wpf.AvalonDock.Themes.Metro.NET5", "..\Device3\wpftoolkit\ExtendedWPFToolkitSolution\Src\Xceed.Wpf.AvalonDock.Themes.Metro\Xceed.Wpf.AvalonDock.Themes.Metro.NET5.csproj", "{DA4A6293-43DC-4A74-A985-0590B645524E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xceed.Wpf.AvalonDock.Themes.VS2010.NET5", "..\Device3\wpftoolkit\ExtendedWPFToolkitSolution\Src\Xceed.Wpf.AvalonDock.Themes.VS2010\Xceed.Wpf.AvalonDock.Themes.VS2010.NET5.csproj", "{B76EA1B6-BE63-4CA8-86B1-4B45F1AD6841}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -72,6 +78,18 @@ Global
 		{7FDA8298-F416-419C-AE63-D06A91977E52}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7FDA8298-F416-419C-AE63-D06A91977E52}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7FDA8298-F416-419C-AE63-D06A91977E52}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47836D01-6877-4BDB-9192-BDEBFBE29331}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47836D01-6877-4BDB-9192-BDEBFBE29331}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47836D01-6877-4BDB-9192-BDEBFBE29331}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47836D01-6877-4BDB-9192-BDEBFBE29331}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA4A6293-43DC-4A74-A985-0590B645524E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA4A6293-43DC-4A74-A985-0590B645524E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA4A6293-43DC-4A74-A985-0590B645524E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA4A6293-43DC-4A74-A985-0590B645524E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B76EA1B6-BE63-4CA8-86B1-4B45F1AD6841}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B76EA1B6-BE63-4CA8-86B1-4B45F1AD6841}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B76EA1B6-BE63-4CA8-86B1-4B45F1AD6841}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B76EA1B6-BE63-4CA8-86B1-4B45F1AD6841}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -351,7 +351,7 @@
         <Setter Property="ContentTemplate">
             <Setter.Value>
                 <DataTemplate>
-                    <Image  Source="/Images/Monitor.png" />
+                    <Image  Source="/Images/Monitor16.png" />
                 </DataTemplate>
             </Setter.Value>
         </Setter>

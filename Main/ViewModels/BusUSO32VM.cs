@@ -281,7 +281,10 @@ namespace Main.ViewModels
             {
                 if (SetProperty(ref _State, value))
                 {
-                    ctbStart.IconSource = ICS[value];
+                    if (Application.Current != null)
+                        Application.Current.Dispatcher.Invoke(DispatcherPriority.Background,
+                            () => ctbStart.IconSource = ICS[value]);
+                    
 
                     if (value == USO32_State.USO32_Run0 || value == USO32_State.USO32_Run1) return;
 
@@ -349,7 +352,7 @@ namespace Main.ViewModels
             ctbSetHP = initHP("pack://application:,,,/Images/Uso32SetHP.png", "USO32 Вкл HP", 102, USO32_State.USO32_SetHP);
             ctbClrHP = initHP("pack://application:,,,/Images/Uso32ClrHP.png", "USO32 Выкл HP", 103, USO32_State.USO32_ClearHP);
 
-            AutomatUpdateSate(USO32_State.USO32_Idle_FindPort);
+            State = USO32_State.USO32_Terminated;
         }
         SerialVM? serialVM { get => (VMConn is SerialVM s) ? s : null; set => VMConn = value; }
         public override bool ShouldSerializeVMConn() => false;
@@ -371,7 +374,8 @@ namespace Main.ViewModels
                 {
                     if (dataOld >= 0)
                     {
-                        AutomatUpdateSate(USO32_State.USO32_Run0);
+                        State = USO32_State.USO32_Run0;
+                        //AutomatUpdateSate(USO32_State.USO32_Run0);
                         stopwatch.Restart();
                         dataOld = data;
                     }
@@ -380,7 +384,8 @@ namespace Main.ViewModels
                 {
                     if (dataOld <= 0)
                     {
-                        AutomatUpdateSate(USO32_State.USO32_Run1);
+                        State = USO32_State.USO32_Run1;
+                        //AutomatUpdateSate(USO32_State.USO32_Run1);
                         stopwatch.Restart();
                         dataOld = data;
                     }
@@ -434,6 +439,7 @@ namespace Main.ViewModels
                 case USO32_State.USO32_FindPort:
                     Task.Run(() =>
                     {
+                        if (DriverUSO32Telesystem.IsLocked) return;
                         Thread.Sleep(500);
                         var fp = DriverUSO32Telesystem.FindUSO32SerialPort();
                         if (fp.Length > 0)

@@ -101,7 +101,7 @@ namespace Main.ViewModels
 
         public MonitorVM() 
         {
-            IconSource = new Uri("pack://application:,,,/Images/Monitor.png");
+            IconSource = new Uri("pack://application:,,,/Images/Monitor16.png");
             CanClose = true;
             PropertyChanged += OnPropertyChangedEvent;
         }        
