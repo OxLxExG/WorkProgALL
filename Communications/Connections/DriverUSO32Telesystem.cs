@@ -1,10 +1,8 @@
 ﻿using Connections.Interface;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using System.Buffers.Binary;
 using System.Collections.Concurrent;
 using System.IO.Ports;
-using System.Windows;
+using Serilog;   
 
 namespace Connections
 {
@@ -15,11 +13,10 @@ namespace Connections
         public ILogger? logger { get; set; }
         static object lockObj = new object();
         public static bool IsLocked;
-        public static string[] FindUSO32SerialPort()
+        public static string[] FindUSO32SerialPort(IConnectionServer? cs)
         {
             string[] ports = SerialPort.GetPortNames();
             List<string> USO32Ports = new List<string>();
-            IConnectionServer? cs = (Application.Current as IServiceProvider)?.GetRequiredService<IConnectionServer>();
 
             lock (lockObj)
             {

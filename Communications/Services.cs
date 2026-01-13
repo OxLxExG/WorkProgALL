@@ -1,8 +1,9 @@
 ﻿using Connections.Interface;
-using ExceptionExtensions;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+using Global;
 using System.Text;
+using Serilog;
+using Microsoft.Extensions.Configuration;
 
 namespace Communications
 {
@@ -24,6 +25,8 @@ namespace Communications
             if (s == null) Subscrubers.Add(new WeakReference(Subscruber));
         }
     }
+
+    //[RegService(typeof(IConnectionServer), IsSingle:false)]
     public class ConnectionCash: IConnectionServer
     {
         static private List<ConectionItem> conections = new ();
@@ -65,16 +68,16 @@ namespace Communications
                     {
                         sb.Append(item.ToString());
                     }
-                    logger.LogTrace("{} = {}", c.Id, sb);
+                    logger.Debug("{} = {}", c.Id, sb);
                 }
             }
         }
     }
     #endregion
 
-    public static class ServicesRoot
+    public class ServiceRegister: AbstractServiceRegister
     {
-        public static void Register(IServiceCollection services)
+        public override void Register(IConfiguration context, IServiceCollection services)
         {
             services.AddTransient<IConnectionServer, ConnectionCash>();
         }

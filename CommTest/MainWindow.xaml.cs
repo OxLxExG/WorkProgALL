@@ -539,7 +539,7 @@ namespace SerialPortTest
                 driverUSO32 = new DriverUSO32Telesystem();
                 driverUSO32.logger = App.logger;
                 sp.Driver = driverUSO32;
-                ProtocolUSO32.StartUSO32(sp, Uso32_Bias.b1, Uso32_Freqs.fq20Hz, OnUSO32Dataf);
+                ProtocolUSO32.StartUSO32(sp, Uso32_Gain.b1, Uso32_Freqs.fq20Hz, OnUSO32Dataf);
             }
             catch (Exception)
             {

@@ -1,0 +1,150 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <LangVersion>latest</LangVersion>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="appsettings.json" />
+    <None Remove="icon.ico" />
+    <None Remove="Images\Cycle.png" />
+    <None Remove="Images\CycleDev.png" />
+    <None Remove="Images\DockBottom.PNG" />
+    <None Remove="Images\DockPane.PNG" />
+    <None Remove="Images\FindPort.png" />
+    <None Remove="Images\FindPortidle.png" />
+    <None Remove="Images\FoundPort.png" />
+    <None Remove="Images\Freeze.png" />
+    <None Remove="Images\HTabGroup.png" />
+    <None Remove="Images\InfoLog.png" />
+    <None Remove="Images\NewProject.png" />
+    <None Remove="Images\TraceLog.png" />
+    <None Remove="Images\Uso32ClrHP.png" />
+    <None Remove="Images\Uso32Err.png" />
+    <None Remove="Images\Uso32Run0.png" />
+    <None Remove="Images\Uso32Run1.png" />
+    <None Remove="Images\Uso32SetHP.png" />
+    <None Remove="Images\Uso32Start.png" />
+    <None Remove="Images\Uso32Terminate.png" />
+    <None Remove="Images\Warning.png" />
+    <None Remove="Images\ExceptLog.png" />
+    <None Remove="Images\Except.png" />
+    <None Remove="Images\Clear.png" />
+    <None Remove="Images\Project.png" />
+    <None Remove="Images\Project16.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Remove="Resources\ExceptLogDictionary_old.xaml" />
+    <Page Remove="Views\USO32\Uso32ToolBar.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="icon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
+    <PackageReference Include="ScottPlot" Version="5.0.55" />
+    <PackageReference Include="ScottPlot.WPF" Version="5.0.55" />
+    <PackageReference Include="Serilog" Version="4.3.0" />
+    <!--<PackageReference Include="System.Drawing.Common" Version="8.0.6" />-->
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\adonis-ui\src\AdonisUI.ClassicTheme\AdonisUI.ClassicTheme.csproj" />
+    <ProjectReference Include="..\..\adonis-ui\src\AdonisUI\AdonisUI.csproj" />
+    <ProjectReference Include="..\..\Xceed.Wpf.AvalonDock\Xceed.Wpf.AvalonDock.NET5.csproj" />
+    <ProjectReference Include="..\Communications\Communications.csproj" />
+    <ProjectReference Include="..\Core\Core.csproj" />
+    <ProjectReference Include="..\Dialogs\WpfDialogs.csproj" />
+    <ProjectReference Include="..\Global\Global.csproj" />
+    <ProjectReference Include="..\Loggin\Loggin.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Properties\Resources.ru-RU.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Models\XMLSchemaVisit.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Update="Properties\Settings.settings">
+      <Generator>PublicSettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Images\Cycle.png" />
+    <Resource Include="Images\CycleDev.png" />
+    <Resource Include="Images\DockBottom.PNG" />
+    <Resource Include="Images\DockPane.PNG" />
+    <Resource Include="Images\FindPort.png" />
+    <Resource Include="Images\FindPortidle.png" />
+    <Resource Include="Images\FoundPort.png" />
+    <Resource Include="Images\Freeze.png" />
+    <Resource Include="Images\HTabGroup.png" />
+    <Resource Include="Images\Monitor16.png" />
+    <Resource Include="Images\NewProject.png" />
+    <Resource Include="Images\TraceLog.png" />
+    <Resource Include="Images\Uso32ClrHP.png" />
+    <Resource Include="Images\Uso32Err.png" />
+    <Resource Include="Images\Uso32Run0.png" />
+    <Resource Include="Images\Uso32Run1.png" />
+    <Resource Include="Images\Uso32SetHP.png" />
+    <Resource Include="Images\Uso32Start.png" />
+    <Resource Include="Images\Uso32Terminate.png" />
+    <Resource Include="Images\Warning.png" />
+    <Resource Include="Images\ExceptLog.png" />
+    <Resource Include="Images\Except.png" />
+    <Resource Include="Images\InfoLog.png" />
+    <Resource Include="Images\Osc.png" />
+    <Resource Include="Images\Uso32Terminated.png" />
+    <Resource Include="Images\Clear.png" />
+    <Resource Include="Images\Project16.png" />
+    <Resource Include="Images\Project.png" />
+    <Resource Include="Images\OpenProject.png" />
+    <Resource Include="Images\TxOnly.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Controls\" />
+  </ItemGroup>
+
+</Project>

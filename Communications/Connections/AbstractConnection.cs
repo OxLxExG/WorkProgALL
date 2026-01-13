@@ -1,5 +1,6 @@
 ﻿using Connections.Interface;
-using Microsoft.Extensions.Logging;
+using Serilog;
+using Serilog.Core;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -55,12 +56,9 @@ namespace Connections //Horizont.Drilling.Connections
                 _Driver = value; 
             }
         }
-
-        // row data events
-        public event OnRowNewDataHandler? OnRowSendHandler;
-        public event OnRowNewDataHandler? OnRowDataHandler;
-        public void OnRowDataEvent(byte[] buf, int oldof, int of) => OnRowDataHandler?.Invoke(buf, oldof, of);
-        public void OnRowSendEvent(byte[] buf, int oldof, int of) => OnRowSendHandler?.Invoke(buf, oldof, of);
+        public void OnRowDataEvent(byte[] buf, int oldof, int of) => monitor?.Debug("Rx {buf}", buf);        
+        public void OnRowSendEvent(byte[] buf, int oldof, int of) => monitor?.Information("{Tx} {buf}", "Tx",buf);
+        
         public DataReq? CurrenRq { get; set; }
         public bool IsReading { get; set; }
         
@@ -70,6 +68,12 @@ namespace Connections //Horizont.Drilling.Connections
 
         [XmlIgnore]
         public ILogger? logger { get; set; }
+
+        [XmlIgnore]
+        public ILogger? monitor { get; set; }
+
+        [XmlIgnore]
+        public LoggingLevelSwitch? monitorLevel { get; set; }
 
 
         // interface
@@ -93,7 +97,7 @@ namespace Connections //Horizont.Drilling.Connections
         protected CancellationTokenSource? CtsCancel { get; set; }
         public virtual void Cancel()
         {
-            logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} {dbg} Cts.Cancel()");
+            logger?.Information($"{Thread.CurrentThread.ManagedThreadId} {dbg} Cts.Cancel()");
             canceled = true;
             CtsCancel?.Cancel();
         }
@@ -142,14 +146,14 @@ namespace Connections //Horizont.Drilling.Connections
 
         public async Task<DataResp> Transaction(DataReq dataReq)
         {
-            logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} {dbg} ===> begin--- {dataReq.rxCount}");
+            logger?.Information($"{Thread.CurrentThread.ManagedThreadId} {dbg} ===> begin--- {dataReq.rxCount}");
             lock (this)
             {
                 CurrenRq = dataReq;
                 Driver?.BeginTransaction(this, dataReq);
             }
             await Send(dataReq);
-            OnRowSendHandler?.Invoke(dataReq.txBuf, 0, dataReq.txBuf.Length);
+            OnRowSendEvent(dataReq.txBuf, 0, dataReq.txBuf.Length);
             return await Read(dataReq);
         }
         protected virtual void BeginRead()
@@ -237,13 +241,13 @@ namespace Connections //Horizont.Drilling.Connections
                     catch (Exception e)
                     {
                         IsReading = false;
-                        logger?.LogInformation($"ERR {Thread.CurrentThread.ManagedThreadId} {dbg} Produser exit rxEndBad.Set() {e}");
+                        logger?.Information($"ERR {Thread.CurrentThread.ManagedThreadId} {dbg} Produser exit rxEndBad.Set() {e}");
                         rxEndBad.Set();
                     }
                 }
                 catch (Exception e)
                 {
-                    logger?.LogError(e.Message, e);
+                    logger?.Error(e.Message, e);
                 }
             }
 

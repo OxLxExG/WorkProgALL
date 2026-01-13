@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Diagnostics;
-using ExceptionExtensions;
+using Global;
 
 namespace TextBlockLogging
 {
@@ -88,7 +88,7 @@ namespace TextBlockLogging
             }
             if (timestamp != null)
             {
-                writer.Add(new InlineStr(timestamp) { Fore = Brushes.Blue });
+                writer.Add(new InlineStr(timestamp) { Fore = Brushes.CadetBlue });
             }
             if (logLevelString != null)
             {
@@ -236,7 +236,7 @@ namespace TextBlockLogging
             static void WriteReplacing(List<InlineStr> writer, string oldValue, string newValue, string message)
             {
                 string newMessage = message.Replace(oldValue, newValue);
-                writer.Add(new InlineStr(newMessage, true) { Fore = Brushes.DarkSlateBlue });
+                writer.Add(new InlineStr(newMessage, true));// { Fore = Brushes.DarkSlateBlue });
             }
         }
     

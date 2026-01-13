@@ -9,9 +9,12 @@
   <ItemGroup>
     <ProjectReference Include="..\Communications\Communications.csproj" />
     <ProjectReference Include="..\Core\Core.csproj" />
-    <ProjectReference Include="..\..\Device3\wpftoolkit\ExtendedWPFToolkitSolution\Src\Xceed.Wpf.AvalonDock\Xceed.Wpf.AvalonDock.NET5.csproj" />
-    <ProjectReference Include="..\..\Device3\wpftoolkit\ExtendedWPFToolkitSolution\Src\Xceed.Wpf.Toolkit\Xceed.Wpf.Toolkit.NET5.csproj" />
-    <ProjectReference Include="..\ExceptLog\ExceptLog.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Microsoft.Extensions.Hosting.Abstractions">
+      <HintPath>..\..\..\..\..\IDEs\.nuget\microsoft.extensions.hosting.abstractions\9.0.1\lib\net8.0\Microsoft.Extensions.Hosting.Abstractions.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

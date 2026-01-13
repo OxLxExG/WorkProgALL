@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.Input;
 using Core;
+using Global;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,7 @@ using System.Xml.Linq;
 
 namespace WpfDialogs
 {
+    [RegService(typeof(IMenuItemClient))]
     public class FormBaseFactory : IMenuItemClient
     {
         private static int n = 1;
@@ -40,7 +42,7 @@ namespace WpfDialogs
                         Title =$"Doc {n++}",
                         ContentID = $"CID_{n}",
                         ToolTip=$"ToolTip {n}",
-                        IconSource = new Uri("pack://application:,,,/Images/HTabGroup.png")
+                        IconSource = "pack://application:,,,/Images/HTabGroup.png"
 
                 }, FormAddedFrom.User);
                     
@@ -60,6 +62,7 @@ namespace WpfDialogs
     /// <summary>
     /// Логика взаимодействия для FormBase.xaml
     /// </summary>
+    [RegService(null)]
     public partial class FormBase : DockUserControl
     {
         public FormBase()

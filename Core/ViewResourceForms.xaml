@@ -1,12 +1,15 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:avalonDock="clr-namespace:Xceed.Wpf.AvalonDock;assembly=Xceed.Wpf.AvalonDock.NET5"
-                    xmlns:adconv="clr-namespace:Xceed.Wpf.AvalonDock.Converters;assembly=Xceed.Wpf.AvalonDock.NET5"
-                    xmlns:adlayout="clr-namespace:Xceed.Wpf.AvalonDock.Layout;assembly=Xceed.Wpf.AvalonDock.NET5"
-                    xmlns:adctrl="clr-namespace:Xceed.Wpf.AvalonDock.Controls;assembly=Xceed.Wpf.AvalonDock.NET5"                    
-                    >
+                    xmlns:avalonDock="http://schemas.xceed.com/wpf/xaml/avalondock"
+                    xmlns:adconv="http://schemas.xceed.com/wpf/xaml/avalondock"
+                    xmlns:vm="clr-namespace:Core"
+                    xmlns:adlayout="http://schemas.xceed.com/wpf/xaml/avalondock"
+                    xmlns:adctrl="http://schemas.xceed.com/wpf/xaml/avalondock"
+                    xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI">
 
     <adconv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+    <!--<vm:DummiConverter x:Key="DummiConverter" />-->
+    <vm:VMFormToImageSource x:Key="VMFormToImageSource" />
 
     <Style x:Key="LayoutItemStyle" TargetType="{x:Type adctrl:LayoutItem}">
         <Setter Property="Title" Value="{Binding Model.Title}"/>
@@ -17,14 +20,7 @@
         <Setter Property="IsActive" Value="{Binding Model.IsActive, Mode=TwoWay}"/>
         <Setter Property="CanClose" Value="{Binding Model.CanClose}"/>
         <Setter Property="CanFloat" Value="{Binding Model.CanFloat}"/>
-        <Style.Triggers>
-            <DataTrigger Binding="{Binding Model.IconSourceEnable}" Value="True">
-                <Setter Property="IconSource" Value="{Binding Model.IconSource}"/>
-            </DataTrigger>
-            <DataTrigger Binding="{Binding Model.ToolTipEnable}" Value="True">
-                <Setter Property="ToolTip" Value="{Binding Model.ToolTip}"/>
-            </DataTrigger>
-        </Style.Triggers>
+        <Setter Property="IconSource" Value="{Binding Model, Converter ={StaticResource VMFormToImageSource}}" />
     </Style>
 
     <Style x:Key="ToolVMStyle" 
@@ -43,28 +39,6 @@
         </Style.Triggers>
     </Style>
     
-    <!--<DataTemplate x:Key="LayoutAnchorableTemplate">
-        <TextBlock Text="{Binding Path=Title,StringFormat=Tool {0:s}!}"/>
-    </DataTemplate>
-    
-    <DataTemplate x:Key="LayoutDocumentTemplate">
-        <TextBlock>
-            <TextBlock.Text>
-                <MultiBinding StringFormat="{} doc name {0}. \n description {1}">
-                    <Binding  Path="Title"/>
-                    <Binding Path="Description"/>
-                </MultiBinding>
-            </TextBlock.Text>
-        </TextBlock>
-    </DataTemplate>
-
-    <Style x:Key="ToolVMStyle" 
-           TargetType="{x:Type adctrl:LayoutAnchorableItem}" 
-           BasedOn="{StaticResource LayoutAnchorableItemStyle}"/>
-    <Style x:Key="DocumentVMStyle" 
-           TargetType="{x:Type adctrl:LayoutDocumentItem}" 
-           BasedOn="{StaticResource LayoutDocumentItemStyle}"/>-->
-
     <DataTemplate x:Key="ToolVMTemplate">
         <StackPanel>
             <TextBlock Text="Object"/>

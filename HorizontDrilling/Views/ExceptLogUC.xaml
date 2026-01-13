@@ -1,0 +1,47 @@
+﻿<UserControl x:Class="HorizontDrilling.Views.TextLogUC"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:log="clr-namespace:Loggin;assembly=Loggin"
+             xmlns:local="clr-namespace:HorizontDrilling"
+             xmlns:v="clr-namespace:HorizontDrilling.Views"
+             xmlns:c="clr-namespace:Core;assembly=Core"
+             xmlns:res="clr-namespace:HorizontDrilling.Properties"
+             xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
+             mc:Ignorable="d"             
+             d:DesignHeight="450"
+             d:DesignWidth="800">
+    <!--Background="{DynamicResource {x:Static adonisUi:Brushes.Layer0BackgroundBrush}}"
+             FontFamily="Courier New"-->
+
+
+    <UserControl.Resources>
+        <c:MenuTemplateSelector x:Key="MenuTemplateSelectorVMKey" />
+        <v:VmToBoxConverter x:Key="VmToBoxConverterKey" />
+    </UserControl.Resources>
+    
+    <UserControl.ContextMenu>
+        <ContextMenu ItemsSource="{Binding CItems}"
+                     UsesItemContainerTemplate="True"
+                     ItemContainerTemplateSelector="{StaticResource MenuTemplateSelectorVMKey}" />
+    </UserControl.ContextMenu>
+
+
+    <!--ScrollChanged="ScrollViewer_ScrollChanged"-->
+    <!--<ScrollViewer x:Name="ScrollViewer" 
+                  Content="{Binding DataContext, 
+                                    RelativeSource={RelativeSource Self},
+                                    Converter={StaticResource VmToBoxConverterKey}}"
+                  HorizontalScrollBarVisibility="Auto"
+                  VerticalScrollBarVisibility="Auto"/>-->
+
+    <UserControl.Content>
+        <Binding Path="DataContext" RelativeSource="{RelativeSource Self}" Converter="{StaticResource VmToBoxConverterKey}" />
+    </UserControl.Content>
+
+    <!--<RichTextBox VerticalContentAlignment ="Top">
+        
+    </RichTextBox>-->
+    
+</UserControl>

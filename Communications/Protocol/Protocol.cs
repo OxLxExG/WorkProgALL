@@ -1,18 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Media.Animation;
+﻿using Connections.Interface;
 using CRCModbusRTU;
-using Connections.Interface;
-using System.Threading;
-using System.Drawing;
-using ExceptionExtensions;
-using System.Windows.Interop;
-using Connections;
-using Microsoft.Extensions.Logging;
+using Global;
+using Serilog;
+using System.Runtime.InteropServices;
 
 /// реализация стандартных команд
 namespace Commands
@@ -280,7 +270,7 @@ namespace Commands
                 if (!p.Check(r))
                 {
                     await con.Close();
-                    logger?.LogError("ReadRam ERR A:{adr} F:{from} B:{bad} ",adr, from, i);
+                    logger?.Error("ReadRam ERR A:{adr} F:{from} B:{bad} ",adr, from, i);
                     await con.Open();
                     continue;
                 }

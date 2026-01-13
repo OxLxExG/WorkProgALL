@@ -1,17 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.Input;
+using Global;
+using Serilog;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Threading;
 using System.Xml.Serialization;
+using Microsoft.Extensions.Configuration;
 
 namespace Core
 {
@@ -26,6 +22,23 @@ namespace Core
     {
         void Register();
     }
+    public class FormsRegistrator : IFormsRegistrator
+    {
+        FormsRegistrator(Type type)
+        {
+            this.type = type;
+        }
+
+        Type type { get; }
+
+        void IFormsRegistrator.Register() => DockManagerVM.Register(type, type.Name, ()=> (VMBaseForm) VMBase.ServiceProvider.GetRequiredService(type));
+        public static void RegFormAction(IConfiguration context, IServiceCollection services, Type type, RegServiceAttribute attr)
+        {
+            services.AddTransient(type);
+            services.AddTransient(typeof(IFormsRegistrator), s => new FormsRegistrator(type));
+        }
+    }
+
     public class FormsRegistrator<T> : IFormsRegistrator where T : VMBaseForm
     {
         void IFormsRegistrator.Register() => DockManagerVM.Register<T>(typeof(T).Name, VMBase.ServiceProvider.GetRequiredService<T>);        
@@ -221,13 +234,71 @@ namespace Core
         }
         #endregion
 
-        #region Icon
-        [XmlIgnore] public Uri? IconSource
+        #region Icon        
+        string? _IconSource;
+        [XmlIgnore] public string? IconSource
         {
-            get;
-            set;
-        } = null;
-        public bool IconSourceEnable => IconSource != null;
+            get=> _IconSource;
+            set=> SetProperty(ref _IconSource, value);
+        }
+        //ImageSource? _IconSource;
+        //[XmlIgnore] public object? IconSource
+        //{
+        //    get => _IconSource;
+        //    set
+        //    {
+        //        if (value is string s)
+        //        {
+        //            if (Uri.TryCreate(s, UriKind.Absolute, out var uriResult))
+        //            {
+        //                _IconSource = new BitmapImage(uriResult);
+        //            }
+        //            else
+        //            {
+        //                FontFamily fontFamily = new FontFamily("Segoe Fluent Icons");
+
+
+        //                var SymbolSize = 16;
+
+        //                var textBlock = new TextBlock
+        //                {
+        //                    /// дллжно быть в xaml Style
+        //                    //Foreground = Application.Current.Resources[AdonisUI.Brushes.ForegroundBrush] as SolidColorBrush,
+        //                    //Background = Application.Current.Resources[AdonisUI.Brushes.Layer1BackgroundBrush] as SolidColorBrush,
+
+        //                    FontFamily = fontFamily,
+        //                    Text = s,
+        //                };
+
+        //                var brush = new VisualBrush
+        //                {
+        //                    Visual = textBlock,
+        //                    Stretch = Stretch.Uniform
+
+        //                };
+
+
+        //                var drawing = new GeometryDrawing
+        //                { 
+        //                    Brush = brush,
+        //                    Geometry = new RectangleGeometry(
+        //                    new Rect(0, 0, SymbolSize, SymbolSize))
+        //                };
+
+        //                _IconSource = new DrawingImage(drawing);
+        //            }
+        //        }
+        //        else
+        //        if (_IconSource != value && _IconSource is ImageSource si)
+        //        {
+        //            _IconSource = si;
+        //            //OnPropertyChanged(nameof(IconSource));
+        //        }
+        //    }
+
+        [XmlIgnore] public bool IconSourceEnable => _IconSource != null;
+        [XmlIgnore] public bool IconSourceIsUri => _IconSource != null && Uri.TryCreate(_IconSource, UriKind.Absolute, out var _);
+        [XmlIgnore] public bool IconSourceIsNotUri => _IconSource != null && !Uri.TryCreate(_IconSource, UriKind.Absolute, out var _);
         #endregion
 
         #region IsSelected
@@ -534,10 +605,10 @@ namespace Core
                 return c;
             }
             // создаем новую форму 
-            string RootContentID = ContentID.Split('.', StringSplitOptions.RemoveEmptyEntries)[0];
+            string RootContentID = SplitID(ContentID)[0];
             var FormVMGenerator = _RegForm.GetValueOrDefault(RootContentID);
             if (FormVMGenerator == null)
-                throw new ArgumentOutOfRangeException(nameof(ContentID), "FormVMGenerator == null bad ID", ContentID);
+                throw new ArgumentOutOfRangeException(nameof(FormVMGenerator), "FormVMGenerator == null", null);
             var form = FormVMGenerator();
             form.ContentID = ContentID;
             //
@@ -576,6 +647,11 @@ namespace Core
             _RegForm.TryAdd(RootContentID, RegFunc);
             if (!_SerializerTypes.Contains(typeof(T))) _SerializerTypes.Add(typeof(T));
         }
+        public static void Register(Type type, string RootContentID, Func<VMBaseForm> RegFunc)
+        {
+            _RegForm.TryAdd(RootContentID, RegFunc);
+            if (!_SerializerTypes.Contains(type)) _SerializerTypes.Add(type);
+        }
         public static XmlSerializer Serializer => new XmlSerializer(typeof(DockManagerVM), null, _SerializerTypes.ToArray(), null, null, null);
 
         public static void Serialize(StreamWriter fs)
@@ -611,9 +687,11 @@ namespace Core
                         });
                     }
 
-                    var l = ServiceProvider.GetRequiredService<ILogger<VMBaseForm>>();
-                    var s = Instance._activeDocument != null ? Instance._activeDocument.ContentID : "NUL";
-                    l.LogTrace(" ActiveDocument {0} => {1} ", s, value.ContentID);
+                    //var l = ServiceProvider.GetRequiredService<ILogger<VMBaseForm>>();
+                    //var s = Instance._activeDocument != null ? Instance._activeDocument.ContentID : "NUL";
+                    //l.LogTrace(" ActiveDocument {0} => {1} ", s, value.ContentID);
+                    Logger.Trace?.Debug(" ActiveDocument {OldActive} => {NewActive} ", 
+                        Instance._activeDocument?.ContentID ?? "NUL", value.ContentID);
 
                     Instance._activeDocument = value;
                     Instance.OnPropertyChanged(nameof(ActiveDocument));

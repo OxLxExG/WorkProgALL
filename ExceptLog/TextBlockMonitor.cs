@@ -1,16 +1,5 @@
-﻿using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Console;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.Extensions.Logging.Console;
 using System.Windows.Media;
-using System.Windows.Markup;
-using System.Windows.Documents;
-using System.Diagnostics.Eventing.Reader;
 
 namespace TextBlockLogging
 {
@@ -37,12 +26,12 @@ namespace TextBlockLogging
         {
             writer ??= new();
             lastTime = DateTime.Now;
-            writer.Add(new InlineStr("W " + lastTime.ToString("ss.fff"), true) { Fore = Brushes.Blue });
+            writer.Add(new InlineStr("W " + lastTime.ToString("ss.fff"), true) { Fore = Brushes.CadetBlue });
             int count = of - oldof;
             int cnt = Math.Min(count, _maxDataLen);
             writer.Add(new InlineStr(count.ToString().PadLeft(6), true) { Fore = Brushes.Green });
-            writer.Add(new InlineStr("   " + BitConverter.ToString(buf, oldof, cnt)) { Fore = Brushes.DarkMagenta });
-            if (count > _maxDataLen) writer.Add(new InlineStr("...") { Fore = Brushes.DarkMagenta });
+            writer.Add(new InlineStr("   " + BitConverter.ToString(buf, oldof, cnt)) { Fore = Brushes.Magenta });
+            if (count > _maxDataLen) writer.Add(new InlineStr("...") { Fore = Brushes.Magenta });
             writer.Add(new InlineStr());
             Write();
         }
@@ -57,8 +46,8 @@ namespace TextBlockLogging
             if (cnt > 0)
             {
                 writer.Add(new InlineStr(count.ToString().PadLeft(6), true) { Fore = Brushes.Green });
-                writer.Add(new InlineStr("   " + BitConverter.ToString(buf, oldof, cnt)) { Fore = Brushes.Black });
-                if (count > _maxDataLen) writer.Add(new InlineStr("...") { Fore = Brushes.Black });
+                writer.Add(new InlineStr("   " + BitConverter.ToString(buf, oldof, cnt)) {  });
+                if (count > _maxDataLen) writer.Add(new InlineStr("...") { });
             }
             else if (cnt == 0) writer.Add(new InlineStr("  --nodata") { Fore = Brushes.Red });
             else if (cnt == -1) writer.Add(new InlineStr("  --timout") { Fore = Brushes.Red });

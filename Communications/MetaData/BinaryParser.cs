@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Net.WebSockets;
-using System.Reflection;
-using System.Reflection.PortableExecutable;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
-using System.Text;
+﻿using System.Text;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
@@ -80,9 +71,9 @@ namespace Communications.MetaData
     // последняя структура с атрибутами: export(видимо ненужен), adr, serial является корневой 
     //   как правило имеет данные типа структура с атрибутами WRK RAM EEP
 
-    using Tip = Byte;
     using atrs_t = List<(Atr Atr, object? value)>;
     using datas_t = List<DataRoot>;
+    using Tip = Byte;
 
     internal static class TipExtention
     {

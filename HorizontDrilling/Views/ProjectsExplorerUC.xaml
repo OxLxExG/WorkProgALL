@@ -1,0 +1,29 @@
+﻿<UserControl x:Class="HorizontDrilling.Views.ProjectsExplorerUC"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:HorizontDrilling.Views"
+             xmlns:vm="clr-namespace:HorizontDrilling.ViewModels"
+             xmlns:c="clr-namespace:Core;assembly=Core"
+             xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
+             mc:Ignorable="d" 
+             d:DesignHeight="150" d:DesignWidth="200">
+
+    <Grid >
+        <Grid.Resources>
+            <local:InstanceConverter x:Key="InstanceConverterKey" />
+            <local:HeaderTemplateSelector x:Key="UITemplateSelectorKey" />
+            <local:ContainerStyleSelector x:Key="ContainerStyleSelectorKey" />
+        </Grid.Resources>
+
+        <local:TreeViewEx Background="{DynamicResource {x:Static adonisUi:Brushes.Layer2BackgroundBrush}}"
+                          BorderBrush="{DynamicResource {x:Static adonisUi:Brushes.Layer2BorderBrush}}"
+                          DataContext="{Binding Source={x:Static c:RootFileDocumentVM.Instance}}"
+                          ItemsSource="{Binding Converter={StaticResource InstanceConverterKey}}"
+                          ItemTemplateSelector="{StaticResource UITemplateSelectorKey}"
+                          ItemContainerStyleSelector="{StaticResource ContainerStyleSelectorKey}"
+                          />
+
+    </Grid>
+</UserControl>

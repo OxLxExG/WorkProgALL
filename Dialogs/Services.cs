@@ -1,20 +1,18 @@
-﻿using Core;
+﻿using Global;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection;
 
 namespace WpfDialogs
 {
-    public static class ServicesRoot
+    public class ServiceRegister : AbstractServiceRegister
     {
-        public static void Register(IServiceCollection services)
+        public override void Register(IConfiguration context, IServiceCollection services)
         {
-            services.AddTransient<FormBase>();
-            services.AddSingleton<IMenuItemClient, FormBaseFactory>();
-            services.AddSingleton<IMenuItemClient, DocRoot>();
+            RegisterServicesFormAttr(Assembly.GetExecutingAssembly(), context, services);
+            //services.AddTransient<FormBase>();
+            //services.AddSingleton<IMenuItemClient, FormBaseFactory>();
+            //services.AddSingleton<IMenuItemClient, DocRoot>();
         }
     }
 }

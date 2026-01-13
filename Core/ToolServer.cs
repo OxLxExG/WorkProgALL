@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Global;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,11 +16,11 @@ namespace Core
         public void Add(string BarContentID, ToolItem Tool);
         public void Remove(string ContentID);
         public void Remove(IEnumerable<ToolItem> Tools);
-        public bool Contains(string ContentID);
+        public ToolItem? Contains(string ContentID);
         public bool Contains(ToolItem Tool);
         public void UpdateSeparatorGroup(string BarContentID);
     }
-
+    [RegService(typeof(IToolServer))]
     internal class ToolServer: PriorityServer, IToolServer
     {
         private static List<ToolBarVM> barVMs = new List<ToolBarVM>();
@@ -39,12 +40,12 @@ namespace Core
         {
             barVMs.Add(toolBar);
         }
-        public bool Contains(string ContentID)
+        public ToolItem? Contains(string ContentID)
         {
            foreach( var br in barVMs)
               foreach(var t in br.Items)
-                    if (t.ContentID == ContentID) return true;
-           return false;                    
+                    if (t.ContentID == ContentID) return t as ToolItem;
+           return null;                    
         }
         public bool Contains(ToolItem Tool)
         {

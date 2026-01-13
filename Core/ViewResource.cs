@@ -1,17 +1,206 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
-using System.Windows;
-using System.Windows.Media;
+﻿using Global;
 using Microsoft.Win32;
-using System.Collections;
 using System.ComponentModel;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Markup;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace Core
 {
+    public static class ThemeEvent
+    {
+        static Dictionary<VMBaseForm, WeakReference<TextBlock>> datas = new Dictionary<VMBaseForm, WeakReference<TextBlock>>();
+        public static void Register(VMBaseForm form, TextBlock tb)
+        {
+            datas.Remove(form);
+            datas.Add(form, new WeakReference<TextBlock>(tb));
+        }
+        public static void DoThemeChanged(object? sender, bool e)
+        {
+            ThemeChangeEvent.DoThemeChanged(sender, e);
+
+            for (var i = datas.Count-1; i >= 0; i--)  
+            {
+                var w = datas.ElementAt(i);
+                if (w.Value.TryGetTarget(out var elem))
+                {
+                    elem.Foreground = Application.Current.Resources[AdonisUI.Brushes.ForegroundBrush] as SolidColorBrush;
+                }
+                else datas.Remove(w.Key);
+            }
+        }
+    }
+
+    //[MarkupExtensionReturnType(typeof(DrawingImage))]
+    //public class IconImageExtension : StaticResourceExtension
+    //{
+    //    private static readonly FontFamily fontFamily
+    //        = new FontFamily("Segoe Fluent Icons");
+
+    //    public string SymbolCode { get; set; } = string.Empty;
+
+    //    public double SymbolSize { get; set; } = 16;
+
+    //    public override object ProvideValue(IServiceProvider serviceProvider)
+    //    {
+    //        var textBlock = new TextBlock
+    //        {
+    //            FontFamily = fontFamily,
+    //            Text = SymbolCode,
+    //        };
+
+    //        var brush = new VisualBrush
+    //        {
+    //            Visual = textBlock,
+    //            Stretch = Stretch.Uniform
+    //        };
+
+    //        var drawing = new GeometryDrawing
+    //        {
+    //            Brush = brush,
+    //            Geometry = new RectangleGeometry(
+    //                new Rect(0, 0, SymbolSize, SymbolSize))
+    //        };
+
+    //        return new DrawingImage(drawing);
+    //    }
+    //}
+
+
+    [ValueConversion(typeof(object), typeof(object))]
+    public class ContentTemplateButtonConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (value != null)
+            {
+                if (value is ComponentResourceKey c)
+                {
+                    var dt = Application.Current.FindResource(c) as DataTemplate;
+                    return dt ?? Binding.DoNothing;
+                }
+                return value;
+            }
+            return null!;
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }    
+
+    [ValueConversion(typeof(object), typeof(object))]
+    public class ContentButtonConverter : IValueConverter
+    {
+
+        #region IValueConverter Members 
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (value != null)
+            {
+                    if (value is string s)
+                    {
+                        if (Uri.TryCreate(s, UriKind.Absolute, out var uriResult))
+                        {
+                            var i = new Image
+                            {
+                                Source = new BitmapImage(uriResult),
+                            };
+                            return i;
+                        }
+                        else
+                        {
+                            return s;
+                        }
+                    }
+                    return value;
+            }
+            return null!;
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+           throw new NotImplementedException();
+        }
+        #endregion
+    }
+
+
+    [ValueConversion(typeof(VMBaseForm), typeof(ImageSourceConverter))]
+    public class VMFormToImageSource : IValueConverter
+    {
+
+        #region IValueConverter Members 
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (value != null && targetType == typeof(ImageSource))
+            {
+                if (value is VMBaseForm f)
+                {
+                    if (f.IconSourceEnable)
+                    {
+                        if (f.IconSourceIsUri) return new Uri(f.IconSource!);
+                        else
+                        {
+                            var textBlock = new TextBlock
+                            {                        
+                                FontFamily = new FontFamily("Segoe Fluent Icons"),
+                                Text = f.IconSource,
+                            };
+                            textBlock.Foreground = Application.Current.Resources[AdonisUI.Brushes.ForegroundBrush] as SolidColorBrush;
+
+                            ThemeEvent.Register(f, textBlock);
+
+                            var brush = new VisualBrush
+                            {
+                                Visual = textBlock,
+                                Stretch = Stretch.Uniform
+                            };
+
+                            var drawing = new GeometryDrawing
+                            {
+                                Brush = brush,
+                                Geometry = new RectangleGeometry(
+                                    new Rect(0, 0, 16, 16))
+                            };
+
+                            return new DrawingImage(drawing);
+
+                            //return new IconImageExtension { SymbolCode = f.IconSource! }.ProvideValue(null!);
+                        }
+                    }
+                }
+            }
+            return Binding.DoNothing; 
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+
+            return value;
+        }
+        #endregion
+    }
+
+    //public class DummiConverter : IValueConverter
+    //{
+
+    //    #region IValueConverter Members 
+    //    public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+    //    {
+    //        return value;
+    //    }
+
+    //    public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+    //    {
+            
+    //        return value;
+    //    }
+    //    #endregion
+    //}
+
     public static class AnyResuorceSelector
     {
         public static object? Get(ResourceDictionary _dictionary, object item, string suffix = "")
@@ -134,6 +323,7 @@ namespace Core
             return r;
         }
     }
+    [RegService(typeof(IFileOpenDialog),IsSingle:false)]
     internal sealed class FileOpenView : FileView, IFileOpenDialog
     {
         private OpenFileDialog fd => (OpenFileDialog) fileDialog;
@@ -141,6 +331,7 @@ namespace Core
         public bool ReadOnlyChecked { get => fd.ReadOnlyChecked; set => fd.ReadOnlyChecked = value; }
         public bool ShowReadOnly { get => fd.ShowReadOnly; set => fd.ShowReadOnly = value; }
     }
+    [RegService(typeof(IFileSaveDialog), IsSingle: false)]
     internal sealed class FileSaveView : FileView, IFileSaveDialog
     {
         private SaveFileDialog fs => (SaveFileDialog) fileDialog;
@@ -148,7 +339,7 @@ namespace Core
         public bool CreatePrompt { get => fs.CreatePrompt; set => fs.CreatePrompt = value; }
         public bool OverwritePrompt { get => fs.OverwritePrompt; set => fs.OverwritePrompt = value; }
     }
-
+    [RegService(typeof(IMessageBox), IsSingle: false)]
     internal sealed class MsgBox : IMessageBox
     {
         public BoxResult Show(string messageBoxText, string caption, BoxButton button, BoxImage icon, BoxResult defaultResult = BoxResult.None, BoxOptions options = BoxOptions.None)

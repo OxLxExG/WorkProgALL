@@ -1,10 +1,4 @@
 ﻿using Connections.Interface;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using CRCModbusRTU;
 
 namespace Connections
@@ -39,7 +33,7 @@ namespace Connections
         {
             // if (offset > 200) App.logger?.LogInformation("I");
             int cntout = await Conn.ReadAsync(rxBuf, offset, rxAll - offset, cancellationToken);
-            if (cntout == 0) Conn.logger?.LogInformation("Z");
+            if (cntout == 0) Conn.logger?.Information("Z");
             int last = rxAll - offset - cntout;
             if (cntout > 0 && cntout < 3 && last > 0) // slim
             {
@@ -54,7 +48,7 @@ namespace Connections
         {
             if (rxAll - offset <= 0)
             {
-                Conn.logger?.LogInformation("CNT = 0 !!!");
+                Conn.logger?.Information("CNT = 0 !!!");
                 return;
             }
             if (Count + offset > rxBuf.Length) { throw new Exception("Buffer OverFlow"); }
@@ -102,9 +96,9 @@ namespace Connections
             else cnt = offset; //EndReadEvent
 
             if (dataReq.rxCount != offset)
-                Conn.logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} {Conn.dbg} ReadTask {dataReq.rxCount} != {offset}");
+                Conn.logger?.Information($"{Thread.CurrentThread.ManagedThreadId} {Conn.dbg} ReadTask {dataReq.rxCount} != {offset}");
             else if (cnt < 0)
-                Conn.logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} {Conn.dbg} ReadTask BAD CRC!!!  0 != {_crc:x4}");
+                Conn.logger?.Information($"{Thread.CurrentThread.ManagedThreadId} {Conn.dbg} ReadTask BAD CRC!!!  0 != {_crc:x4}");
 
             var r = new DataResp(dataReq, rxBuf, cnt);
             // time out for monitor

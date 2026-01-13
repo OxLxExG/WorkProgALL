@@ -8,10 +8,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.0" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
-    <ProjectReference Include="..\..\Device3\wpftoolkit\ExtendedWPFToolkitSolution\Src\Xceed.Wpf.AvalonDock\Xceed.Wpf.AvalonDock.NET5.csproj" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.4" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="Serilog" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\adonis-ui\src\AdonisUI.ClassicTheme\AdonisUI.ClassicTheme.csproj" />
+    <ProjectReference Include="..\..\adonis-ui\src\AdonisUI\AdonisUI.csproj" />
+    <ProjectReference Include="..\..\Xceed.Wpf.AvalonDock\Xceed.Wpf.AvalonDock.NET5.csproj" />
+    <ProjectReference Include="..\Global\Global.csproj" />
   </ItemGroup>
 
 </Project>

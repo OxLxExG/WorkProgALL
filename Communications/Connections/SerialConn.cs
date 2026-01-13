@@ -1,9 +1,5 @@
 ﻿using Connections.Interface;
-using Microsoft.Extensions.Logging;
-using System;
 using System.IO.Ports;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Connections
 {
@@ -52,14 +48,14 @@ namespace Connections
 
         public override Task Close(int timout = 2000)
         {
-            logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} {dbg} CLOSE {port.PortName}   {port.BaudRate}");
+            logger?.Information($"{Thread.CurrentThread.ManagedThreadId} {dbg} CLOSE {port.PortName}   {port.BaudRate}");
             port.Close();
             return base.Close(timout);
         }
 
         public override Task Open(int timout = 500, bool RxNeed = true)
         {
-            logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} {dbg} OPEN {port.PortName}   {port.BaudRate}");
+            logger?.Information($"{Thread.CurrentThread.ManagedThreadId} {dbg} OPEN {port.PortName}   {port.BaudRate}");
             port.Open();
             PortDisposed = false;
             return base.Open(timout, RxNeed);
@@ -75,7 +71,7 @@ namespace Connections
                 rxDisposeEvent.Reset();
                 CtsCancel.Token.Register(() =>
                 {
-                    logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} {dbg} Cancel Event port.Dispose() {port.PortName}   {port.BaudRate}");
+                    logger?.Information($"{Thread.CurrentThread.ManagedThreadId} {dbg} Cancel Event port.Dispose() {port.PortName}   {port.BaudRate}");
                     PortDisposed = true;
                     port.Dispose();// Close();
                     rxDisposeEvent.Set();
@@ -88,14 +84,14 @@ namespace Connections
         {
             if (IsReading)
             {
-                logger?.LogInformation($"ERR {Thread.CurrentThread.ManagedThreadId} {dbg} EndRead(BEGIN): IsReading =True");
+                logger?.Information($"ERR {Thread.CurrentThread.ManagedThreadId} {dbg} EndRead(BEGIN): IsReading =True");
 
                 if (CtsCancel != null)
                 {
                     if (!CtsCancel.IsCancellationRequested)
                     {
                         CtsCancel.Cancel();
-                        logger?.LogInformation($"ERR {Thread.CurrentThread.ManagedThreadId} {dbg} EndRead(CONTINUE): Cts.Cancel()");
+                        logger?.Information($"ERR {Thread.CurrentThread.ManagedThreadId} {dbg} EndRead(CONTINUE): Cts.Cancel()");
                     }
                     WaitHandle.WaitAll(new[] { rxDisposeEvent, rxEndBad });
                     try
@@ -105,13 +101,13 @@ namespace Connections
                     catch (Exception ex)
                     {
                         Thread.Sleep(300);
-                        logger?.LogInformation($"ERR {Thread.CurrentThread.ManagedThreadId} {dbg} ERR_Open {ex}");
+                        logger?.Information($"ERR {Thread.CurrentThread.ManagedThreadId} {dbg} ERR_Open {ex}");
                         Open();
                     }
 
                 }
                 IsReading = false;
-                logger?.LogInformation($"ERR  {Thread.CurrentThread.ManagedThreadId} {dbg}  EndRead(END) Wait ALL");
+                logger?.Information($"ERR  {Thread.CurrentThread.ManagedThreadId} {dbg}  EndRead(END) Wait ALL");
             }
             else
             {
@@ -119,10 +115,10 @@ namespace Connections
                 {
                     rxDisposeEvent.WaitOne();
                     Open();
-                    logger?.LogInformation($"ERR  {Thread.CurrentThread.ManagedThreadId} {dbg} EndRead(END) Wait rxDisposeEvent Only ");
+                    logger?.Information($"ERR  {Thread.CurrentThread.ManagedThreadId} {dbg} EndRead(END) Wait rxDisposeEvent Only ");
                 }
                 else
-                    logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} {dbg} EndRead(END) EasyEnd ");
+                    logger?.Information($"{Thread.CurrentThread.ManagedThreadId} {dbg} EndRead(END) EasyEnd ");
             }
             base.EndRead();
         }

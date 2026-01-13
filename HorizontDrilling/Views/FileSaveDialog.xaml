@@ -1,0 +1,74 @@
+﻿<adonisControls:AdonisWindow x:Class="HorizontDrilling.Views.FileSaveDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
+        xmlns:adonisControls="clr-namespace:AdonisUI.Controls;assembly=AdonisUI"
+        xmlns:adonisExtensions="clr-namespace:AdonisUI.Extensions;assembly=AdonisUI"
+        xmlns:local="clr-namespace:HorizontDrilling.Views"
+        xmlns:c="clr-namespace:Core;assembly=Core"
+        xmlns:res="clr-namespace:HorizontDrilling.Properties"
+        WindowStartupLocation="CenterOwner"
+        mc:Ignorable="d"
+        MinWidth="400"
+        MinHeight="250"
+        Title="{x:Static res:Resources.wFileSaveDialogTitle}"
+        Height="250"
+        Width="400">
+    
+    <Grid Margin="20,0">
+        <Grid.Resources>
+            <!--<local:DrityToVisibilityConverter x:Key="DrityToVisibility" />-->
+            <Style TargetType="Button" BasedOn="{StaticResource AdonisButton}">
+                <Setter Property="Margin"
+                        Value="8,15" />
+                <Setter Property="Width"
+                        Value="100" />
+                <Setter Property="Height"
+                        Value="24" />
+            </Style>
+            <Style TargetType="TreeViewItem">
+                <Setter Property="IsExpanded"
+                        Value="True" />
+            </Style>
+        </Grid.Resources>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <TextBlock Margin="10"
+                   HorizontalAlignment="Center"
+                   Text="{x:Static res:Resources.wFileSaveDialogLabel}" />
+        <TreeView x:Name="treeView"
+                  Grid.Row="1"
+                  IsTabStop="False"
+                  ItemsSource="{Binding Items}">
+            <TreeView.Resources>
+                <HierarchicalDataTemplate DataType="{x:Type c:SaveFileItem}"
+                                          ItemsSource="{Binding Path=Items}">
+                    <!--<TreeViewItem Header="{Binding Path=FileName}"/>-->
+                    <TextBlock Text="{Binding Path=DrityFileName}" />
+                </HierarchicalDataTemplate>
+            </TreeView.Resources>
+        </TreeView>
+
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right">
+            <Button x:Name="btSave"
+                    TabIndex="1"
+                    Content="{x:Static res:Resources.strSave}"
+                    Click="btSave_Click" />
+            <Button x:Name="btNoSave"
+                    TabIndex="2"
+                    Content="{x:Static res:Resources.strNoSave}"
+                    Click="btNoSave_Click" />
+            <Button x:Name="btCancel"
+                    TabIndex="3"
+                    Content="{x:Static res:Resources.strCancel}"
+                    Click="btCancel_Click" />
+        </StackPanel>
+    </Grid>
+</adonisControls:AdonisWindow>

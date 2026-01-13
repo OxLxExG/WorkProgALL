@@ -52,9 +52,9 @@ namespace SerialPortTest
             //System.Threading.Thread.CurrentThread.CurrentCulture = new CultureInfo(Settings.Culture);
 
             //ExceptLog.ServicesRoot.Register(configuration, services, opt.Logging.Box.Trace);
-            ExceptLog.ServicesRoot.Register(configuration, services,
-                opt.Logging.Box.Info, opt.Logging.Box.Trace, opt.Logging.Box.Error,
-                opt.Logging.File.Info, opt.Logging.File.Trace, opt.Logging.File.Error);
+            //ExceptLog.ServicesRoot.Register(configuration, services,
+            //    opt.Logging.Box.Info, opt.Logging.Box.Trace, opt.Logging.Box.Error,
+            //    opt.Logging.File.Info, opt.Logging.File.Trace, opt.Logging.File.Error);
 
             Communications.ServicesRoot.Register(services);
 

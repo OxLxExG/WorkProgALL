@@ -1,0 +1,528 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:v="clr-namespace:HorizontDrilling.Views"
+                    xmlns:c="clr-namespace:Core;assembly=Core"
+                    xmlns:con="clr-namespace:Connections;assembly=Communications"
+                    xmlns:vm="clr-namespace:HorizontDrilling.ViewModels" 
+                    xmlns:res="clr-namespace:HorizontDrilling.Properties"
+                    xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/Core;component/ViewResourceTools.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <c:MenuTemplateSelector x:Key="MenuTemplateSelectorVMKey" />
+    <v:ProjectExplorerTemplateSelector x:Key="DataTemplateSelectorKey" />
+    <v:BoolToVisibilityConverter x:Key="BoolToVisibility" />
+
+    <!--<Style x:Key="VMBaseStyle"
+           TargetType="{x:Type TreeViewItem}"
+           BasedOn="{StaticResource {x:Type TreeViewItem}}">
+    </Style>-->
+
+    <SolidColorBrush x:Key="BPHighlLightKey"
+                     Color="#80a1a1f1" />
+    <SolidColorBrush x:Key="TreeViewItem.TreeArrow.Static.Stroke"
+                     Color="#FF818181" />
+    <SolidColorBrush x:Key="TreeViewItem.TreeArrow.Static.Fill"
+                     Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="TreeViewItem.TreeArrow.MouseOver.Stroke"
+                     Color="#FF27C7F7" />
+    <SolidColorBrush x:Key="TreeViewItem.TreeArrow.MouseOver.Fill"
+                     Color="#FFCCEEFB" />
+    <SolidColorBrush x:Key="TreeViewItem.TreeArrow.Static.Checked.Stroke"
+                     Color="#FF262626" />
+    <SolidColorBrush x:Key="TreeViewItem.TreeArrow.Static.Checked.Fill"
+                     Color="#FF595959" />
+    <SolidColorBrush x:Key="TreeViewItem.TreeArrow.MouseOver.Checked.Stroke"
+                     Color="#FF1CC4F7" />
+    <SolidColorBrush x:Key="TreeViewItem.TreeArrow.MouseOver.Checked.Fill"
+                     Color="#FF82DFFB" />
+    
+    <PathGeometry x:Key="TreeArrow"
+                  Figures="M0,0 V6 L6,0 z" />
+    
+    <Style x:Key="ExpandCollapseToggleStyle"
+           TargetType="{x:Type ToggleButton}">
+        <Setter Property="Focusable"
+                Value="False" />
+        <Setter Property="Width"
+                Value="16" />
+        <Setter Property="Height"
+                Value="16" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ToggleButton}">
+                    <Border Background="Transparent"
+                            Height="16"
+                            Padding="5,5,5,5"
+                            Width="16">
+                        <Path x:Name="ExpandPath"
+                              Data="{StaticResource TreeArrow}"
+                              Fill="{StaticResource TreeViewItem.TreeArrow.Static.Fill}"
+                              Stroke="{DynamicResource {x:Static adonisUi:Brushes.ForegroundBrush}}">
+                            <Path.RenderTransform>
+                                <RotateTransform Angle="135"
+                                                 CenterY="3"
+                                                 CenterX="3" />
+                            </Path.RenderTransform>
+                        </Path>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked"
+                                 Value="True">
+                            <Setter Property="RenderTransform"
+                                    TargetName="ExpandPath">
+                                <Setter.Value>
+                                    <RotateTransform Angle="180"
+                                                     CenterY="3"
+                                                     CenterX="3" />
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="Fill"
+                                    TargetName="ExpandPath"
+                                    Value="{StaticResource TreeViewItem.TreeArrow.Static.Checked.Fill}" />
+                            <Setter Property="Stroke"
+                                    TargetName="ExpandPath"
+                                    Value="{DynamicResource {x:Static adonisUi:Brushes.ForegroundBrush}}" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver"
+                                 Value="True">
+                            <Setter Property="Stroke"
+                                    TargetName="ExpandPath"
+                                    Value="{StaticResource TreeViewItem.TreeArrow.MouseOver.Stroke}" />
+                            <Setter Property="Fill"
+                                    TargetName="ExpandPath"
+                                    Value="{StaticResource TreeViewItem.TreeArrow.MouseOver.Fill}" />
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsMouseOver"
+                                           Value="True" />
+                                <Condition Property="IsChecked"
+                                           Value="True" />
+                            </MultiTrigger.Conditions>
+                            <Setter Property="Stroke"
+                                    TargetName="ExpandPath"
+                                    Value="{StaticResource TreeViewItem.TreeArrow.MouseOver.Checked.Stroke}" />
+                            <Setter Property="Fill"
+                                    TargetName="ExpandPath"
+                                    Value="{StaticResource TreeViewItem.TreeArrow.MouseOver.Checked.Fill}" />
+                        </MultiTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="VMBaseStyle"
+           TargetType="{x:Type v:TreeViewItemSubHeader}">
+        <!--BasedOn="{StaticResource {x:Type TreeViewItem}}">-->
+        <Setter Property="IsExpanded"
+                Value="{Binding IsExpanded, Mode=TwoWay}" />
+        <Setter Property="IsSelected"
+                Value="{Binding IsSelected}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type v:TreeViewItemSubHeader}" >
+                        <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition MinWidth="19"
+                                              Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <ToggleButton x:Name="Expander"
+                                      ClickMode="Press"
+                                      IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource Mode=TemplatedParent}}"
+                                      Style="{StaticResource ExpandCollapseToggleStyle}" />
+                            
+
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Grid.Column="1"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="true">
+                                <ContentPresenter x:Name="PART_Header"
+                                              ContentSource="Header"
+                                              TextElement.Foreground="{DynamicResource {x:Static adonisUi:Brushes.ForegroundBrush}}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                        </Border>
+                            
+                        <StackPanel x:Name="sub" Grid.Column="1" 
+                                    Grid.ColumnSpan="2"
+                                    Grid.Row="1">
+
+                            <ContentPresenter x:Name="PART_SubHeader"
+                                              ContentSource="SubHeader"
+                                              TextElement.Foreground="{DynamicResource {x:Static adonisUi:Brushes.ForegroundBrush}}"
+                                              Content="{TemplateBinding SubHeader}"
+                                              ContentTemplate="{TemplateBinding SubHeaderTemplate}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}">
+                            </ContentPresenter>
+                            
+                            <ItemsPresenter x:Name="ItemsHost" />
+                        </StackPanel>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsExpanded"
+                                 Value="false">
+                            <!--<Setter Property="Visibility"
+                                    TargetName="ItemsHost"
+                                    Value="Collapsed" />-->
+                            <Setter Property="Visibility"
+                                    TargetName="sub"
+                                    Value="Collapsed" />
+                        </Trigger>
+                        <Trigger Property="HasItems"
+                                 Value="false">
+                            <Setter Property="Visibility"
+                                    TargetName="Expander"
+                                    Value="Hidden" />
+                        </Trigger>
+                        <Trigger Property="IsSelected"
+                                 Value="true">
+                            <Setter Property="Background"
+                                    TargetName="Bd"
+                                    Value="{DynamicResource {x:Static adonisUi:Brushes.Layer3InteractionBrush}}" />
+                            <!--<Setter Property="BorderBrush"
+                                    TargetName="Bd"
+                                    Value="Red"/>-->
+                            <Setter Property="TextElement.Foreground"
+                                    TargetName="PART_Header"
+                                    Value="{DynamicResource {x:Static adonisUi:Brushes.Layer3InteractionForegroundBrush}}" />
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsSelected"
+                                           Value="true" />
+                                <Condition Property="IsSelectionActive"
+                                           Value="false" />
+                            </MultiTrigger.Conditions>
+                            <Setter Property="Background"
+                                    TargetName="Bd"
+                                    Value="{DynamicResource {x:Static adonisUi:Brushes.Layer1InteractionBrush}}" />
+                            <Setter Property="Foreground"
+                                    Value="{DynamicResource {x:Static adonisUi:Brushes.Layer1InteractionForegroundBrush}}" />
+                        </MultiTrigger>
+                        <Trigger Property="IsEnabled"
+                                 Value="false">
+                            <Setter Property="Foreground"
+                                    Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ContextMenuStypeKey" TargetType="ContextMenu">
+        <Setter Property="ItemsSource"
+                Value="{Binding CItems}" />
+        <Setter Property="UsesItemContainerTemplate"
+                Value="True" />
+        <Setter Property="ItemContainerTemplateSelector"
+                Value="{StaticResource MenuTemplateSelectorVMKey}" />
+    </Style>
+    
+    <Style x:Key="DataTemplateStyle"
+           TargetType="FrameworkElement">
+        <Setter Property="ContextMenu">
+            <Setter.Value>
+                <ContextMenu ItemsSource="{Binding CItems}"
+                             UsesItemContainerTemplate="True"
+                             ItemContainerTemplateSelector="{StaticResource MenuTemplateSelectorVMKey}"  />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+     <DataTemplate x:Key="VisitDocumentSubHeader" DataType="{x:Type vm:VisitDocument}">
+        <v:VisitUI Style="{StaticResource DataTemplateStyle}"/>
+    </DataTemplate>
+
+    <HierarchicalDataTemplate x:Key="VisitDocumentHeader"
+                              DataType="{x:Type vm:VisitDocument}"
+                              ItemsSource="{Binding Items}">
+
+        <TextBlock 
+                   FontWeight="Bold"
+                   Text="{Binding FileName}"
+                   Style="{StaticResource DataTemplateStyle}" />
+        
+    </HierarchicalDataTemplate>
+
+    <HierarchicalDataTemplate x:Key="HeaderHelperHeader" 
+                              DataType="{x:Type vm:HeaderHelper}"
+                              ItemsSource="{Binding Items}">
+        <TextBlock Text="{Binding Header}"/>
+    </HierarchicalDataTemplate>
+
+
+    <HierarchicalDataTemplate x:Key="TripVMHeader"
+                              DataType="{x:Type vm:TripVM}"
+                              ItemsSource="{Binding Items}">
+        <TextBlock Text="{x:Static res:Resources.tTrip}"
+                   FontWeight="Bold"
+                   Style="{StaticResource DataTemplateStyle}" />
+    </HierarchicalDataTemplate>
+
+    <DataTemplate x:Key="TripVMSubHeader"
+                  DataType="{x:Type vm:TripVM}">
+        <!--<StackPanel Orientation="Vertical">-->
+            <!--<TextBlock Text="{Binding trip.Delay}" />-->
+        <TextBlock Text="{Binding trip.DTimStart}"
+                   Style="{StaticResource DataTemplateStyle}" />
+            <!--<TextBlock Text="{Binding trip.DTimStartDrilling}" />
+            <TextBlock Text="{Binding trip.DTimStop}" />
+            <TextBlock Text="{Binding trip.DTimStopDrilling}" />-->
+        <!--</StackPanel>-->
+    </DataTemplate>
+
+    <!--<HierarchicalDataTemplate x:Key="PipeVMHeader"
+                              DataType="{x:Type vm:PipeVM}"
+                              ItemsSource="{Binding Items}">
+        <TextBlock Text="{Binding pipe.Connection.IsOpen}"
+                   Style="{StaticResource DataTemplateStyle}" />
+    </HierarchicalDataTemplate>
+
+    <HierarchicalDataTemplate x:Key="SerialPipeVMHeader"
+                              DataType="{x:Type vm:SerialPipeVM}"
+                              ItemsSource="{Binding Items}">
+        <TextBlock Foreground="Red" Style="{StaticResource DataTemplateStyle}">
+            <Run Text="Serial Connection " />
+            <Bold>
+            <Run Text="{Binding PortName}" />
+            </Bold>
+            <Run FontSize="10" Text=" Speed: " />
+            <Run FontSize="10"
+                 Text="{Binding BaudRate}" />
+            --><!--<TextBlock.ContextMenu>
+                <ContextMenu Style="{StaticResource ContextMenuStypeKey}" />
+            </TextBlock.ContextMenu>--><!--
+        </TextBlock>
+    </HierarchicalDataTemplate>-->
+    
+    <!--<DataTemplate x:Key="SerialPipeVMSubHeader"
+                              DataType="{x:Type vm:SerialPipeVM}">
+        <StackPanel Style="{StaticResource DataTemplateStyle}">
+            --><!--<StackPanel.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header=" sdaacdcasd" />
+                </ContextMenu>
+            </StackPanel.ContextMenu>--><!--
+            <TextBlock Text="{Binding BaudRate}" />
+            <TextBlock Text="{Binding PortName}" />
+        </StackPanel>
+    </DataTemplate>-->
+
+    <!--<HierarchicalDataTemplate x:Key="NetPipeVMHeader"
+                              DataType="{x:Type vm:NetPipeVM}"
+                              ItemsSource="{Binding Items}">
+        <TextBlock Text="Net Connection"
+                   Style="{StaticResource DataTemplateStyle}" />
+    </HierarchicalDataTemplate>
+
+    <DataTemplate x:Key="NetPipeVMSubHeader"
+                              DataType="{x:Type vm:NetPipeVM}">
+        <StackPanel Style="{StaticResource DataTemplateStyle}">
+            <TextBlock Text="{Binding Port}" />
+            <TextBlock Text="{Binding Host}" />
+        </StackPanel>
+    </DataTemplate>-->
+
+    <Style x:Key="MonitorButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource ToolButtonBaseStyle}">
+        <Setter Property="ToolTip" Value="{x:Static res:Resources.con_ShowMon}" />
+        <Setter Property="Height" Value="20" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+        <Setter Property="Content" Value="&#xe7f8;" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Visibility" Value="{Binding VisibilityMonitor, Converter={StaticResource BoolToVisibility},Mode=OneTime}" />
+
+        <Setter Property="Command" Value="{Binding ShowMonitor}" />
+        <!--<Setter Property="ContentTemplate">
+            <Setter.Value>
+                <DataTemplate>
+                    <Image  Source="/Images/Monitor16.png" />
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>-->
+    </Style>
+
+    <DataTemplate x:Key="SerialVMData"
+                  DataType="{x:Type vm:SerialVM}">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Foreground="{DynamicResource {x:Static adonisUi:Brushes.ErrorBrush}}">
+            <Run Text="Port: " />
+            <Bold>
+            <Run Text="{Binding PortName}" />
+            </Bold>
+            <Run FontSize="10"
+                 Text=" Baud: " />
+            <Run FontSize="10"
+                 Text="{Binding BaudRate}" />
+            </TextBlock>
+            <Button Style="{StaticResource MonitorButtonStyle}" />
+        </StackPanel>
+    </DataTemplate>
+
+    <DataTemplate x:Key="NetVMData"
+                  DataType="{x:Type vm:NetVM}">
+        <TextBlock Foreground="{DynamicResource {x:Static adonisUi:Brushes.ErrorBrush}}">
+            <Run Text="Host: " />
+            <Bold>
+                <Run Text="{Binding Host}" />
+            </Bold>
+            <Run Text=":" />
+            <Run Text="{Binding Port}" />
+            <Button Style="{StaticResource MonitorButtonStyle}" />
+        </TextBlock>
+    </DataTemplate>
+
+    <DataTemplate x:Key="NopConVMData"
+                  DataType="{x:Type vm:NopConVM}">
+        <TextBlock Foreground="{DynamicResource {x:Static adonisUi:Brushes.ErrorBrush}}" Text="not connect" />
+    </DataTemplate>
+
+    <DataTemplate x:Key="BusUSO32VMSubHeader"
+                  DataType="{x:Type vm:BusUSO32VM}">
+        <StackPanel>
+            <ContentPresenter Content="{Binding VMConn}"
+                              ContentTemplateSelector="{StaticResource DataTemplateSelectorKey}" />
+        </StackPanel>
+    </DataTemplate>
+
+    <HierarchicalDataTemplate x:Key="BusUSO32VMHeader"
+                              DataType="{x:Type vm:BusUSO32VM}"
+                              ItemsSource="{Binding Items}">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Style="{StaticResource DataTemplateStyle}"
+                       Foreground="{DynamicResource {x:Static adonisUi:Brushes.HyperlinkBrush}}" VerticalAlignment="Center">
+            <Bold>
+                <Run Text="{Binding Name}" />
+            </Bold>
+                <Run FontSize="10" Text="LPF:" />
+                <Run FontSize="10" Text="{Binding tbxFQ.Text}" />
+                <Run FontSize="10" Text="GN:" />
+                <Run FontSize="10" Text="{Binding tbxAMP.Text}" />
+            </TextBlock>
+            <Button Style="{StaticResource ToolButtonBaseStyle}"
+                    VerticalAlignment="Center"
+                    Height="20"
+                    FontSize="16"
+                    FontFamily="Segoe Fluent Icons" 
+                    ToolTip="{x:Static res:Resources.uso_ShowOsc1}"
+                    Command="{Binding OscCommand}"
+                    Content="&#xe9d9;">
+                <!--<Image Source="/Images/Osc.png" />-->
+            </Button>
+                <!--<TextBlock Foreground="Blue">
+            <Run Text=" интервал опроса " />
+                <Run Text="{Binding Interval}" />
+            --><!--<Bold>
+                <InlineUIContainer BaselineAlignment="Center">
+                    <TextBox  Foreground="Blue"
+                              BorderBrush="Transparent"
+                              Text="{Binding Interval}" />
+                </InlineUIContainer>
+            </Bold>--><!--
+            <Run Text="ms" />
+            </TextBlock>-->
+        </StackPanel>
+    </HierarchicalDataTemplate>
+    
+    <DataTemplate x:Key="TelesysVMHeader"
+                  DataType="{x:Type vm:TelesysVM}">
+        <TextBlock Style="{StaticResource DataTemplateStyle}">
+				<Run Text="{x:Static res:Resources.strTelesystem}" />
+				<Run Text=": " />
+				<Bold>
+				<Run Text="{Binding Model.Name, Mode=OneWay}" />
+				 </Bold>
+        </TextBlock>
+        <!--<TextBlock Text="{Binding Model.serial, Mode=OneWay, StringFormat='серийный номер {0}'}" />-->
+    </DataTemplate>
+
+
+    <HierarchicalDataTemplate x:Key="BusPBVMHeader"
+                              DataType="{x:Type vm:BusPBVM}"
+                              ItemsSource="{Binding Items}">
+        <StackPanel Orientation="Horizontal">
+        <TextBlock Style="{StaticResource DataTemplateStyle}"
+                       Foreground="{DynamicResource {x:Static adonisUi:Brushes.HyperlinkBrush}}">
+            <Bold>
+                <Run Text="{Binding Name}" />
+            </Bold>
+        </TextBlock>
+            <TextBlock Foreground="{DynamicResource {x:Static adonisUi:Brushes.HyperlinkBrush}}">
+            <Run Text=" интервал опроса " />
+                <Run Text="{Binding Interval}" />
+            <!--<Bold>
+                <InlineUIContainer BaselineAlignment="Center">
+                    <TextBox  Foreground="Blue"
+                              BorderBrush="Transparent"
+                              Text="{Binding Interval}" />
+                </InlineUIContainer>
+            </Bold>-->
+            <Run Text="ms" />
+            </TextBlock>
+        </StackPanel>
+    </HierarchicalDataTemplate>
+
+    <DataTemplate x:Key="BusPBVMSubHeader"
+                              DataType="{x:Type vm:BusPBVM}">
+        <StackPanel >
+            <ContentPresenter Content="{Binding VMConn}" ContentTemplateSelector="{StaticResource DataTemplateSelectorKey}" />
+        </StackPanel>
+    </DataTemplate>
+
+
+    <DataTemplate x:Key="DeviceVMHeader"
+                  DataType="{x:Type vm:DeviceVM}">
+        <StackPanel Style="{StaticResource DataTemplateStyle}">
+            <TextBlock Text="Device" />
+            <TextBlock Text="{Binding Model.Id}" />
+        </StackPanel>
+    </DataTemplate>
+
+    <DataTemplate x:Key="DevicePBVMHeader"
+                  DataType="{x:Type vm:DevicePBVM}">
+        <TextBlock Style="{StaticResource DataTemplateStyle}">
+				<Run Text="Прибор: " />
+				<Bold>
+				<Italic>
+				<Run Text="{Binding Model.Name, Mode=OneWay}" />
+				</Italic>
+				 </Bold>
+				<Run Text=" номер: " />                
+				<Bold>
+                <Run Text="{Binding Model.serial, Mode=OneWay}" />
+				</Bold>
+				<Run FontSize="10" Text=" адр: " />
+        		<Run FontSize="10" Text="{Binding Model.Address, Mode=OneWay}" />
+				<Run FontSize="10" Text=" чип: " />
+                <Run FontSize="10" Text="{Binding Model.chip, Mode=OneWay}" />
+				<Run FontSize="10" Text=" порт: " />
+                <Run FontSize="10" Text="{Binding MaskPort, Mode=OneWay}" />
+            </TextBlock>
+            <!--<TextBlock Text="{Binding Model.serial, Mode=OneWay, StringFormat='серийный номер {0}'}" />-->
+    </DataTemplate>
+    
+    <DataTemplate x:Key="DevicePBVMSubHeader"
+                  DataType="{x:Type vm:DevicePBVM}">
+        <!--<StackPanel Style="{StaticResource DataTemplateStyle}">-->
+            <TextBlock FontSize="10"
+                       FontWeight="DemiBold"
+                   Foreground="{DynamicResource {x:Static adonisUi:Brushes.SuccessBrush}}" Text="{Binding Model.info, Mode=OneWay, StringFormat='Info: {0}'}" />
+        <!--</StackPanel>-->
+    </DataTemplate>
+
+</ResourceDictionary>

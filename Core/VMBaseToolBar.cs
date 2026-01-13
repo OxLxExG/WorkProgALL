@@ -18,6 +18,35 @@ namespace Core
     public class ToolItem : PriorityItemBase;
     public class ToolButton : ToolItem
     {
+        object? _ContentTemplate;
+        public object? ContentTemplate { get=>_ContentTemplate; set => SetProperty (ref _ContentTemplate,value); }
+
+        object ? _Content;
+        //string? _StringContent;
+        public object? Content { get => _Content; set => SetProperty(ref _Content, value); }
+        //    { 
+        //        if (_Content == value) return;
+        //        if (value is string s && s != _StringContent)
+        //        {
+        //            _StringContent = s;
+        //            if (Uri.TryCreate(s, UriKind.Absolute, out var uriResult))
+        //            {
+        //                var im = new Image
+        //                {
+        //                    Source = new BitmapImage(uriResult),
+        //                };
+        //                SetProperty(ref _Content, im);
+        //            }
+        //            else
+        //            {
+        //                SetProperty(ref _Content, value);
+        //            }
+        //        }
+        //        else SetProperty(ref _Content, value);
+        //    } 
+        //}
+        public int FontSize { get; set; } = 16;
+        public int Size { get; set; } = 24;
         public ICommand? Command { get; set; }
     }
     public class CheckToolButton : ToolButton

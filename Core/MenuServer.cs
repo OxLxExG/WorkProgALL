@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Global;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
-using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 
 namespace Core
 {
@@ -38,6 +32,7 @@ namespace Core
         public void UpdateSeparatorGroup(MenuItemVM? ParentContentID);
     }
 
+    [RegService(typeof(IMenuItemServer))]
     public class MenuServer: PriorityServer, IMenuItemServer
     {
         public static ObservableCollection<PriorityItem> Items = new ObservableCollection<PriorityItem>();

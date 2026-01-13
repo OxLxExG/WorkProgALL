@@ -1,18 +1,7 @@
 ﻿using Commands;
 using Connections.Interface;
-using Connections;
-using CRCModbusRTU;
-using ExceptionExtensions;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Threading;
+using Global;
+using Serilog;
 
 namespace Connections
 {
@@ -81,7 +70,8 @@ namespace Connections
         /// <exception cref="FlagsArgumentOutOfRangeException"></exception>
         /// <exception cref="FlagsOperationCanceledException"></exception>
         /// <exception cref="FlagsArgumentException"></exception>
-        public static Stream CreateFileStream(FileReadOptions Opt, ref ulong SrcFrom, Action<int, ulong>? checkFileFrom = null )
+        public static Stream CreateFileStream(FileReadOptions Opt, ref ulong SrcFrom, Action<int, ulong>? checkFileFrom = null, 
+            Func<string,bool>? deleteFile = null)
         {
             string file = Opt.Name;
             FileStream? Res = null;
@@ -112,13 +102,17 @@ namespace Connections
                 }
                 else
                 {
-                    string msg = string.Format(Resources.msgDeleteFile, file);
-                    string capt = Resources.cptDeleteFile; 
-                    var msgRes = MessageBox.Show(msg ,capt, MessageBoxButton.OKCancel, MessageBoxImage.Warning);
-                    if (msgRes == MessageBoxResult.OK) 
-                       File.Delete(file);
-                    else 
-                       throw new FlagsOperationCanceledException(capt);
+                    //string msg = string.Format(Resources.msgDeleteFile, file);
+                    //string capt = Resources.cptDeleteFile; 
+                    //var msgRes = MessageBox.Show(msg ,capt, MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                    // if (msgRes == MessageBoxResult.OK) 
+                    if (deleteFile != null && deleteFile(file))
+                        File.Delete(file);
+                    else
+                    {
+                        string capt = Resources.cptDeleteFile; 
+                        throw new FlagsOperationCanceledException(capt);
+                    }
                 }
             }
             else
@@ -149,6 +143,7 @@ namespace Connections
         /// <param name="dest"></param>
         /// <param name="opt"></param>
         /// <param name="onProgress"></param>
+        /// 
         /// <returns></returns>
         public static Task<uint> Read(IConnection src, Stream dest, ComRamReadOptions opt, Action<ProgressData> onProgress, ILogger? logger = null)
         {
@@ -166,7 +161,7 @@ namespace Connections
                         {
                             ((AbstractConnection)src).dbg = "TURBO";
                             await Protocol.SetTurbo(src, (byte)opt.Turbo);
-                            logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} TURBO (END) start TURBO");
+                            logger?.Information($"{Thread.CurrentThread.ManagedThreadId} TURBO (END) start TURBO");
                             if (src is ISerialConnection) ((ISerialConnection)src).BaudRate = br;                            
                         }
                         int timOut = (int) ((double)opt.BufferSize * 1000 * 10 * 2 / br);
@@ -194,7 +189,7 @@ namespace Connections
                                     {
                                         old = progress.Elapsed;
                                         var pd = progress.FindProgressData();
-                                        logger?.LogWarning(pd.ToString());
+                                        logger?.Warning(pd.ToString());
                                         onProgress(pd);
                                     }
                                     from += cnt;
@@ -218,9 +213,9 @@ namespace Connections
                                 {
                                     ((AbstractConnection)src).dbg = "UN TURBO";
                                     if (src.IsCanceled) Thread.Sleep(timOut); // wait last data sended
-                                    logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} finally UN TURBO(B)");
+                                    logger?.Information($"{Thread.CurrentThread.ManagedThreadId} finally UN TURBO(B)");
                                     await Protocol.SetTurbo(src, (byte)ComRamReadOptions.Turbos.ts125K);
-                                    logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} finally UN TURBO(E)");
+                                    logger?.Information($"{Thread.CurrentThread.ManagedThreadId} finally UN TURBO(E)");
                                 }
                             }
                             finally 
@@ -238,7 +233,7 @@ namespace Connections
                 }
                 finally
                 {
-                    logger?.LogInformation($"{Thread.CurrentThread.ManagedThreadId} UnLock");
+                    logger?.Information($"{Thread.CurrentThread.ManagedThreadId} UnLock");
                     src.UnLock();
                 }
             });
@@ -256,7 +251,9 @@ namespace Connections
                 }
             }
         }
-        public static Task<ulong> Read(ISSDConnection src, Stream dest, RamReadOptions opt, Action<ProgressData> onProgress, ILogger? logger = null)
+        public static Task<ulong> Read(ISSDConnection src, Stream dest, RamReadOptions opt, Action<ProgressData> onProgress, 
+            Func<ulong,ulong,bool>? totalBiggeSSD = null,
+            ILogger? logger = null)
         {
             src.CheckLock();
 
@@ -275,13 +272,17 @@ namespace Connections
                         if (total > ssdSize)
                         {
 
-                            string msg = string.Format(Resources.msgTotalBiggeSSD, opt.Total, ssdSize);
-                            string capt = Resources.cptTotal;
-                            var msgRes = MessageBox.Show(msg, capt, MessageBoxButton.OKCancel, MessageBoxImage.Warning);
-                            if (msgRes == MessageBoxResult.OK)
+                            //string msg = string.Format(Resources.msgTotalBiggeSSD, opt.Total, ssdSize);
+                            //string capt = Resources.cptTotal;
+                            //var msgRes = MessageBox.Show(msg, capt, MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                            //if (msgRes == MessageBoxResult.OK)
+                            if (totalBiggeSSD != null && totalBiggeSSD(opt.Total, ssdSize))
                                 total = ssdSize;
                             else
+                            {
+                                string capt = Resources.cptTotal;
                                 throw new FlagsOperationCanceledException(capt);
+                            }
                         }
                         if (from >= total)
                         {
@@ -318,7 +319,7 @@ namespace Connections
                             writeTask = dest.WriteAsync(W, 0, rcnt, toc);
                             Task.WhenAll(readTask, writeTask).Wait();
 
-                            logger?.LogTrace($"read {rcnt:X}");
+                            logger?.Debug($"read {rcnt:X}");
 
                             from += (uint)rcnt;
                             progress.Update((uint)rcnt);                           
@@ -326,7 +327,7 @@ namespace Connections
                             {
                                 old = progress.Elapsed;
                                 var pd = progress.FindProgressData();
-                                logger?.LogWarning(pd.ToString());
+                                logger?.Warning(pd.ToString());
                                 onProgress(pd);
                             }
                             rcnt = readTask.Result;
@@ -349,12 +350,12 @@ namespace Connections
                     }
                     catch (OperationCanceledException e)
                     {
-                        logger?.LogError(e.Message);
+                        logger?.Error(e.Message);
                         return from - (uint)opt.From;
                     }
                     catch (AggregateException e)
                     {
-                        logger?.LogError(e.Message);
+                        logger?.Error(e.Message);
                         return from - (uint)opt.From;
                     }
                     finally

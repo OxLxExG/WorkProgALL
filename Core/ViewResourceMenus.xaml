@@ -22,7 +22,11 @@
 
     <Style x:Key="MenuItemKey" TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}" >
         <!--<Setter Property="ItemContainerStyleSelector" Value="{StaticResource ItemContainerStyleSelectorVMKey}"/>-->
-        <Setter Property="UsesItemContainerTemplate"  Value="True"/>
+        <!--<Setter Property="Background"
+                Value="{Binding Path=Background, 
+                                    RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type MenuItem}, AncestorLevel=1}}"  />-->
+        <Setter Property="UsesItemContainerTemplate"
+                Value="True" />
         <Setter Property="ItemContainerTemplateSelector" Value="{StaticResource MenuTemplateSelectorVMKey}"/>
         <Setter Property="Header" Value="{Binding Header}" />
         <Setter Property="Icon" Value="{Binding Icon}"/>

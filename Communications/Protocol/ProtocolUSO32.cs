@@ -1,14 +1,8 @@
 ﻿using Connections.Interface;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Connections.Uso32
 {
-    public enum Uso32_Bias
+    public enum Uso32_Gain
     {
         b1 = 0,
         b2 = 1,
@@ -38,7 +32,7 @@ namespace Connections.Uso32
 
     public class ProtocolUSO32
     {
-        public static void StartUSO32(IConnection con, Uso32_Bias c, Uso32_Freqs fq, OnUSO32DataHandler onUSO32Data, OnResponseEvent? OnResponse = null)
+        public static void StartUSO32(IConnection con, Uso32_Gain c, Uso32_Freqs fq, OnUSO32DataHandler onUSO32Data, OnResponseEvent? OnResponse = null)
         {
             if (con is AbstractConnection ac && ac.Driver is DriverUSO32Telesystem d && !ac.IsLocked)
             {

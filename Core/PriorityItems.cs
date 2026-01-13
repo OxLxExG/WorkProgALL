@@ -30,10 +30,6 @@ namespace Core
 
         ToolTip? _toolTip;
         public ToolTip? ToolTip { get=>_toolTip; set=>SetProperty(ref _toolTip, value); }
-        public bool IconSourceEnable => IconSource != null;
-
-        string? _IconSource;
-        public string? IconSource { get => _IconSource; set => SetProperty(ref _IconSource, value); }
     }
 
     public abstract class PriorityServer

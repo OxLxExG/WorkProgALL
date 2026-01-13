@@ -348,6 +348,7 @@ namespace Core
     public abstract class ComplexFileDocumentVM : VMBaseFileDocument
     {
         public abstract VMBase? Find(string id);
+        public abstract IEnumerable<T>? Find<T>() where T : VMBase;
         #region prop lastClosedFiles сам файл
         //protected LastClosedFilesVM? _lastClosedFiles = null;
         ///// <summary>
@@ -565,6 +566,8 @@ namespace Core
         //}
 
         public static VMBase? Find(string id)=> _instance?.Find(id);
+        public static IEnumerable<T>? Find<T>() where T: VMBase => _instance?.Find<T>();
+        
         public static void SetDrity()
         {
             if (Instance != null)

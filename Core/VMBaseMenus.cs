@@ -14,6 +14,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace Core
@@ -91,15 +92,51 @@ namespace Core
 
         #region Icon
 
-        private Image? _icon;
-        public Image? Icon
+        public bool IconSourceEnable { get => IconSource != null; }
+
+        string? _IconSource;
+        public string? IconSource { get => _IconSource; set => SetProperty(ref _IconSource, value); }
+
+
+        private Object? _icon;
+        public Object? Icon
         {
               
             get
             {
                 if (_icon == null && !String.IsNullOrWhiteSpace(IconSource))
                 {
-                    _icon = new Image { Source = new BitmapImage(new Uri(IconSource)) };
+                    if (Uri.TryCreate(IconSource, UriKind.Absolute, out var uriResult))
+                    {
+                        _icon = new Image { Source = new BitmapImage(uriResult) };
+                    }
+                    else
+                    {
+                        FontFamily fontFamily  = new FontFamily("Segoe Fluent Icons");
+
+                        var SymbolSize  = 16;
+
+                        var textBlock = new TextBlock
+                        {
+                            FontFamily = fontFamily,
+                            Text = IconSource,
+                        };
+
+                        var brush = new VisualBrush
+                        {
+                            Visual = textBlock,
+                            Stretch = Stretch.Uniform
+                        };
+
+                        var drawing = new GeometryDrawing
+                        {
+                            Brush = brush,
+                            Geometry = new RectangleGeometry(
+                            new Rect(0, 0, SymbolSize, SymbolSize))
+                        };
+
+                        _icon = new Image { Source = new DrawingImage(drawing) };
+                    }
                 }
                 return _icon;
             }

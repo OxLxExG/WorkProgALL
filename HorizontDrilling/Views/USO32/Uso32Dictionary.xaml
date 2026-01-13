@@ -1,0 +1,128 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:v="clr-namespace:HorizontDrilling.Views"
+                    xmlns:vm="clr-namespace:HorizontDrilling.ViewModels" 
+                    xmlns:res="clr-namespace:HorizontDrilling.Properties"
+                    xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/Core;component/ViewResourceTools.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <DataTemplate x:Key="{ x:Static v:Icons.HPOff}">
+        <Viewbox Stretch="Uniform">
+            <Canvas Width="256"
+                    Height="256">
+                <Path Fill="{DynamicResource {x:Static adonisUi:Brushes.Layer1BorderBrush}}"
+                      Data="M16,16 v240 h240 v-8 h-112 v-232 h-8 v232 h-112 v-112 h232 v-8 h-232 v-112 Z" />
+                <Path Fill="{DynamicResource {x:Static adonisUi:Brushes.ForegroundBrush}}"
+                      Data="M14,64 h240 v32 h-240  Z" />
+            </Canvas>
+        </Viewbox>
+    </DataTemplate>
+
+    <DataTemplate x:Key="{x:Static v:Icons.HPOn}">
+        <Viewbox Stretch="Uniform">
+            <Canvas Width="256"
+                    Height="256">
+                <Path Fill="{DynamicResource {x:Static adonisUi:Brushes.Layer1BorderBrush}}"
+                      Data="M16,16 v240 h240 v-8 h-112 v-232 h-8 v232 h-112 v-112 h232 v-8 h-232 v-112 Z" />
+                <Path Fill="{DynamicResource {x:Static adonisUi:Brushes.ForegroundBrush}}"
+                      Data="M140 64h114v32h-114c-24 0-21 9-31 25L27 260 1 244 84 107C96 86 108 65 132 64Z" />
+            </Canvas>
+        </Viewbox>
+    </DataTemplate>
+
+    <DataTemplate x:Key="{x:Static v:Icons.VPlus}">
+        <Viewbox Stretch="Uniform">
+            <Canvas Width="128"
+                    Height="128">
+                <Path Fill="Red"
+                      Data="M40 10v40h50v-40z" />
+                <Path Fill="{DynamicResource {x:Static adonisUi:Brushes.ForegroundBrush}}"
+                      Data="M30 15C30 5 35 0 45 0h40c10 0 15 5 15 15v30c0 10-5 15-15 15H45c-10 0-15-5-15-15zm10 30c0 3 2 5 5 5h40c3 0 5-2 5-5V15c0-3-2-5-5-5H45c-3 0-5 2-5 5M30 82c0-10 5-15 15-15h40c10 0 15 5 15 15v30c0 10-5 15-15 15H45c-10 0-15-5-15-15zm10 30c0 3 2 5 5 5h40c3 0 5-2 5-5V82c0-3-2-5-5-5H45c-3 0-5 2-5 5" />
+            </Canvas>
+        </Viewbox>
+    </DataTemplate>
+    
+    <DataTemplate x:Key="{x:Static v:Icons.VMinus}">
+        <Viewbox Stretch="Uniform">
+            <Canvas Width="128"
+                    Height="128">
+                <Path Fill="Red"
+                      Data="M40 77v40h50v-40z" />
+                <Path Fill="{DynamicResource {x:Static adonisUi:Brushes.ForegroundBrush}}"
+                      Data="M30 15C30 5 35 0 45 0h40c10 0 15 5 15 15v30c0 10-5 15-15 15H45c-10 0-15-5-15-15zm10 30c0 3 2 5 5 5h40c3 0 5-2 5-5V15c0-3-2-5-5-5H45c-3 0-5 2-5 5M30 82c0-10 5-15 15-15h40c10 0 15 5 15 15v30c0 10-5 15-15 15H45c-10 0-15-5-15-15zm10 30c0 3 2 5 5 5h40c3 0 5-2 5-5V82c0-3-2-5-5-5H45c-3 0-5 2-5 5" />
+            </Canvas>
+        </Viewbox>
+    </DataTemplate>
+    
+    <DataTemplate x:Key="{x:Static v:Icons.VZerro}">
+        <Viewbox Stretch="Uniform">
+            <Canvas Width="128"
+                    Height="128">
+                <Path Fill="{DynamicResource {x:Static adonisUi:Brushes.ForegroundBrush}}"
+                      Data="M30 15C30 5 35 0 45 0h40c10 0 15 5 15 15v30c0 10-5 15-15 15H45c-10 0-15-5-15-15zm10 30c0 3 2 5 5 5h40c3 0 5-2 5-5V15c0-3-2-5-5-5H45c-3 0-5 2-5 5M30 82c0-10 5-15 15-15h40c10 0 15 5 15 15v30c0 10-5 15-15 15H45c-10 0-15-5-15-15zm10 30c0 3 2 5 5 5h40c3 0 5-2 5-5V82c0-3-2-5-5-5H45c-3 0-5 2-5 5" />
+            </Canvas>
+        </Viewbox>
+    </DataTemplate>
+
+    <Style x:Key="Uso32StartToolButtonStyle"
+           TargetType="ToggleButton"
+           BasedOn="{StaticResource TogleToolButtonStyle}">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding State}" Value="{x:Static vm:USO32_State.USO32_Idle_FindPort}">
+                <Setter Property="Content" Value="{x:Null}" />
+                <Setter Property="ContentTemplate" Value="{StaticResource {x:Static adonisUi:Templates.LoadingDots}}" />
+                <Setter Property="ToolTip" Value="{Binding tt_FindPort}" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding State}" Value="{x:Static vm:USO32_State.USO32_FoundPort}">
+                <Setter Property="ContentTemplate" Value="{x:Null}" />
+                <Setter Property="Content" Value="&#xef90;" />
+                <Setter Property="ToolTip" Value="{Binding tt_FoundPort}" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding State}" Value="{x:Static vm:USO32_State.USO32_VZerro}">
+                <Setter Property="Content" Value="{x:Null}" />
+                <Setter Property="ContentTemplate" Value="{StaticResource {x:Static v:Icons.VZerro}}" />
+                <Setter Property="ToolTip" Value="{Binding tt_Run}" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding State}" Value="{x:Static vm:USO32_State.USO32_VMinus}">
+                <Setter Property="Content" Value="{x:Null}" />
+                <Setter Property="ContentTemplate" Value="{StaticResource {x:Static v:Icons.VMinus}}" />
+                <Setter Property="ToolTip" Value="{Binding tt_Run}" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding State}" Value="{x:Static vm:USO32_State.USO32_VPlus}">
+                <Setter Property="Content" Value="{x:Null}" />
+                <Setter Property="ContentTemplate" Value="{StaticResource {x:Static v:Icons.VPlus}}" />
+                <Setter Property="ToolTip" Value="{Binding tt_Run}" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding State}" Value="{x:Static vm:USO32_State.USO32_Terminate}">
+                <Setter Property="ContentTemplate" Value="{x:Null}" />
+                <Setter Property="Content" Value="&#xf16d;" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding State}" Value="{x:Static vm:USO32_State.USO32_Terminated}">
+                <Setter Property="ContentTemplate" Value="{x:Null}" />
+                <Setter Property="Content" Value="&#xe7e8;" />
+                <Setter Property="ToolTip" Value="{Binding tt_Terminated}" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding State}" Value="{x:Static vm:USO32_State.USO32_SetHP }">
+                <Setter Property="Content" Value="{x:Null}" />
+                <Setter Property="ContentTemplate" Value="{StaticResource {x:Static v:Icons.HPOn}}" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding State}" Value="{x:Static vm:USO32_State.USO32_ClearHP }">
+                <Setter Property="Content" Value="{x:Null}" />
+                <Setter Property="ContentTemplate" Value="{StaticResource {x:Static v:Icons.HPOff}}" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding State}" Value="{x:Static vm:USO32_State.USO32_ErrorPort }">
+                <Setter Property="Content" Value="{x:Null}" />
+                <Setter Property="ContentTemplate" Value="{StaticResource {x:Static adonisUi:Icons.Error}}" />
+                <Setter Property="ToolTip" Value="{Binding tt_Error}" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <DataTemplate x:Key="Uso32StartToolButton">
+        <ToggleButton Style="{StaticResource Uso32StartToolButtonStyle}" />
+    </DataTemplate>
+
+</ResourceDictionary>
